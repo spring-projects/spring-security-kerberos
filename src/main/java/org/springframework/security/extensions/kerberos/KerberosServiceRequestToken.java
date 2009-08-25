@@ -16,7 +16,10 @@
 
 package org.springframework.security.extensions.kerberos;
 
+import java.util.List;
+
 import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 
 /**
  * Holds the Kerberos/SPNEGO token for requesting a kerberized service Will
@@ -30,9 +33,15 @@ import org.springframework.security.authentication.AbstractAuthenticationToken;
 
 public class KerberosServiceRequestToken extends AbstractAuthenticationToken {
 
+	public KerberosServiceRequestToken(Object principal, List<GrantedAuthority> authorities, byte[] token) {
+		super(authorities);
+		this.token = token;
+		this.principal = principal;
+	}
+
 	private static final long serialVersionUID = 395488921064775014L;
 	private final byte[] token;
-	private final Object principal = null;
+	private final Object principal;
 
 	/**
 	 * Creates an unauthenticated instance which should then be authenticated by
@@ -44,6 +53,7 @@ public class KerberosServiceRequestToken extends AbstractAuthenticationToken {
 	public KerberosServiceRequestToken(byte[] token) {
 		super(null);
 		this.token = token;
+		this.principal = null;
 	}
 
 	@Override
