@@ -16,6 +16,7 @@
 
 package org.springframework.security.extensions.kerberos;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.security.authentication.AbstractAuthenticationToken;
@@ -58,8 +59,30 @@ public class KerberosServiceRequestToken extends AbstractAuthenticationToken {
 	}
 
 	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + Arrays.hashCode(token);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		KerberosServiceRequestToken other = (KerberosServiceRequestToken) obj;
+		if (!Arrays.equals(token, other.token))
+			return false;
+		return true;
+	}
+
+	@Override
 	public Object getCredentials() {
-		return this.token;
+		return null;
 	}
 
 	@Override
