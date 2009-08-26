@@ -66,9 +66,9 @@ public class SpnegoAuthenticationProcessingFilter extends GenericFilterBean {
 				authentication = authenticationManager
 						.authenticate(authenticationRequest);
 			} catch (AuthenticationException e) {
+				// That shouldn't happen, as it is most likely a wrong configuration on server side
 				SecurityContextHolder.clearContext();
-				response
-						.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				response.flushBuffer();
 				return;
 			}
