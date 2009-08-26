@@ -37,6 +37,7 @@ public class KerberosServiceRequestToken extends AbstractAuthenticationToken {
 		super(authorities);
 		this.token = token;
 		this.principal = principal;
+		super.setAuthenticated(true);
 	}
 
 	private static final long serialVersionUID = 395488921064775014L;

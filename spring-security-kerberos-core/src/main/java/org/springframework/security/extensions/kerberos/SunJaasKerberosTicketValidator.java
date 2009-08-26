@@ -46,10 +46,6 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
 		this.keyTabLocation = keyTabLocation;
 	}
 
-	public void setServiceSubject(Subject serviceSubject) {
-		this.serviceSubject = serviceSubject;
-	}
-
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		Assert.notNull(this.servicePrincipal, "ServicePrincipal muss gesetzt werden");

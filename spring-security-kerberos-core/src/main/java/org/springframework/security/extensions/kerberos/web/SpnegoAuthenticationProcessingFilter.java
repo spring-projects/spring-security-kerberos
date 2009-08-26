@@ -43,6 +43,10 @@ public class SpnegoAuthenticationProcessingFilter extends GenericFilterBean {
 
 	private AuthenticationManager authenticationManager;
 
+	public void setAuthenticationManager(AuthenticationManager authenticationManager) {
+		this.authenticationManager = authenticationManager;
+	}
+
 	@Override
 	public void doFilter(ServletRequest req, ServletResponse res,
 			FilterChain chain) throws IOException, ServletException {
