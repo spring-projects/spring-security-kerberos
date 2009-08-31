@@ -4,7 +4,7 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
 		http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.0.xsd">
 
-	<sec:http entry-point-ref="spnegoEntryPoint" >
+	<sec:http entry-point-ref="spnegoEntryPoint">
 		<sec:intercept-url pattern="/secure/**" access="IS_AUTHENTICATED_FULLY" />
 		<sec:custom-filter ref="spnegoAuthenticationProcessingFilter"
 			position="BASIC_PROCESSING_FILTER" />
@@ -17,12 +17,12 @@
 		class="org.springframework.security.extensions.kerberos.web.SpnegoAuthenticationProcessingFilter" />
 
 	<bean id="spnegoAuthenticationProcessingFilter"
-		class="org.springframework.security.extensions.kerberos.web.SpnegoAuthenticationProcessingFilter" >
-			<property name="authenticationManager" ref="authenticationManager"/>
-		</bean>
+		class="org.springframework.security.extensions.kerberos.web.SpnegoAuthenticationProcessingFilter">
+		<property name="authenticationManager" ref="authenticationManager" />
+	</bean>
 
-	<sec:authentication-manager alias="authenticationManager" >
-		<sec:authentication-provider ref="kerberosServiceAuthenticationProvider"/>
+	<sec:authentication-manager alias="authenticationManager">
+		<sec:authentication-provider ref="kerberosServiceAuthenticationProvider" />
 	</sec:authentication-manager>
 
 	<bean id="kerberosServiceAuthenticationProvider"
@@ -30,19 +30,22 @@
 		<property name="ticketValidator">
 			<bean
 				class="org.springframework.security.extensions.kerberos.SunJaasKerberosTicketValidator">
-				<property name="servicePrincipal" value="HTTP/mbpmike.secpod.de" />
-				<property name="keyTabLocation" value="classpath:java-test.keytab" />
+				<property name="servicePrincipal" value="HTTP/add-your-hostname-here" />
+				<property name="keyTabLocation" value="classpath:spring-security.keytab" />
 			</bean>
 		</property>
-		<property name="userDetailsService">
-			<bean
-				class="org.springframework.security.core.userdetails.memory.InMemoryDaoImpl">
-				<property name="userProperties">
-					<value>
-						mike@SECPOD.DE=notUsed,ROLE_ADMIN
+		<property name="userDetailsService" ref="dummyUserDetailsService" />
+	</bean>
+
+	<!-- Just returns the User authenticated by Kerberos and gives him the ROLE_USER -->
+	<bean id="dummyUserDetailsService" class="org.springframework.security.extensions.kerberos.sample.DummyUserDetailsService"/>
+	
+	<bean id="inMemoryUserDetailsService"
+		class="org.springframework.security.core.userdetails.memory.InMemoryDaoImpl">
+		<property name="userProperties">
+			<value>
+				mike@SECPOD.DE=notUsed,ROLE_ADMIN
 					</value>
-				</property>
-			</bean>
 		</property>
 	</bean>
 </beans>
