@@ -112,6 +112,7 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
 		public LoginConfig(String keyTabLocation, String servicePrincipalName, boolean debug) {
 			this.keyTabLocation = keyTabLocation;
 			this.servicePrincipalName = servicePrincipalName;
+			this.debug = debug;
 		}
 
 		@Override
@@ -125,7 +126,7 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
 			if (this.debug) {
 				options.put("debug", "true");
 			}
-			options.put("isInitiator", "true");
+			options.put("isInitiator", "false");
 
 			return new AppConfigurationEntry[] { new AppConfigurationEntry("com.sun.security.auth.module.Krb5LoginModule",
 					AppConfigurationEntry.LoginModuleControlFlag.REQUIRED, options), };

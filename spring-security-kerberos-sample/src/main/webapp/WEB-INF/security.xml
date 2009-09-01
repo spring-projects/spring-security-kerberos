@@ -13,9 +13,6 @@
 	<bean id="spnegoEntryPoint"
 		class="org.springframework.security.extensions.kerberos.web.SpnegoEntryPoint" />
 
-	<bean
-		class="org.springframework.security.extensions.kerberos.web.SpnegoAuthenticationProcessingFilter" />
-
 	<bean id="spnegoAuthenticationProcessingFilter"
 		class="org.springframework.security.extensions.kerberos.web.SpnegoAuthenticationProcessingFilter">
 		<property name="authenticationManager" ref="authenticationManager" />
@@ -30,8 +27,9 @@
 		<property name="ticketValidator">
 			<bean
 				class="org.springframework.security.extensions.kerberos.SunJaasKerberosTicketValidator">
-				<property name="servicePrincipal" value="HTTP/add-your-hostname-here" />
-				<property name="keyTabLocation" value="classpath:spring-security.keytab" />
+				<property name="servicePrincipal" value="HTTP/web.springsource.com" />
+				<property name="keyTabLocation" value="classpath:http-java.keytab" />
+				<property name="debug" value="true"/>
 			</bean>
 		</property>
 		<property name="userDetailsService" ref="dummyUserDetailsService" />
