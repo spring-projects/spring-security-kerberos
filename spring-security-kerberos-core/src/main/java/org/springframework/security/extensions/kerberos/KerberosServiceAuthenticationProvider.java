@@ -16,10 +16,12 @@
 
 package org.springframework.security.extensions.kerberos;
 
+import org.springframework.security.authentication.AccountStatusUserDetailsChecker;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsChecker;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.extensions.kerberos.web.SpnegoAuthenticationProcessingFilter;
 
@@ -49,6 +51,7 @@ public class KerberosServiceAuthenticationProvider implements
 	
 	private KerberosTicketValidator ticketValidator;
 	private UserDetailsService userDetailsService;
+	private UserDetailsChecker userDetailsChecker = new AccountStatusUserDetailsChecker();
 	
 	
 	/** The <code>UserDetailsService</code> to use, for loading the user properties
@@ -75,8 +78,25 @@ public class KerberosServiceAuthenticationProvider implements
 		byte[] token = auth.getToken();
 		String username = this.ticketValidator.validateTicket(token);
 		UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+		userDetailsChecker.check(userDetails);
+		additionalAuthenticationChecks(userDetails, auth);
 		return new KerberosServiceRequestToken(userDetails, userDetails.getAuthorities(), token);
 	}
+	
+    
+	/** 
+	 * Allows subclasses to perform any additional checks of a returned <code>UserDetails</code>
+     * for a given authentication request.
+     * 
+     * @param userDetails as retrieved from the {@link UserDetailsService}
+	 * @param authentication validated {@link KerberosServiceRequestToken}
+	 * @throws AuthenticationException AuthenticationException if the credentials could not be validated (generally a
+     *         <code>BadCredentialsException</code>, an <code>AuthenticationServiceException</code>)
+	 */
+	protected void additionalAuthenticationChecks(UserDetails userDetails, KerberosServiceRequestToken authentication)
+            throws AuthenticationException {
+    	
+    }
 
 	/* (non-Javadoc)
 	 * @see org.springframework.security.authentication.AuthenticationProvider#supports(java.lang.Class)

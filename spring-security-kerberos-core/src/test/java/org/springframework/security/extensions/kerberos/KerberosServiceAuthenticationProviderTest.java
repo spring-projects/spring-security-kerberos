@@ -23,7 +23,11 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.CredentialsExpiredException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -64,16 +68,35 @@ public class KerberosServiceAuthenticationProviderTest {
 	
 	@Test
 	public void testEverythingWorks() throws Exception {
-		// stubbing
-		when(ticketValidator.validateTicket(TEST_TOKEN)).thenReturn(TEST_USER);
-		when(userDetailsService.loadUserByUsername(TEST_USER)).thenReturn(USER_DETAILS);
-		
-		// testing
-		Authentication output = provider.authenticate(INPUT_TOKEN);
+		Authentication output = callProviderAndReturnUser(USER_DETAILS);
 		assertNotNull(output);
 		assertEquals(TEST_USER, output.getName());
 		assertEquals(AUTHORITY_LIST, output.getAuthorities());
 		assertEquals(USER_DETAILS, output.getPrincipal());	
+	}
+	
+	@Test(expected=DisabledException.class)
+	public void testUserIsDisabled() throws Exception {
+		User disabledUser = new User(TEST_USER, "empty", false, true, true,true, AUTHORITY_LIST);
+		callProviderAndReturnUser(disabledUser);
+	}
+	
+	@Test(expected=AccountExpiredException.class)
+	public void testUserAccountIsExpired() throws Exception {
+		User expiredUser = new User(TEST_USER, "empty", true, false, true,true, AUTHORITY_LIST);
+		callProviderAndReturnUser(expiredUser);
+	}
+	
+	@Test(expected=CredentialsExpiredException.class)
+	public void testUserCredentialsExpired() throws Exception {
+		User credExpiredUser = new User(TEST_USER, "empty", true, true, false ,true, AUTHORITY_LIST);
+		callProviderAndReturnUser(credExpiredUser);
+	}
+	
+	@Test(expected=LockedException.class)
+	public void testUserAccountLockedCredentialsExpired() throws Exception {
+		User lockedUser = new User(TEST_USER, "empty", true, true, true ,false, AUTHORITY_LIST);
+		callProviderAndReturnUser(lockedUser);
 	}
 	
 	@Test(expected=UsernameNotFoundException.class)
@@ -85,6 +108,7 @@ public class KerberosServiceAuthenticationProviderTest {
 		// testing
 		provider.authenticate(INPUT_TOKEN);
 	}
+
 	
 	@Test(expected=BadCredentialsException.class)
 	public void testTicketValidationWrong() throws Exception {
@@ -93,6 +117,15 @@ public class KerberosServiceAuthenticationProviderTest {
 		
 		// testing
 		provider.authenticate(INPUT_TOKEN);
+	}
+	
+	private Authentication callProviderAndReturnUser(UserDetails disabledUser) {
+		// stubbing
+		when(ticketValidator.validateTicket(TEST_TOKEN)).thenReturn(TEST_USER);
+		when(userDetailsService.loadUserByUsername(TEST_USER)).thenReturn(disabledUser);
+		
+		// testing
+		return provider.authenticate(INPUT_TOKEN);
 	}
 
 }
