@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,21 +21,53 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.extensions.kerberos.web.SpnegoAuthenticationProcessingFilter;
 
+
+/**
+ * <p>Authentication Provider which validates Kerberos Service Tickets 
+ * or SPNEGO Tokens (which includes Kerberos Service Tickets).</p>
+ * 
+ * <p>It needs a <code>KerberosTicketValidator</code>, which contains the
+ * code to validate the ticket, as this code is different between
+ * SUN and IBM JRE.<br>
+ * It also needs an <code>UserDetailsService</code> to load the user properties
+ * and the <code>GrantedAuthorities</code>, as we only get back the username
+ * from Kerbeos</p>
+ * 
+ * You can see an example configuration in <code>SpnegoAuthenticationProcessingFilter</code>.
+ * 
+ * @author Mike Wiesner
+ * @since 1.0
+ * @version $Id$
+ * @see KerberosTicketValidator
+ * @see UserDetailsService
+ * @see SpnegoAuthenticationProcessingFilter
+ */
 public class KerberosServiceAuthenticationProvider implements
 		AuthenticationProvider {
 	
 	private KerberosTicketValidator ticketValidator;
 	private UserDetailsService userDetailsService;
 	
+	
+	/** The <code>UserDetailsService</code> to use, for loading the user properties
+	 * and the <code>GrantedAuthorities</code>.
+	 */
 	public void setUserDetailsService(UserDetailsService userDetailsService) {
 		this.userDetailsService = userDetailsService;
 	}
 
+	/** The <code>KerberosTicketValidator</code> to use, for validating
+	 * the Kerberos/SPNEGO tickets.
+	 */
 	public void setTicketValidator(KerberosTicketValidator ticketValidator) {
 		this.ticketValidator = ticketValidator;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.springframework.security.authentication.AuthenticationProvider#authenticate(org.springframework.security.core.Authentication)
+	 */
 	@Override
 	public Authentication authenticate(Authentication authentication)
 			throws AuthenticationException {
@@ -46,6 +78,9 @@ public class KerberosServiceAuthenticationProvider implements
 		return new KerberosServiceRequestToken(userDetails, userDetails.getAuthorities(), token);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.springframework.security.authentication.AuthenticationProvider#supports(java.lang.Class)
+	 */
 	@Override
 	public boolean supports(Class<? extends Object> auth) {
 		return KerberosServiceRequestToken.class.isAssignableFrom(auth);

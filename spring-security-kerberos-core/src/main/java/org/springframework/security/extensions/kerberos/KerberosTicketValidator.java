@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,24 @@
 
 package org.springframework.security.extensions.kerberos;
 
+import org.springframework.security.authentication.BadCredentialsException;
+
 /**
+ * Implementations of this interface are used in
+ * {@link KerberosServiceAuthenticationProvider} to validate a Kerberos/SPNEGO Ticket.
  * 
  * @author Mike Wiesner
  * @since 1.0
  * @version $Id$
+ * @see KerberosServiceAuthenticationProvider
  */
 public interface KerberosTicketValidator {
 
-	public abstract String validateTicket(byte[] token);
+	/** Validates a Kerberos/SPNEGO ticket.
+	 * @param token Kerbeos/SPNEGO ticket
+	 * @return authenticated kerberos principal
+	 * @throws BadCredentialsException if the ticket is not valid
+	 */
+	public String validateTicket(byte[] token) throws BadCredentialsException;
 
 }

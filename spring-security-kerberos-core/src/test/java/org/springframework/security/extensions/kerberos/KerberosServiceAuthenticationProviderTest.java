@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 /**
+ * Test class for {@link KerberosServiceAuthenticationProvider}
  * 
  * @author Mike Wiesner
  * @since 1.0
@@ -45,11 +46,11 @@ public class KerberosServiceAuthenticationProviderTest {
 	private UserDetailsService userDetailsService;
 	
 	// data
-	private static final byte[] testToken = "TestToken".getBytes();
-	private static final String testuser = "Testuser@SPRINGSOURCE.ORG";
-	private static final List<GrantedAuthority> authorityList = AuthorityUtils.createAuthorityList("ROLE_ADMIN");
-	private static final UserDetails userDetails = new User(testuser, "empty", true, true, true,true, authorityList);
-	private static final KerberosServiceRequestToken input = new KerberosServiceRequestToken(testToken);
+	private static final byte[] TEST_TOKEN = "TestToken".getBytes();
+	private static final String TEST_USER = "Testuser@SPRINGSOURCE.ORG";
+	private static final List<GrantedAuthority> AUTHORITY_LIST = AuthorityUtils.createAuthorityList("ROLE_ADMIN");
+	private static final UserDetails USER_DETAILS = new User(TEST_USER, "empty", true, true, true,true, AUTHORITY_LIST);
+	private static final KerberosServiceRequestToken INPUT_TOKEN = new KerberosServiceRequestToken(TEST_TOKEN);
 	
 	@Before
 	public void before() {
@@ -64,34 +65,34 @@ public class KerberosServiceAuthenticationProviderTest {
 	@Test
 	public void testEverythingWorks() throws Exception {
 		// stubbing
-		when(ticketValidator.validateTicket(testToken)).thenReturn(testuser);
-		when(userDetailsService.loadUserByUsername(testuser)).thenReturn(userDetails);
+		when(ticketValidator.validateTicket(TEST_TOKEN)).thenReturn(TEST_USER);
+		when(userDetailsService.loadUserByUsername(TEST_USER)).thenReturn(USER_DETAILS);
 		
 		// testing
-		Authentication output = provider.authenticate(input);
+		Authentication output = provider.authenticate(INPUT_TOKEN);
 		assertNotNull(output);
-		assertEquals(testuser, output.getName());
-		assertEquals(authorityList, output.getAuthorities());
-		assertEquals(userDetails, output.getPrincipal());	
+		assertEquals(TEST_USER, output.getName());
+		assertEquals(AUTHORITY_LIST, output.getAuthorities());
+		assertEquals(USER_DETAILS, output.getPrincipal());	
 	}
 	
 	@Test(expected=UsernameNotFoundException.class)
 	public void testUsernameNotFound() throws Exception {
 		// stubbing
-		when(ticketValidator.validateTicket(testToken)).thenReturn(testuser);
-		when(userDetailsService.loadUserByUsername(testuser)).thenThrow(new UsernameNotFoundException(""));
+		when(ticketValidator.validateTicket(TEST_TOKEN)).thenReturn(TEST_USER);
+		when(userDetailsService.loadUserByUsername(TEST_USER)).thenThrow(new UsernameNotFoundException(""));
 		
 		// testing
-		provider.authenticate(input);
+		provider.authenticate(INPUT_TOKEN);
 	}
 	
 	@Test(expected=BadCredentialsException.class)
 	public void testTicketValidationWrong() throws Exception {
 		// stubbing
-		when(ticketValidator.validateTicket(testToken)).thenThrow(new BadCredentialsException(""));
+		when(ticketValidator.validateTicket(TEST_TOKEN)).thenThrow(new BadCredentialsException(""));
 		
 		// testing
-		provider.authenticate(input);
+		provider.authenticate(INPUT_TOKEN);
 	}
 
 }

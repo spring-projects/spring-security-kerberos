@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,13 +26,18 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 
 /**
+ * Sends back a request for a Negotiate Authentication to the browser.
  * 
  * @author Mike Wiesner
  * @since 1.0
- * @version $Id: $
+ * @version $Id$
+ * @see SpnegoAuthenticationProcessingFilter
  */
 public class SpnegoEntryPoint implements AuthenticationEntryPoint {
 
+	/* (non-Javadoc)
+	 * @see org.springframework.security.web.AuthenticationEntryPoint#commence(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, org.springframework.security.core.AuthenticationException)
+	 */
 	@Override
 	public void commence(HttpServletRequest request, HttpServletResponse response,
 			AuthenticationException ex) throws IOException, ServletException {

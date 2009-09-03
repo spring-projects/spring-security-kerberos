@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.extensions.kerberos.KerberosServiceRequestToken;
 
 /**
+ * Test class for {@link SpnegoAuthenticationProcessingFilter}
  * 
  * @author Mike Wiesner
  * @since 1.0
@@ -42,17 +43,21 @@ import org.springframework.security.extensions.kerberos.KerberosServiceRequestTo
  */
 public class SpnegoAuthenticationProcessingFilterTest {
 
+
+
 	private SpnegoAuthenticationProcessingFilter filter;
 	private AuthenticationManager authenticationManager;
 	private HttpServletRequest request;
 	private HttpServletResponse response;
 	private FilterChain chain;
-	
+	 
 	// data
-	private static final byte[] testToken = "TestToken".getBytes();
-	private static final String testTokenBase64 = "VGVzdFRva2Vu";
-	private static final Authentication authentication = new KerberosServiceRequestToken("test", 
-			AuthorityUtils.createAuthorityList("ROLE_ADMIN"), testToken);
+	private static final byte[] TEST_TOKEN = "TestToken".getBytes();
+	private static final String TEST_TOKEN_BASE64 = "VGVzdFRva2Vu";
+	private static final Authentication AUTHENTICATION = new KerberosServiceRequestToken("test", 
+			AuthorityUtils.createAuthorityList("ROLE_ADMIN"), TEST_TOKEN);
+	private static final String HEADER = "Authorization";
+	private static final String TOKEN_PREFIX = "Negotiate ";
 	
 
 	@Before
@@ -69,13 +74,13 @@ public class SpnegoAuthenticationProcessingFilterTest {
 	@Test
 	public void testEverythingWorks() throws Exception {
 		// stubbing
-		when(request.getHeader("Authorization")).thenReturn("Negotiate "+testTokenBase64);
-		when(authenticationManager.authenticate(new KerberosServiceRequestToken(testToken))).thenReturn(authentication);
+		when(request.getHeader(HEADER)).thenReturn(TOKEN_PREFIX+TEST_TOKEN_BASE64);
+		when(authenticationManager.authenticate(new KerberosServiceRequestToken(TEST_TOKEN))).thenReturn(AUTHENTICATION);
 		
 		// testing
 		filter.doFilter(request, response, chain);
 		verify(chain).doFilter(request, response);
-		assertEquals(authentication, SecurityContextHolder.getContext().getAuthentication());
+		assertEquals(AUTHENTICATION, SecurityContextHolder.getContext().getAuthentication());
 	}
 	
 	@Test
@@ -91,7 +96,7 @@ public class SpnegoAuthenticationProcessingFilterTest {
 	@Test
 	public void testAuthenticationFails() throws Exception {
 		// stubbing
-		when(request.getHeader("Authorization")).thenReturn("Negotiate "+testTokenBase64);
+		when(request.getHeader(HEADER)).thenReturn(TOKEN_PREFIX+TEST_TOKEN_BASE64);
 		when(authenticationManager.authenticate(any(Authentication.class))).thenThrow(new BadCredentialsException(""));
 		
 		// testing

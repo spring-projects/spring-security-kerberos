@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,10 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.util.Assert;
 
 /**
+ * Implementation of {@link KerberosTicketValidator} which uses the SUN JAAS
+ * login module, which is included in the SUN JRE, it will not work with an IBM JRE. 
+ * The whole configuration is done in this class, no additional JAAS configuration
+ * is needed.
  * 
  * @author Mike Wiesner
  * @since 1.0
@@ -50,10 +54,9 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
 	private Subject serviceSubject;
 	private boolean debug = false;
 
-	public void setDebug(boolean debug) {
-		this.debug = debug;
-	}
-
+	/* (non-Javadoc)
+	 * @see org.springframework.security.extensions.kerberos.KerberosTicketValidator#validateTicket(byte[])
+	 */
 	public String validateTicket(byte[] token) {
 		String username = null;
 		try {
@@ -64,14 +67,40 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
 		return username;
 	}
 
+	/** The service principal of the application.
+	 * For web apps this is <code>HTTP/full-qualified-domain-name@DOMAIN</code>. 
+	 * The keytab must contain the key for this principal.
+	 * 
+	 * @param servicePrincipal service principal to use
+	 * @see #setKeyTabLocation(Resource)
+	 */
 	public void setServicePrincipal(String servicePrincipal) {
 		this.servicePrincipal = servicePrincipal;
 	}
 
+	/**
+	 * The location of the keytab. You can use the normale Spring Resource
+	 * prefixes like <code>file:</code> or <code>classpath:</code>, but as the
+	 * file is later on read by JAAS, we cannot guarantee that <code>classpath</code>
+	 * works in every environment, esp. not in Java EE application servers. You
+	 * should use <code>file:</code> there.
+	 * 
+	 * @param keyTabLocation The location where the keytab resides
+	 */
 	public void setKeyTabLocation(Resource keyTabLocation) {
 		this.keyTabLocation = keyTabLocation;
 	}
+	
+	/** Enables the debug mode of the JAAS Kerberos login module
+	 * @param debug default is false
+	 */
+	public void setDebug(boolean debug) {
+		this.debug = debug;
+	}
 
+	/* (non-Javadoc)
+	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
+	 */
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		Assert.notNull(this.servicePrincipal, "servicePrincipal must be specified");
@@ -86,6 +115,13 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
 		this.serviceSubject = lc.getSubject();
 	}
 
+	/**
+	 * This class is needed, because the validation must run with previously generated JAAS subject
+	 * which belongs to the service principal and was loaded out of the keytab during startup.
+	 * 
+	 * @author Mike Wiesner
+	 * @since 1.0
+	 */
 	private static class KerberosValidateAction implements PrivilegedExceptionAction<String> {
 		byte[] kerberosTicket;
 
@@ -104,6 +140,13 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
 
 	}
 
+	/**
+	 * Normally you need a JAAS config file in order to use the JAAS Kerberos Login Module, 
+	 * with this class it is not needed and you can have different configurations in one JVM.
+	 * 
+	 * @author Mike Wiesner
+	 * @since 1.0
+	 */
 	private static class LoginConfig extends Configuration {
 		private String keyTabLocation;
 		private String servicePrincipalName;
