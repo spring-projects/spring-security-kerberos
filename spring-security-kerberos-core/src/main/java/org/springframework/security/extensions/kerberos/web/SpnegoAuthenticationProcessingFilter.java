@@ -32,6 +32,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.extensions.kerberos.KerberosServiceAuthenticationProvider;
 import org.springframework.security.extensions.kerberos.KerberosServiceRequestToken;
+import org.springframework.util.Assert;
 import org.springframework.web.filter.GenericFilterBean;
 
 /**
@@ -102,7 +103,11 @@ public class SpnegoAuthenticationProcessingFilter extends GenericFilterBean {
 
 		String header = request.getHeader("Authorization");
 
+
 		if ((header != null) && header.startsWith("Negotiate ")) {
+			if (logger.isDebugEnabled()) { 
+				logger.debug("Received Negotiate Header for request "+ request.getRequestURL()+ ": " + header);
+			}
 			String base64Token = header.substring(10);
 			byte[] kerberosTicket = Base64.decodeBase64(base64Token.trim()
 					.getBytes());
@@ -114,6 +119,7 @@ public class SpnegoAuthenticationProcessingFilter extends GenericFilterBean {
 						.authenticate(authenticationRequest);
 			} catch (AuthenticationException e) {
 				// That shouldn't happen, as it is most likely a wrong configuration on the server side
+				logger.warn("Negotiate Header was invalid: "+header, e);
 				SecurityContextHolder.clearContext();
 				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				response.flushBuffer();
@@ -134,6 +140,15 @@ public class SpnegoAuthenticationProcessingFilter extends GenericFilterBean {
 	 */
 	public void setAuthenticationManager(AuthenticationManager authenticationManager) {
 		this.authenticationManager = authenticationManager;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.springframework.web.filter.GenericFilterBean#afterPropertiesSet()
+	 */
+	@Override
+	public void afterPropertiesSet() throws ServletException {
+		super.afterPropertiesSet();
+		Assert.notNull(this.authenticationManager, "authenticationManager must be specified");
 	}
 
 }

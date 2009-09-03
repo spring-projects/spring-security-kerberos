@@ -16,6 +16,9 @@
 
 package org.springframework.security.extensions.kerberos;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.authentication.AccountStatusUserDetailsChecker;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
@@ -24,6 +27,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsChecker;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.extensions.kerberos.web.SpnegoAuthenticationProcessingFilter;
+import org.springframework.util.Assert;
 
 
 /**
@@ -47,7 +51,9 @@ import org.springframework.security.extensions.kerberos.web.SpnegoAuthentication
  * @see SpnegoAuthenticationProcessingFilter
  */
 public class KerberosServiceAuthenticationProvider implements
-		AuthenticationProvider {
+		AuthenticationProvider, InitializingBean {
+	
+	private static final Log LOG = LogFactory.getLog(KerberosServiceAuthenticationProvider.class);
 	
 	private KerberosTicketValidator ticketValidator;
 	private UserDetailsService userDetailsService;
@@ -76,7 +82,9 @@ public class KerberosServiceAuthenticationProvider implements
 			throws AuthenticationException {
 		KerberosServiceRequestToken auth = (KerberosServiceRequestToken) authentication;
 		byte[] token = auth.getToken();
+		LOG.debug("Try to validate Kerberos Token");
 		String username = this.ticketValidator.validateTicket(token);
+		LOG.debug("Succesfully validated " + username);
 		UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
 		userDetailsChecker.check(userDetails);
 		additionalAuthenticationChecks(userDetails, auth);
@@ -104,6 +112,15 @@ public class KerberosServiceAuthenticationProvider implements
 	@Override
 	public boolean supports(Class<? extends Object> auth) {
 		return KerberosServiceRequestToken.class.isAssignableFrom(auth);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
+	 */
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		Assert.notNull(this.ticketValidator, "ticketValidator must be specified");
+		Assert.notNull(this.userDetailsService, "userDetailsService must be specified");
 	}
 
 }

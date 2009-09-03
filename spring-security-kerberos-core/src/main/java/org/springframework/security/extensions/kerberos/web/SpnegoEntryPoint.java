@@ -21,7 +21,10 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpUtils;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 
@@ -34,6 +37,8 @@ import org.springframework.security.web.AuthenticationEntryPoint;
  * @see SpnegoAuthenticationProcessingFilter
  */
 public class SpnegoEntryPoint implements AuthenticationEntryPoint {
+	
+	private static final Log LOG = LogFactory.getLog(SpnegoEntryPoint.class);
 
 	/* (non-Javadoc)
 	 * @see org.springframework.security.web.AuthenticationEntryPoint#commence(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, org.springframework.security.core.AuthenticationException)
@@ -41,7 +46,10 @@ public class SpnegoEntryPoint implements AuthenticationEntryPoint {
 	@Override
 	public void commence(HttpServletRequest request, HttpServletResponse response,
 			AuthenticationException ex) throws IOException, ServletException {
-        response.addHeader("WWW-Authenticate", "Negotiate");
+        if (LOG.isDebugEnabled()) {
+        	LOG.debug("Sending back Negotiate Header for request: "+request.getRequestURL());
+        }
+		response.addHeader("WWW-Authenticate", "Negotiate");
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.flushBuffer();
 
