@@ -1,73 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.security.extensions</groupId>
+		<artifactId>spring-security-kerberos-parent</artifactId>
+		<version>1.0.0.CI-SNAPSHOT</version>
+	</parent>
 	<groupId>org.springframework.security.extensions</groupId>
 	<artifactId>spring-security-kerberos-core</artifactId>
 	<version>1.0.0.CI-SNAPSHOT</version>
-	<name>Spring Security Kerberos</name>
+	<name>Spring Security Kerberos Core</name>
 	<packaging>jar</packaging>
-
-	<description>Spring Security Kerberos</description>
-	<organization>
-		<name>SpringSource, Inc</name>
-		<url>http://www.springsource.com/</url>
-	</organization>
-	<inceptionYear>2009</inceptionYear>
-
-	<licenses>
-		<license>
-			<name>The Apache Software License, Version 2.0</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-			<distribution>repo</distribution>
-		</license>
-	</licenses>
-
-	<scm>
-		<connection>scm:svn:https://src.springframework.org/svn/se-security/trunk/spring-security-kerberos</connection>
-		<developerConnection>scm:svn:https://src.springframework.org/svn/se-security/trunk/spring-security-kerberos</developerConnection>
-		<url>https://src.springframework.org/svn/se-security/trunk/spring-security-kerberos</url>
-	</scm>
-
-	<issueManagement>
-		<system>jira</system>
-		<url>http://jira.springsource.org/browse/SES</url>
-	</issueManagement>
-
-	<repositories>
-		<repository>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<id>com.springsource.repository.maven.snapshot</id>
-			<name>SpringSource Enterprise Bundle Maven Repository - SpringSource Snapshot Releases</name>
-			<url>http://maven.springframework.org/snapshot</url>
-		</repository>
-
-		<repository>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<id>com.springsource.repository.maven.milestone</id>
-			<name>Spring Framework Maven Milestone Releases (Maven Central Format)</name>
-			<url>http://maven.springframework.org/milestone</url>
-		</repository>
-	</repositories>
-
-	<pluginRepositories>
-		<pluginRepository>
-			<id>com.springsource.repository.maven.milestone</id>
-			<name>SpringSource Enterprise Bundle Repository - SpringSource Milestone Releases</name>
-			<url>http://repository.springsource.com/maven/bundles/milestone</url>
-		</pluginRepository>
-	</pluginRepositories>
-
+	<description>Spring Security Kerberos Core</description>
 	<developers>
 		<developer>
 			<name>Mike Wiesner</name>
@@ -77,9 +21,6 @@
             </organization>
 		</developer>
 	</developers>
-
-
-
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
@@ -109,105 +50,15 @@
 			<version>2.4</version>
 			<scope>provided</scope>
 		</dependency>
-		   <dependency>
-                <groupId>commons-logging</groupId>
-                <artifactId>commons-logging</artifactId>
-                <version>1.1.1</version>
-                <optional>true</optional>
-            </dependency>
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+			<version>1.1.1</version>
+			<optional>true</optional>
+		</dependency>
 	</dependencies>
-
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-resources-plugin</artifactId>
-				<version>2.3</version>
-				<configuration>
-					<encoding>UTF-8</encoding>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.4.2</version>
-				<configuration>
-					<includes>
-						<include>**/*Tests.class</include>
-					</includes>
-					<excludes>
-						<exclude>**/Abstract*</exclude>
-					</excludes>
-					<forkMode>once</forkMode>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.0.2</version>
-				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.1</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>test-jar</goal>
-						</goals>
-						<phase>package</phase>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<version>2.1</version>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-install-plugin</artifactId>
-				<version>2.2</version>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-deploy-plugin</artifactId>
-				<version>2.3</version>
-			</plugin>
-			<!-- IDE -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-eclipse-plugin</artifactId>
-				<version>2.5.1</version>
-				<configuration>
-					<downloadSources>true</downloadSources>
-					<wtpversion>2.0</wtpversion>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-idea-plugin</artifactId>
-				<version>2.0</version>
-				<configuration>
-					<downloadSources>true</downloadSources>
-					<!--<downloadJavadocs>true</downloadJavadocs>-->
-					<dependenciesAsLibraries>
-						true
-                    </dependenciesAsLibraries>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
-
 	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<spring.version>3.0.0.M4</spring.version>
 		<spring.security.version>3.0.0.M2</spring.security.version>
 	</properties>
-
 </project>
