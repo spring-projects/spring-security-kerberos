@@ -23,23 +23,23 @@ import org.junit.Test;
 
 /**
  * Test class for {@link SpnegoEntryPoint}
- * 
+ *
  * @author Mike Wiesner
  * @since 1.0
  * @version $Id$
  */
 public class SpnegoEntryPointTest {
-	
-	private SpnegoEntryPoint entryPoint = new SpnegoEntryPoint();
-	
-	@Test
-	public void testEntryPointOk() throws Exception {
-		HttpServletResponse response = mock(HttpServletResponse.class);
-	
-		entryPoint.commence(null, response, null);
-		
-		verify(response).addHeader("WWW-Authenticate", "Negotiate");
-		verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-	}
+
+    private SpnegoEntryPoint entryPoint = new SpnegoEntryPoint();
+
+    @Test
+    public void testEntryPointOk() throws Exception {
+        HttpServletResponse response = mock(HttpServletResponse.class);
+
+        entryPoint.commence(null, response, null);
+
+        verify(response).addHeader("WWW-Authenticate", "Negotiate");
+        verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+    }
 
 }

@@ -30,29 +30,29 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 
 /**
  * Sends back a request for a Negotiate Authentication to the browser.
- * 
+ *
  * @author Mike Wiesner
  * @since 1.0
  * @version $Id$
  * @see SpnegoAuthenticationProcessingFilter
  */
 public class SpnegoEntryPoint implements AuthenticationEntryPoint {
-	
-	private static final Log LOG = LogFactory.getLog(SpnegoEntryPoint.class);
 
-	/* (non-Javadoc)
-	 * @see org.springframework.security.web.AuthenticationEntryPoint#commence(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, org.springframework.security.core.AuthenticationException)
-	 */
-	@Override
-	public void commence(HttpServletRequest request, HttpServletResponse response,
-			AuthenticationException ex) throws IOException, ServletException {
+    private static final Log LOG = LogFactory.getLog(SpnegoEntryPoint.class);
+
+    /* (non-Javadoc)
+     * @see org.springframework.security.web.AuthenticationEntryPoint#commence(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, org.springframework.security.core.AuthenticationException)
+     */
+    @Override
+    public void commence(HttpServletRequest request, HttpServletResponse response,
+            AuthenticationException ex) throws IOException, ServletException {
         if (LOG.isDebugEnabled()) {
-        	LOG.debug("Sending back Negotiate Header for request: "+request.getRequestURL());
+            LOG.debug("Sending back Negotiate Header for request: "+request.getRequestURL());
         }
-		response.addHeader("WWW-Authenticate", "Negotiate");
+        response.addHeader("WWW-Authenticate", "Negotiate");
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.flushBuffer();
 
-	}
+    }
 
 }

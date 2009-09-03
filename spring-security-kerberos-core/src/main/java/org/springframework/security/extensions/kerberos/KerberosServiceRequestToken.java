@@ -27,11 +27,11 @@ import org.springframework.security.extensions.kerberos.web.SpnegoAuthentication
 /**
  * Holds the Kerberos/SPNEGO token for requesting a kerberized service
  * and is also the output of <code>KerberosServiceAuthenticationProvider</code>.<br>
- * Will mostly be created in <code>SpnegoAuthenticationProcessingFilter</code> 
+ * Will mostly be created in <code>SpnegoAuthenticationProcessingFilter</code>
  * and authenticated in <code>KerberosServiceAuthenticationProvider</code>.
- * 
+ *
  * This token cannot be re-authenticated, as you will get a Kerberos Reply error.
- * 
+ *
  * @author Mike Wiesner
  * @since 1.0
  * @version $Id$
@@ -41,84 +41,84 @@ import org.springframework.security.extensions.kerberos.web.SpnegoAuthentication
 
 public class KerberosServiceRequestToken extends AbstractAuthenticationToken {
 
-	private static final long serialVersionUID = 395488921064775014L;
-	private final byte[] token;
-	private final Object principal;
-	
-	/** Creates an authenticated token, normally used as an output of an authentication provider.
-	 * @param principal the user principal (mostly of instance <code>UserDetails</code>
-	 * @param authorities the authorities which are granted to the user
-	 * @param token the Kerberos/SPNEGO token
-	 * @see UserDetails
-	 */
-	public KerberosServiceRequestToken(Object principal, List<GrantedAuthority> authorities, byte[] token) {
-		super(authorities);
-		this.token = token;
-		this.principal = principal;
-		super.setAuthenticated(true);
-	}
+    private static final long serialVersionUID = 395488921064775014L;
+    private final byte[] token;
+    private final Object principal;
 
-	/**
-	 * Creates an unauthenticated instance which should then be authenticated by
-	 * <code>KerberosServiceAuthenticationProvider/code>
-	 * 
-	 * @param token Kerberos/SPNEGO token
-	 * @see KerberosServiceAuthenticationProvider
-	 */
-	public KerberosServiceRequestToken(byte[] token) {
-		super(null);
-		this.token = token;
-		this.principal = null;
-	}
+    /** Creates an authenticated token, normally used as an output of an authentication provider.
+     * @param principal the user principal (mostly of instance <code>UserDetails</code>
+     * @param authorities the authorities which are granted to the user
+     * @param token the Kerberos/SPNEGO token
+     * @see UserDetails
+     */
+    public KerberosServiceRequestToken(Object principal, List<GrantedAuthority> authorities, byte[] token) {
+        super(authorities);
+        this.token = token;
+        this.principal = principal;
+        super.setAuthenticated(true);
+    }
 
-	/** 
-	 * Calculates hashcode based on the Kerberos token
-	 */
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + Arrays.hashCode(token);
-		return result;
-	}
+    /**
+     * Creates an unauthenticated instance which should then be authenticated by
+     * <code>KerberosServiceAuthenticationProvider/code>
+     *
+     * @param token Kerberos/SPNEGO token
+     * @see KerberosServiceAuthenticationProvider
+     */
+    public KerberosServiceRequestToken(byte[] token) {
+        super(null);
+        this.token = token;
+        this.principal = null;
+    }
 
-	/**
-	 * equals() is based only on the Kerberos token
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		KerberosServiceRequestToken other = (KerberosServiceRequestToken) obj;
-		if (!Arrays.equals(token, other.token))
-			return false;
-		return true;
-	}
+    /**
+     * Calculates hashcode based on the Kerberos token
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + Arrays.hashCode(token);
+        return result;
+    }
 
-	/* (non-Javadoc)
-	 * @see org.springframework.security.core.Authentication#getCredentials()
-	 */
-	@Override
-	public Object getCredentials() {
-		return null;
-	}
+    /**
+     * equals() is based only on the Kerberos token
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        KerberosServiceRequestToken other = (KerberosServiceRequestToken) obj;
+        if (!Arrays.equals(token, other.token))
+            return false;
+        return true;
+    }
 
-	/* (non-Javadoc)
-	 * @see org.springframework.security.core.Authentication#getPrincipal()
-	 */
-	@Override
-	public Object getPrincipal() {
-		return this.principal;
-	}
+    /* (non-Javadoc)
+     * @see org.springframework.security.core.Authentication#getCredentials()
+     */
+    @Override
+    public Object getCredentials() {
+        return null;
+    }
 
-	/** Returns the Kerberos token
-	 */
-	public byte[] getToken() {
-		return this.token;
-	}
+    /* (non-Javadoc)
+     * @see org.springframework.security.core.Authentication#getPrincipal()
+     */
+    @Override
+    public Object getPrincipal() {
+        return this.principal;
+    }
+
+    /** Returns the Kerberos token
+     */
+    public byte[] getToken() {
+        return this.token;
+    }
 
 }

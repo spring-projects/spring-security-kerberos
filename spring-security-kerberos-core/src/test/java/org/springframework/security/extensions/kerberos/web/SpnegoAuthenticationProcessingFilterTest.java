@@ -36,7 +36,7 @@ import org.springframework.security.extensions.kerberos.KerberosServiceRequestTo
 
 /**
  * Test class for {@link SpnegoAuthenticationProcessingFilter}
- * 
+ *
  * @author Mike Wiesner
  * @since 1.0
  * @version $Id$
@@ -45,72 +45,72 @@ public class SpnegoAuthenticationProcessingFilterTest {
 
 
 
-	private SpnegoAuthenticationProcessingFilter filter;
-	private AuthenticationManager authenticationManager;
-	private HttpServletRequest request;
-	private HttpServletResponse response;
-	private FilterChain chain;
-	 
-	// data
-	private static final byte[] TEST_TOKEN = "TestToken".getBytes();
-	private static final String TEST_TOKEN_BASE64 = "VGVzdFRva2Vu";
-	private static final Authentication AUTHENTICATION = new KerberosServiceRequestToken("test", 
-			AuthorityUtils.createAuthorityList("ROLE_ADMIN"), TEST_TOKEN);
-	private static final String HEADER = "Authorization";
-	private static final String TOKEN_PREFIX = "Negotiate ";
-	
+    private SpnegoAuthenticationProcessingFilter filter;
+    private AuthenticationManager authenticationManager;
+    private HttpServletRequest request;
+    private HttpServletResponse response;
+    private FilterChain chain;
 
-	@Before
-	public void before() {
-		// mocking
-		authenticationManager = mock(AuthenticationManager.class);
-		filter = new SpnegoAuthenticationProcessingFilter();
-		filter.setAuthenticationManager(authenticationManager);
-		request = mock(HttpServletRequest.class);
-		response = mock(HttpServletResponse.class);
-		chain = mock(FilterChain.class);
-	}
+    // data
+    private static final byte[] TEST_TOKEN = "TestToken".getBytes();
+    private static final String TEST_TOKEN_BASE64 = "VGVzdFRva2Vu";
+    private static final Authentication AUTHENTICATION = new KerberosServiceRequestToken("test",
+            AuthorityUtils.createAuthorityList("ROLE_ADMIN"), TEST_TOKEN);
+    private static final String HEADER = "Authorization";
+    private static final String TOKEN_PREFIX = "Negotiate ";
 
-	@Test
-	public void testEverythingWorks() throws Exception {
-		// stubbing
-		when(request.getHeader(HEADER)).thenReturn(TOKEN_PREFIX+TEST_TOKEN_BASE64);
-		when(authenticationManager.authenticate(new KerberosServiceRequestToken(TEST_TOKEN))).thenReturn(AUTHENTICATION);
-		
-		// testing
-		filter.doFilter(request, response, chain);
-		verify(chain).doFilter(request, response);
-		assertEquals(AUTHENTICATION, SecurityContextHolder.getContext().getAuthentication());
-	}
-	
-	@Test
-	public void testNoHeader() throws Exception {
-		filter.doFilter(request, response, chain);
-		// If the header is not present, the filter is not allowed to call authenticate()
-		verify(authenticationManager, never()).authenticate(any(Authentication.class));
-		// chain should go on
-		verify(chain).doFilter(request, response);
-		assertEquals(null, SecurityContextHolder.getContext().getAuthentication());
-	}
-	
-	@Test
-	public void testAuthenticationFails() throws Exception {
-		// stubbing
-		when(request.getHeader(HEADER)).thenReturn(TOKEN_PREFIX+TEST_TOKEN_BASE64);
-		when(authenticationManager.authenticate(any(Authentication.class))).thenThrow(new BadCredentialsException(""));
-		
-		// testing
-		filter.doFilter(request, response, chain);
-		// chain should stop here and it should send back a 500
-		// future version should call some error handler
-		verify(chain, never()).doFilter(any(ServletRequest.class), any(ServletResponse.class));
-		verify(response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-	}
-	
-	@After
-	public void after() {
-		SecurityContextHolder.clearContext();
-	}
-	
+
+    @Before
+    public void before() {
+        // mocking
+        authenticationManager = mock(AuthenticationManager.class);
+        filter = new SpnegoAuthenticationProcessingFilter();
+        filter.setAuthenticationManager(authenticationManager);
+        request = mock(HttpServletRequest.class);
+        response = mock(HttpServletResponse.class);
+        chain = mock(FilterChain.class);
+    }
+
+    @Test
+    public void testEverythingWorks() throws Exception {
+        // stubbing
+        when(request.getHeader(HEADER)).thenReturn(TOKEN_PREFIX+TEST_TOKEN_BASE64);
+        when(authenticationManager.authenticate(new KerberosServiceRequestToken(TEST_TOKEN))).thenReturn(AUTHENTICATION);
+
+        // testing
+        filter.doFilter(request, response, chain);
+        verify(chain).doFilter(request, response);
+        assertEquals(AUTHENTICATION, SecurityContextHolder.getContext().getAuthentication());
+    }
+
+    @Test
+    public void testNoHeader() throws Exception {
+        filter.doFilter(request, response, chain);
+        // If the header is not present, the filter is not allowed to call authenticate()
+        verify(authenticationManager, never()).authenticate(any(Authentication.class));
+        // chain should go on
+        verify(chain).doFilter(request, response);
+        assertEquals(null, SecurityContextHolder.getContext().getAuthentication());
+    }
+
+    @Test
+    public void testAuthenticationFails() throws Exception {
+        // stubbing
+        when(request.getHeader(HEADER)).thenReturn(TOKEN_PREFIX+TEST_TOKEN_BASE64);
+        when(authenticationManager.authenticate(any(Authentication.class))).thenThrow(new BadCredentialsException(""));
+
+        // testing
+        filter.doFilter(request, response, chain);
+        // chain should stop here and it should send back a 500
+        // future version should call some error handler
+        verify(chain, never()).doFilter(any(ServletRequest.class), any(ServletResponse.class));
+        verify(response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+    }
+
+    @After
+    public void after() {
+        SecurityContextHolder.clearContext();
+    }
+
 
 }

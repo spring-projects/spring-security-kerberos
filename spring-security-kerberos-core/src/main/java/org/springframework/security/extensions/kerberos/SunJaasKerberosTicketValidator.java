@@ -39,142 +39,142 @@ import org.springframework.util.Assert;
 
 /**
  * Implementation of {@link KerberosTicketValidator} which uses the SUN JAAS
- * login module, which is included in the SUN JRE, it will not work with an IBM JRE. 
+ * login module, which is included in the SUN JRE, it will not work with an IBM JRE.
  * The whole configuration is done in this class, no additional JAAS configuration
  * is needed.
- * 
+ *
  * @author Mike Wiesner
  * @since 1.0
  * @version $Id$
  */
 public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, InitializingBean {
 
-	private String servicePrincipal;
-	private Resource keyTabLocation;
-	private Subject serviceSubject;
-	private boolean debug = false;
+    private String servicePrincipal;
+    private Resource keyTabLocation;
+    private Subject serviceSubject;
+    private boolean debug = false;
 
-	/* (non-Javadoc)
-	 * @see org.springframework.security.extensions.kerberos.KerberosTicketValidator#validateTicket(byte[])
-	 */
-	public String validateTicket(byte[] token) {
-		String username = null;
-		try {
-			username = Subject.doAs(this.serviceSubject, new KerberosValidateAction(token));
-		} catch (PrivilegedActionException e) {
-			throw new BadCredentialsException("Kerberos validation not succesfull", e);
-		}
-		return username;
-	}
+    /* (non-Javadoc)
+     * @see org.springframework.security.extensions.kerberos.KerberosTicketValidator#validateTicket(byte[])
+     */
+    public String validateTicket(byte[] token) {
+        String username = null;
+        try {
+            username = Subject.doAs(this.serviceSubject, new KerberosValidateAction(token));
+        } catch (PrivilegedActionException e) {
+            throw new BadCredentialsException("Kerberos validation not succesfull", e);
+        }
+        return username;
+    }
 
-	/** The service principal of the application.
-	 * For web apps this is <code>HTTP/full-qualified-domain-name@DOMAIN</code>. 
-	 * The keytab must contain the key for this principal.
-	 * 
-	 * @param servicePrincipal service principal to use
-	 * @see #setKeyTabLocation(Resource)
-	 */
-	public void setServicePrincipal(String servicePrincipal) {
-		this.servicePrincipal = servicePrincipal;
-	}
+    /** The service principal of the application.
+     * For web apps this is <code>HTTP/full-qualified-domain-name@DOMAIN</code>.
+     * The keytab must contain the key for this principal.
+     *
+     * @param servicePrincipal service principal to use
+     * @see #setKeyTabLocation(Resource)
+     */
+    public void setServicePrincipal(String servicePrincipal) {
+        this.servicePrincipal = servicePrincipal;
+    }
 
-	/**
-	 * The location of the keytab. You can use the normale Spring Resource
-	 * prefixes like <code>file:</code> or <code>classpath:</code>, but as the
-	 * file is later on read by JAAS, we cannot guarantee that <code>classpath</code>
-	 * works in every environment, esp. not in Java EE application servers. You
-	 * should use <code>file:</code> there.
-	 * 
-	 * @param keyTabLocation The location where the keytab resides
-	 */
-	public void setKeyTabLocation(Resource keyTabLocation) {
-		this.keyTabLocation = keyTabLocation;
-	}
-	
-	/** Enables the debug mode of the JAAS Kerberos login module
-	 * @param debug default is false
-	 */
-	public void setDebug(boolean debug) {
-		this.debug = debug;
-	}
+    /**
+     * The location of the keytab. You can use the normale Spring Resource
+     * prefixes like <code>file:</code> or <code>classpath:</code>, but as the
+     * file is later on read by JAAS, we cannot guarantee that <code>classpath</code>
+     * works in every environment, esp. not in Java EE application servers. You
+     * should use <code>file:</code> there.
+     *
+     * @param keyTabLocation The location where the keytab resides
+     */
+    public void setKeyTabLocation(Resource keyTabLocation) {
+        this.keyTabLocation = keyTabLocation;
+    }
 
-	/* (non-Javadoc)
-	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
-	 */
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		Assert.notNull(this.servicePrincipal, "servicePrincipal must be specified");
-		Assert.notNull(this.keyTabLocation, "keyTab must be specified");
-		LoginConfig loginConfig = new LoginConfig(this.keyTabLocation.getURL().toExternalForm(), this.servicePrincipal,
-				this.debug);
-		Set<Principal> princ = new HashSet<Principal>(1);
-		princ.add(new KerberosPrincipal(this.servicePrincipal));
-		Subject sub = new Subject(false, princ, new HashSet<Object>(), new HashSet<Object>());
-		LoginContext lc = new LoginContext("", sub, null, loginConfig);
-		lc.login();
-		this.serviceSubject = lc.getSubject();
-	}
+    /** Enables the debug mode of the JAAS Kerberos login module
+     * @param debug default is false
+     */
+    public void setDebug(boolean debug) {
+        this.debug = debug;
+    }
 
-	/**
-	 * This class is needed, because the validation must run with previously generated JAAS subject
-	 * which belongs to the service principal and was loaded out of the keytab during startup.
-	 * 
-	 * @author Mike Wiesner
-	 * @since 1.0
-	 */
-	private static class KerberosValidateAction implements PrivilegedExceptionAction<String> {
-		byte[] kerberosTicket;
+    /* (non-Javadoc)
+     * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
+     */
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        Assert.notNull(this.servicePrincipal, "servicePrincipal must be specified");
+        Assert.notNull(this.keyTabLocation, "keyTab must be specified");
+        LoginConfig loginConfig = new LoginConfig(this.keyTabLocation.getURL().toExternalForm(), this.servicePrincipal,
+                this.debug);
+        Set<Principal> princ = new HashSet<Principal>(1);
+        princ.add(new KerberosPrincipal(this.servicePrincipal));
+        Subject sub = new Subject(false, princ, new HashSet<Object>(), new HashSet<Object>());
+        LoginContext lc = new LoginContext("", sub, null, loginConfig);
+        lc.login();
+        this.serviceSubject = lc.getSubject();
+    }
 
-		public KerberosValidateAction(byte[] kerberosTicket) {
-			this.kerberosTicket = kerberosTicket;
-		}
+    /**
+     * This class is needed, because the validation must run with previously generated JAAS subject
+     * which belongs to the service principal and was loaded out of the keytab during startup.
+     *
+     * @author Mike Wiesner
+     * @since 1.0
+     */
+    private static class KerberosValidateAction implements PrivilegedExceptionAction<String> {
+        byte[] kerberosTicket;
 
-		@Override
-		public String run() throws Exception {
-			GSSContext context = GSSManager.getInstance().createContext((GSSCredential) null);
-			context.acceptSecContext(kerberosTicket, 0, kerberosTicket.length);
-			String user = context.getSrcName().toString();
-			context.dispose();
-			return user;
-		}
+        public KerberosValidateAction(byte[] kerberosTicket) {
+            this.kerberosTicket = kerberosTicket;
+        }
 
-	}
+        @Override
+        public String run() throws Exception {
+            GSSContext context = GSSManager.getInstance().createContext((GSSCredential) null);
+            context.acceptSecContext(kerberosTicket, 0, kerberosTicket.length);
+            String user = context.getSrcName().toString();
+            context.dispose();
+            return user;
+        }
 
-	/**
-	 * Normally you need a JAAS config file in order to use the JAAS Kerberos Login Module, 
-	 * with this class it is not needed and you can have different configurations in one JVM.
-	 * 
-	 * @author Mike Wiesner
-	 * @since 1.0
-	 */
-	private static class LoginConfig extends Configuration {
-		private String keyTabLocation;
-		private String servicePrincipalName;
-		private boolean debug;
+    }
 
-		public LoginConfig(String keyTabLocation, String servicePrincipalName, boolean debug) {
-			this.keyTabLocation = keyTabLocation;
-			this.servicePrincipalName = servicePrincipalName;
-			this.debug = debug;
-		}
+    /**
+     * Normally you need a JAAS config file in order to use the JAAS Kerberos Login Module,
+     * with this class it is not needed and you can have different configurations in one JVM.
+     *
+     * @author Mike Wiesner
+     * @since 1.0
+     */
+    private static class LoginConfig extends Configuration {
+        private String keyTabLocation;
+        private String servicePrincipalName;
+        private boolean debug;
 
-		@Override
-		public AppConfigurationEntry[] getAppConfigurationEntry(String name) {
-			HashMap<String, String> options = new HashMap<String, String>();
-			options.put("useKeyTab", "true");
-			options.put("keyTab", this.keyTabLocation);
-			options.put("principal", this.servicePrincipalName);
-			options.put("storeKey", "true");
-			options.put("doNotPrompt", "true");
-			if (this.debug) {
-				options.put("debug", "true");
-			}
-			options.put("isInitiator", "false");
+        public LoginConfig(String keyTabLocation, String servicePrincipalName, boolean debug) {
+            this.keyTabLocation = keyTabLocation;
+            this.servicePrincipalName = servicePrincipalName;
+            this.debug = debug;
+        }
 
-			return new AppConfigurationEntry[] { new AppConfigurationEntry("com.sun.security.auth.module.Krb5LoginModule",
-					AppConfigurationEntry.LoginModuleControlFlag.REQUIRED, options), };
-		}
+        @Override
+        public AppConfigurationEntry[] getAppConfigurationEntry(String name) {
+            HashMap<String, String> options = new HashMap<String, String>();
+            options.put("useKeyTab", "true");
+            options.put("keyTab", this.keyTabLocation);
+            options.put("principal", this.servicePrincipalName);
+            options.put("storeKey", "true");
+            options.put("doNotPrompt", "true");
+            if (this.debug) {
+                options.put("debug", "true");
+            }
+            options.put("isInitiator", "false");
 
-	}
+            return new AppConfigurationEntry[] { new AppConfigurationEntry("com.sun.security.auth.module.Krb5LoginModule",
+                    AppConfigurationEntry.LoginModuleControlFlag.REQUIRED, options), };
+        }
+
+    }
 
 }
