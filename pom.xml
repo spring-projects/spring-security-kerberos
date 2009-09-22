@@ -179,8 +179,22 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
-				<version>2.1</version>
-			</plugin>
+				<version>2.2-beta-2</version>
+				<executions> 
+							     <execution> 
+							              <id>create-project-bundle</id> 
+							              <phase>package</phase> 
+							              <goals> 
+							                <goal>single</goal> 
+							              </goals> 
+							              <configuration> 
+							                <descriptorRefs> 
+							                  <descriptorRef>project</descriptorRef> 
+							                </descriptorRefs> 
+							              </configuration> 
+							            </execution> 
+							</executions>
+						</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-install-plugin</artifactId>
@@ -251,6 +265,8 @@
 					<aggregate>true</aggregate>
 					<links>
 						<link>http://java.sun.com/javase/6/docs/api/</link>
+						<link>http://static.springsource.org/spring-security/site/docs/3.0.x/apidocs/</link>
+						<link>http://static.springsource.org/spring/docs/3.0.x/javadoc-api/</link>
 					</links>
 				</configuration>
 				<reportSets>
