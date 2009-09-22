@@ -4,11 +4,11 @@
 	<parent>
 		<groupId>org.springframework.security.extensions</groupId>
 		<artifactId>spring-security-kerberos-parent</artifactId>
-		<version>1.0.0.M1</version>
+		<version>1.0.0.CI-SNAPSHOT</version>
 	</parent>
 	<groupId>org.springframework.security.extensions</groupId>
 	<artifactId>spring-security-kerberos-sample</artifactId>
-	<version>1.0.0.M1</version>
+	<version>1.0.0.CI-SNAPSHOT</version>
 	<name>Spring Security Kerberos Sample</name>
 	<packaging>war</packaging>
 	<description>Spring Security Kerberos Sample</description>
@@ -28,7 +28,7 @@
 		<dependency>
 			<groupId>org.springframework.security.extensions</groupId>
 			<artifactId>spring-security-kerberos-core</artifactId>
-			<version>1.0.0.M1</version>
+			<version>1.0.0.CI-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.security</groupId>

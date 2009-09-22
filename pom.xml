@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.springframework.security.extensions</groupId>
 	<artifactId>spring-security-kerberos-parent</artifactId>
-	<version>1.0.0.M1</version>
+	<version>1.0.0.CI-SNAPSHOT</version>
 	<name>Spring Security Kerberos parent</name>
 	<packaging>pom</packaging>
 	<modules>
@@ -24,9 +24,9 @@
 		</license>
 	</licenses>
 	<scm>
-		<connection>scm:svn:https://src.springsource.org/svn/se-security/tags/krb-1.0.0.M1</connection>
-		<developerConnection>scm:svn:https://src.springsource.org/svn/se-security/tags/krb-1.0.0.M1</developerConnection>
-		<url>https://src.springsource.org/svn/se-security/tags/krb-1.0.0.M1</url>
+		<connection>scm:svn:https://src.springframework.org/svn/se-security/trunk/spring-security-kerberos</connection>
+		<developerConnection>scm:svn:https://src.springframework.org/svn/se-security/trunk/spring-security-kerberos</developerConnection>
+		<url>https://src.springframework.org/svn/se-security/trunk/spring-security-kerberos</url>
 	</scm>
 	<issueManagement>
 		<system>jira</system>
@@ -197,7 +197,7 @@
 				<version>2.0-beta-7</version>
 				<configuration>
 					<tagBase>
-                        https://src.springsource.org/svn/se-security/tags
+                        https://src.springframework.org/svn/spring-security/tags
                     </tagBase>
 				</configuration>
 			</plugin>
