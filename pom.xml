@@ -123,7 +123,27 @@
 						</execution>
 					</executions>
 				</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-assembly-plugin</artifactId>
+						<version>2.2-beta-2</version>
+						<executions> 
+									     <execution> 
+									              <id>create-project-bundle</id> 
+									              <phase>package</phase> 
+									              <goals> 
+									                <goal>single</goal> 
+									              </goals> 
+									              <configuration> 
+									                <descriptorRefs> 
+									                  <descriptorRef>project</descriptorRef> 
+									                </descriptorRefs> 
+									              </configuration> 
+									            </execution> 
+									</executions>
+								</plugin>
 			</plugins>
+			
 		</pluginManagement>
 		<plugins>
 			<plugin>
@@ -176,25 +196,7 @@
 				<artifactId>maven-war-plugin</artifactId>
 				<version>2.0.2</version>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<version>2.2-beta-2</version>
-				<executions> 
-							     <execution> 
-							              <id>create-project-bundle</id> 
-							              <phase>package</phase> 
-							              <goals> 
-							                <goal>single</goal> 
-							              </goals> 
-							              <configuration> 
-							                <descriptorRefs> 
-							                  <descriptorRef>project</descriptorRef> 
-							                </descriptorRefs> 
-							              </configuration> 
-							            </execution> 
-							</executions>
-						</plugin>
+		
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-install-plugin</artifactId>
