@@ -32,6 +32,8 @@ import org.springframework.security.core.codec.Base64;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.extensions.kerberos.KerberosServiceAuthenticationProvider;
 import org.springframework.security.extensions.kerberos.KerberosServiceRequestToken;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.util.Assert;
 import org.springframework.web.filter.GenericFilterBean;
 
@@ -93,9 +95,15 @@ import org.springframework.web.filter.GenericFilterBean;
  */
 public class SpnegoAuthenticationProcessingFilter extends GenericFilterBean {
 
-    private AuthenticationManager authenticationManager;
 
-    @Override
+    private AuthenticationManager authenticationManager;
+    private AuthenticationSuccessHandler successHandler;
+    private AuthenticationFailureHandler failureHandler;
+    
+
+    /* (non-Javadoc)
+     * @see javax.servlet.Filter#doFilter(javax.servlet.ServletRequest, javax.servlet.ServletResponse, javax.servlet.FilterChain)
+     */
     public void doFilter(ServletRequest req, ServletResponse res,
             FilterChain chain) throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) req;
@@ -120,12 +128,19 @@ public class SpnegoAuthenticationProcessingFilter extends GenericFilterBean {
                 // That shouldn't happen, as it is most likely a wrong configuration on the server side
                 logger.warn("Negotiate Header was invalid: "+header, e);
                 SecurityContextHolder.clearContext();
-                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                response.flushBuffer();
+                if (failureHandler != null) {
+                    failureHandler.onAuthenticationFailure(request, response, e);
+                }
+                else {
+                    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    response.flushBuffer();
+                }
                 return;
             }
-            SecurityContextHolder.getContext()
-                    .setAuthentication(authentication);
+            if (successHandler != null) {
+                successHandler.onAuthenticationSuccess(request, response, authentication); 
+            }
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         }
 
         chain.doFilter(request, response);
@@ -140,6 +155,31 @@ public class SpnegoAuthenticationProcessingFilter extends GenericFilterBean {
     public void setAuthenticationManager(AuthenticationManager authenticationManager) {
         this.authenticationManager = authenticationManager;
     }
+    
+    /**
+     * This handler is called after a successful authentication.
+     * One can add additional authentication behavior by setting this.<br />
+     * Default is null, which means nothing additional happens
+     *  
+     * @param successHandler
+     */
+    public void setSuccessHandler(AuthenticationSuccessHandler successHandler) {
+        this.successHandler = successHandler;
+    }
+
+    /**
+     * This handler is called after a failure authentication.
+     * In most cases you only get Kerberos/SPNEGO failures with a wrong server
+     * or network configurations and not during runtime. If the client encounters
+     * an error, he will just stop the communication with server and therefore
+     * this handler will not be called in this case.<br />
+     * Default is null, which means that the Filter returns the HTTP 500 code
+     * 
+     * @param failureHandler
+     */
+    public void setFailureHandler(AuthenticationFailureHandler failureHandler) {
+        this.failureHandler = failureHandler;
+    }
 
     /* (non-Javadoc)
      * @see org.springframework.web.filter.GenericFilterBean#afterPropertiesSet()
@@ -149,5 +189,6 @@ public class SpnegoAuthenticationProcessingFilter extends GenericFilterBean {
         super.afterPropertiesSet();
         Assert.notNull(this.authenticationManager, "authenticationManager must be specified");
     }
+
 
 }

@@ -18,7 +18,10 @@ package org.springframework.security.extensions.kerberos.web;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+import java.io.IOException;
+
 import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
@@ -30,9 +33,12 @@ import org.junit.Test;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.extensions.kerberos.KerberosServiceRequestToken;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 /**
  * Test class for {@link SpnegoAuthenticationProcessingFilter}
@@ -50,6 +56,8 @@ public class SpnegoAuthenticationProcessingFilterTest {
     private HttpServletRequest request;
     private HttpServletResponse response;
     private FilterChain chain;
+    private AuthenticationSuccessHandler successHandler;
+    private AuthenticationFailureHandler failureHandler;
 
     // data
     private static final byte[] TEST_TOKEN = "TestToken".getBytes();
@@ -58,10 +66,11 @@ public class SpnegoAuthenticationProcessingFilterTest {
             AuthorityUtils.createAuthorityList("ROLE_ADMIN"), TEST_TOKEN);
     private static final String HEADER = "Authorization";
     private static final String TOKEN_PREFIX = "Negotiate ";
+    private static final BadCredentialsException BCE = new BadCredentialsException("");
 
 
     @Before
-    public void before() {
+    public void before() throws Exception {
         // mocking
         authenticationManager = mock(AuthenticationManager.class);
         filter = new SpnegoAuthenticationProcessingFilter();
@@ -69,10 +78,24 @@ public class SpnegoAuthenticationProcessingFilterTest {
         request = mock(HttpServletRequest.class);
         response = mock(HttpServletResponse.class);
         chain = mock(FilterChain.class);
+        filter.afterPropertiesSet();
     }
 
     @Test
     public void testEverythingWorks() throws Exception {
+        everythingWorks();
+    }
+    
+    @Test
+    public void testEverythingWorksWithHandlers() throws Exception {
+        createHandler();
+        everythingWorks();
+        verify(successHandler).onAuthenticationSuccess(request, response, AUTHENTICATION);
+        verify(failureHandler, never()).onAuthenticationFailure(any(HttpServletRequest.class), 
+                any(HttpServletResponse.class), any(AuthenticationException.class));
+    }
+
+    private void everythingWorks() throws IOException, ServletException {
         // stubbing
         when(request.getHeader(HEADER)).thenReturn(TOKEN_PREFIX+TEST_TOKEN_BASE64);
         when(authenticationManager.authenticate(new KerberosServiceRequestToken(TEST_TOKEN))).thenReturn(AUTHENTICATION);
@@ -82,6 +105,8 @@ public class SpnegoAuthenticationProcessingFilterTest {
         verify(chain).doFilter(request, response);
         assertEquals(AUTHENTICATION, SecurityContextHolder.getContext().getAuthentication());
     }
+    
+    
 
     @Test
     public void testNoHeader() throws Exception {
@@ -95,17 +120,39 @@ public class SpnegoAuthenticationProcessingFilterTest {
 
     @Test
     public void testAuthenticationFails() throws Exception {
+        authenticationFails();
+        verify(response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+    }
+    
+    @Test
+    public void testAuthenticationFailsWithHandlers() throws Exception {
+        createHandler();
+        authenticationFails();
+        verify(failureHandler).onAuthenticationFailure(request, response, BCE);
+        verify(successHandler, never()).onAuthenticationSuccess(any(HttpServletRequest.class), 
+                any(HttpServletResponse.class), any(Authentication.class));
+        verify(response, never()).setStatus(anyInt());
+    }
+
+    private void authenticationFails() throws IOException, ServletException {
         // stubbing
         when(request.getHeader(HEADER)).thenReturn(TOKEN_PREFIX+TEST_TOKEN_BASE64);
-        when(authenticationManager.authenticate(any(Authentication.class))).thenThrow(new BadCredentialsException(""));
+        when(authenticationManager.authenticate(any(Authentication.class))).thenThrow(BCE);
 
         // testing
         filter.doFilter(request, response, chain);
         // chain should stop here and it should send back a 500
         // future version should call some error handler
         verify(chain, never()).doFilter(any(ServletRequest.class), any(ServletResponse.class));
-        verify(response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
+    
+    private void createHandler() {
+        successHandler = mock(AuthenticationSuccessHandler.class);
+        failureHandler = mock(AuthenticationFailureHandler.class);
+        filter.setSuccessHandler(successHandler);
+        filter.setFailureHandler(failureHandler);
+    }
+    
 
     @After
     public void after() {
