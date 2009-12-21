@@ -28,6 +28,8 @@
 			<bean
 				class="org.springframework.security.extensions.kerberos.SunJaasKerberosTicketValidator">
 				<property name="servicePrincipal" value="HTTP/WEB.FENETRES.MONKEYMACHINE.EU" />
+                <!-- Setting keyTabLocation to a classpath resource will most likely not work in a Java EE application Server -->
+                <!-- See the Javadoc for more information on that -->
 				<property name="keyTabLocation" value="classpath:http-web.keytab" />
 				<property name="debug" value="true"/>
 			</bean>

@@ -29,10 +29,13 @@ import javax.security.auth.login.AppConfigurationEntry;
 import javax.security.auth.login.Configuration;
 import javax.security.auth.login.LoginContext;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.ietf.jgss.GSSContext;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSManager;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.util.Assert;
@@ -53,6 +56,7 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
     private Resource keyTabLocation;
     private Subject serviceSubject;
     private boolean debug = false;
+    private static final Log LOG = LogFactory.getLog(SunJaasKerberosTicketValidator.class);
 
     /* (non-Javadoc)
      * @see org.springframework.security.extensions.kerberos.KerberosTicketValidator#validateTicket(byte[])
@@ -83,7 +87,11 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
      * prefixes like <code>file:</code> or <code>classpath:</code>, but as the
      * file is later on read by JAAS, we cannot guarantee that <code>classpath</code>
      * works in every environment, esp. not in Java EE application servers. You
-     * should use <code>file:</code> there.
+     * should use <code>file:</code> there.<br />
+     * <br />
+     * This file also needs special protection, which is another reason to
+     * not include it in the classpath but rather use <code>file:/etc/http.keytab</code>
+     * for example.
      *
      * @param keyTabLocation The location where the keytab resides
      */
@@ -105,6 +113,9 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
     public void afterPropertiesSet() throws Exception {
         Assert.notNull(this.servicePrincipal, "servicePrincipal must be specified");
         Assert.notNull(this.keyTabLocation, "keyTab must be specified");
+        if (keyTabLocation instanceof ClassPathResource) {
+            LOG.warn("Your keytab is in the classpath. This file needs special protection and shouldn't be in the classpath. JAAS may also not be able to load this file from classpath.");
+        }
         LoginConfig loginConfig = new LoginConfig(this.keyTabLocation.getURL().toExternalForm(), this.servicePrincipal,
                 this.debug);
         Set<Principal> princ = new HashSet<Principal>(1);
@@ -169,7 +180,7 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
             if (this.debug) {
                 options.put("debug", "true");
             }
-            options.put("isInitiator", "false");
+            options.put("isInitiator", "true");
 
             return new AppConfigurationEntry[] { new AppConfigurationEntry("com.sun.security.auth.module.Krb5LoginModule",
                     AppConfigurationEntry.LoginModuleControlFlag.REQUIRED, options), };
