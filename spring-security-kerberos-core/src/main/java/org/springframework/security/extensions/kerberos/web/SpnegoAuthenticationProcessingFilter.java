@@ -25,10 +25,10 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.codec.binary.Base64;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.codec.Base64;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.extensions.kerberos.KerberosServiceAuthenticationProvider;
 import org.springframework.security.extensions.kerberos.KerberosServiceRequestToken;
@@ -49,7 +49,7 @@ import org.springframework.web.filter.GenericFilterBean;
  *
  *	&lt;sec:http entry-point-ref=&quot;spnegoEntryPoint&quot;&gt;
  *		&lt;sec:intercept-url pattern=&quot;/secure/**&quot; access=&quot;IS_AUTHENTICATED_FULLY&quot; /&gt;
- *		&lt;sec:custom-filter ref=&quot;spnegoAuthenticationProcessingFilter&quot; position=&quot;BASIC_PROCESSING_FILTER&quot; /&gt;
+ *		&lt;sec:custom-filter ref=&quot;spnegoAuthenticationProcessingFilter&quot; position=&quot;BASIC_AUTH_FILTER&quot; /&gt;
  *	&lt;/sec:http&gt;
  *
  *	&lt;bean id=&quot;spnegoEntryPoint&quot; class=&quot;org.springframework.security.extensions.kerberos.web.SpnegoEntryPoint&quot; /&gt;
@@ -108,9 +108,8 @@ public class SpnegoAuthenticationProcessingFilter extends GenericFilterBean {
             if (logger.isDebugEnabled()) {
                 logger.debug("Received Negotiate Header for request "+ request.getRequestURL()+ ": " + header);
             }
-            String base64Token = header.substring(10);
-            byte[] kerberosTicket = Base64.decodeBase64(base64Token.trim()
-                    .getBytes());
+            byte[] base64Token = header.substring(10).getBytes("UTF-8");
+            byte[] kerberosTicket = Base64.decode(base64Token);
             KerberosServiceRequestToken authenticationRequest = new KerberosServiceRequestToken(
                     kerberosTicket);
             Authentication authentication;

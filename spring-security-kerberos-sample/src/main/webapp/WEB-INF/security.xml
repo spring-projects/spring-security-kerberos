@@ -7,7 +7,7 @@
 	<sec:http entry-point-ref="spnegoEntryPoint">
 		<sec:intercept-url pattern="/secure/**" access="IS_AUTHENTICATED_FULLY" />
 		<sec:custom-filter ref="spnegoAuthenticationProcessingFilter"
-			position="BASIC_PROCESSING_FILTER" />
+			position="BASIC_AUTH_FILTER" />
 	</sec:http>
 
 	<bean id="spnegoEntryPoint"
