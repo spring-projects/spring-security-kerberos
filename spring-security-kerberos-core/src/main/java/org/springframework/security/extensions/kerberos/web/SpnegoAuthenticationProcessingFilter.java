@@ -86,6 +86,12 @@ import org.springframework.web.filter.GenericFilterBean;
  *	&lt;/bean&gt;
  * &lt;/beans&gt;
  * </pre>
+ * 
+ * If you get a "GSSException: Channel binding mismatch (Mechanism level:ChannelBinding not provided!) 
+ * have a look at this <a href="http://bugs.sun.com/view_bug.do?bug_id=6851973">bug</a>.<br />
+ * A workaround unti this is fixed in the JVM is to change 
+ * HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\LSA\SuppressExtendedProtection to 0x02
+ * 
  *
  * @author Mike Wiesner
  * @since 1.0
