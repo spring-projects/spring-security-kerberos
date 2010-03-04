@@ -31,7 +31,6 @@ import javax.security.auth.login.LoginException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.authentication.BadCredentialsException;
 
 /**
@@ -44,10 +43,9 @@ import org.springframework.security.authentication.BadCredentialsException;
  * @since 1.0
  * @version $Id$
  */
-public class SunJaasKerberosClient implements KerberosClient, InitializingBean {
+public class SunJaasKerberosClient implements KerberosClient {
 
     private boolean debug = false;
-    private String krbConfLocation;
     
 
     private static final Log LOG = LogFactory.getLog(SunJaasKerberosClient.class);
@@ -75,22 +73,6 @@ public class SunJaasKerberosClient implements KerberosClient, InitializingBean {
 
     public void setDebug(boolean debug) {
         this.debug = debug;
-    }
-
-   
-    public void setKrbConfLocation(String krbConfLocation) {
-        this.krbConfLocation = krbConfLocation;
-    }
-
-    public void afterPropertiesSet() throws Exception {
-        if (krbConfLocation != null) {
-            System.setProperty("java.security.krb5.conf", krbConfLocation);
-        }
-        if (debug) {
-            System.setProperty("sun.security.krb5.debug", "true");
-        }
-        
-        
     }
 
     private static class LoginConfig extends Configuration {

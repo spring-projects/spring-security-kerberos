@@ -43,14 +43,7 @@ public class KerberosAuthenticationProvider implements AuthenticationProvider {
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) authentication;
         String validatedUsername = kerberosClient.login(auth.getName(), auth.getCredentials().toString());
-        if (validatedUsername.equalsIgnoreCase(auth.getName()) == false) {
-            if (LOG.isDebugEnabled()) {
-                LOG.info("Username returned from KDC ("+validatedUsername+") doesn't match with supplied username ("+auth.getName()+")");    
-            }
-            throw new BadCredentialsException("Username returned from KDC doesn't match with supplied username");
-        }
-        
-        UserDetails userDetails = this.userDetailsService.loadUserByUsername(auth.getName());
+        UserDetails userDetails = this.userDetailsService.loadUserByUsername(validatedUsername);
         UsernamePasswordAuthenticationToken output = new UsernamePasswordAuthenticationToken(userDetails, auth.getCredentials(), userDetails.getAuthorities());
         return output;
         
