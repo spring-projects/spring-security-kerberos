@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:sec="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+		http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.0.xsd">
+
+	<!-- This configuration uses SPNEGO by default, but one could also use a form if he directly goes to /login.html -->
+	<sec:http>
+		<sec:intercept-url pattern="/secure/**" access="IS_AUTHENTICATED_FULLY" />
+		<sec:form-login login-page="/login.html" default-target-url="/secure/index.jsp"/>
+	</sec:http>
+
+	<sec:authentication-manager alias="authenticationManager">
+		<sec:authentication-provider ref="kerberosAuthenticationProvider"/>
+	</sec:authentication-manager>
+
+	<bean id="kerberosAuthenticationProvider"  
+		class="org.springframework.security.extensions.kerberos.KerberosAuthenticationProvider">
+		<property name="kerberosClient">
+			<bean class="org.springframework.security.extensions.kerberos.SunJaasKerberosClient">
+				<property name="debug" value="true"/>
+			</bean>
+		</property>
+		<property name="userDetailsService" ref="dummyUserDetailsService"/>
+	</bean>
+	
+	<bean
+		class="org.springframework.security.extensions.kerberos.GlobalSunJaasKerberosConfig">
+		<property name="debug" value="true" />
+		<!-- You can point to a different kerberos config location here, if you don't want the default one -->
+		<!-- <property name="krbConfLocation" value="/etc/krb5.conf"/> -->
+	</bean>
+
+	<!--
+		Just returns the User authenticated by Kerberos and gives him the
+		ROLE_USER
+	-->
+	<bean id="dummyUserDetailsService"
+		class="org.springframework.security.extensions.kerberos.sample.DummyUserDetailsService" />
+</beans>

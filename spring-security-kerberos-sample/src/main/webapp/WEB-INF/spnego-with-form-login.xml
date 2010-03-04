@@ -4,10 +4,12 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
 		http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.0.xsd">
 
+	<!-- This configuration uses SPNEGO by default, but one could also use a form if he directly goes to /login.html -->
 	<sec:http entry-point-ref="spnegoEntryPoint">
 		<sec:intercept-url pattern="/secure/**" access="IS_AUTHENTICATED_FULLY" />
 		<sec:custom-filter ref="spnegoAuthenticationProcessingFilter"
 			position="BASIC_AUTH_FILTER" />
+		<sec:form-login login-page="/login.html" default-target-url="/secure/index.jsp"/>
 	</sec:http>
 
 	<bean id="spnegoEntryPoint"
@@ -19,33 +21,38 @@
 	</bean>
 
 	<sec:authentication-manager alias="authenticationManager">
-		<sec:authentication-provider ref="kerberosServiceAuthenticationProvider" />
+		<sec:authentication-provider ref="kerberosServiceAuthenticationProvider" /> <!-- Used with SPNEGO -->
+		<sec:authentication-provider user-service-ref="dummyUserDetailsService"/> <!-- Used with form login -->
 	</sec:authentication-manager>
 
+	
+	
 	<bean id="kerberosServiceAuthenticationProvider"
 		class="org.springframework.security.extensions.kerberos.KerberosServiceAuthenticationProvider">
 		<property name="ticketValidator">
 			<bean
 				class="org.springframework.security.extensions.kerberos.SunJaasKerberosTicketValidator">
-				<property name="servicePrincipal" value="HTTP/WEB.FENETRES.MONKEYMACHINE.EU" />
-                <!-- Setting keyTabLocation to a classpath resource will most likely not work in a Java EE application Server -->
-                <!-- See the Javadoc for more information on that -->
-				<property name="keyTabLocation" value="classpath:http-web.keytab" />
-				<property name="debug" value="true"/>
+				<property name="servicePrincipal" value="HTTP/web.springsource.com" />
+				<!-- Setting keyTabLocation to a classpath resource will most likely not work in a Java EE application Server -->
+				<!-- See the Javadoc for more information on that -->
+				<property name="keyTabLocation" value="/etc/web-springsource-com.keytab" />
+				<property name="debug" value="true" />
 			</bean>
 		</property>
 		<property name="userDetailsService" ref="dummyUserDetailsService" />
 	</bean>
-
-	<!-- Just returns the User authenticated by Kerberos and gives him the ROLE_USER -->
-	<bean id="dummyUserDetailsService" class="org.springframework.security.extensions.kerberos.sample.DummyUserDetailsService"/>
 	
-	<bean id="inMemoryUserDetailsService"
-		class="org.springframework.security.core.userdetails.memory.InMemoryDaoImpl">
-		<property name="userProperties">
-			<value>
-				mike@SECPOD.DE=notUsed,ROLE_ADMIN
-					</value>
-		</property>
+	<!-- This bean definition enables a very detailed Kerberos logging -->
+	<bean
+		class="org.springframework.security.extensions.kerberos.GlobalSunJaasKerberosConfig">
+		<property name="debug" value="true" />
 	</bean>
+
+	<!--
+		Just returns the User authenticated by Kerberos and gives him the
+		ROLE_USER
+	-->
+	<bean id="dummyUserDetailsService"
+		class="org.springframework.security.extensions.kerberos.sample.DummyUserDetailsService" />
+
 </beans>

@@ -8,5 +8,8 @@
 </head>
 <body>
 <h1>Click <a href="secure/index.jsp">here</a> to attempt SPNEGO authentication.</h1>
+
+<h1>Click <a href="login.html">here</a> to got to the form based login.</h1>
+
 </body>
 </html>
