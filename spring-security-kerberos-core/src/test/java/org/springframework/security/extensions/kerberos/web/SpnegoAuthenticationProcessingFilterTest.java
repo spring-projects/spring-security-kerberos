@@ -30,8 +30,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -42,14 +44,12 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 
 /**
  * Test class for {@link SpnegoAuthenticationProcessingFilter}
- *
+ * 
  * @author Mike Wiesner
  * @since 1.0
  * @version $Id$
  */
 public class SpnegoAuthenticationProcessingFilterTest {
-
-
 
     private SpnegoAuthenticationProcessingFilter filter;
     private AuthenticationManager authenticationManager;
@@ -68,7 +68,6 @@ public class SpnegoAuthenticationProcessingFilterTest {
     private static final String TOKEN_PREFIX = "Negotiate ";
     private static final BadCredentialsException BCE = new BadCredentialsException("");
 
-
     @Before
     public void before() throws Exception {
         // mocking
@@ -85,19 +84,19 @@ public class SpnegoAuthenticationProcessingFilterTest {
     public void testEverythingWorks() throws Exception {
         everythingWorks();
     }
-    
+
     @Test
     public void testEverythingWorksWithHandlers() throws Exception {
         createHandler();
         everythingWorks();
         verify(successHandler).onAuthenticationSuccess(request, response, AUTHENTICATION);
-        verify(failureHandler, never()).onAuthenticationFailure(any(HttpServletRequest.class), 
-                any(HttpServletResponse.class), any(AuthenticationException.class));
+        verify(failureHandler, never()).onAuthenticationFailure(any(HttpServletRequest.class), any(HttpServletResponse.class),
+                any(AuthenticationException.class));
     }
 
     private void everythingWorks() throws IOException, ServletException {
         // stubbing
-        when(request.getHeader(HEADER)).thenReturn(TOKEN_PREFIX+TEST_TOKEN_BASE64);
+        when(request.getHeader(HEADER)).thenReturn(TOKEN_PREFIX + TEST_TOKEN_BASE64);
         when(authenticationManager.authenticate(new KerberosServiceRequestToken(TEST_TOKEN))).thenReturn(AUTHENTICATION);
 
         // testing
@@ -105,13 +104,12 @@ public class SpnegoAuthenticationProcessingFilterTest {
         verify(chain).doFilter(request, response);
         assertEquals(AUTHENTICATION, SecurityContextHolder.getContext().getAuthentication());
     }
-    
-    
 
     @Test
     public void testNoHeader() throws Exception {
         filter.doFilter(request, response, chain);
-        // If the header is not present, the filter is not allowed to call authenticate()
+        // If the header is not present, the filter is not allowed to call
+        // authenticate()
         verify(authenticationManager, never()).authenticate(any(Authentication.class));
         // chain should go on
         verify(chain).doFilter(request, response);
@@ -123,20 +121,71 @@ public class SpnegoAuthenticationProcessingFilterTest {
         authenticationFails();
         verify(response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
-    
+
     @Test
     public void testAuthenticationFailsWithHandlers() throws Exception {
         createHandler();
         authenticationFails();
         verify(failureHandler).onAuthenticationFailure(request, response, BCE);
-        verify(successHandler, never()).onAuthenticationSuccess(any(HttpServletRequest.class), 
-                any(HttpServletResponse.class), any(Authentication.class));
+        verify(successHandler, never()).onAuthenticationSuccess(any(HttpServletRequest.class), any(HttpServletResponse.class),
+                any(Authentication.class));
         verify(response, never()).setStatus(anyInt());
+    }
+
+    @Test
+    public void testAlreadyAuthenticated() throws Exception {
+        try {
+            Authentication existingAuth = new UsernamePasswordAuthenticationToken("mike", "mike",
+                    AuthorityUtils.createAuthorityList("ROLE_TEST"));
+            SecurityContextHolder.getContext().setAuthentication(existingAuth);
+            when(request.getHeader(HEADER)).thenReturn(TOKEN_PREFIX + TEST_TOKEN_BASE64);
+            filter.doFilter(request, response, chain);
+            verify(authenticationManager, never()).authenticate(any(Authentication.class));
+        } finally {
+            SecurityContextHolder.clearContext();
+        }
+    }
+
+    @Test
+    public void testAlreadyAuthenticatedWithNotAuthenticatedToken() throws Exception {
+        try {
+            // this token is not authenticated yet!
+            Authentication existingAuth = new UsernamePasswordAuthenticationToken("mike", "mike");
+            SecurityContextHolder.getContext().setAuthentication(existingAuth);
+            everythingWorks();
+        } finally {
+            SecurityContextHolder.clearContext();
+        }
+    }
+
+    @Test
+    public void testAlreadyAuthenticatedWithAnonymousToken() throws Exception {
+        try {
+            Authentication existingAuth = new AnonymousAuthenticationToken("test", "mike",
+                    AuthorityUtils.createAuthorityList("ROLE_TEST"));
+            SecurityContextHolder.getContext().setAuthentication(existingAuth);
+            everythingWorks();
+        } finally {
+            SecurityContextHolder.clearContext();
+        }
+    }
+    
+    @Test
+    public void testAlreadyAuthenticatedNotActive() throws Exception {
+        try {
+            Authentication existingAuth = new UsernamePasswordAuthenticationToken("mike", "mike",
+                    AuthorityUtils.createAuthorityList("ROLE_TEST"));
+            SecurityContextHolder.getContext().setAuthentication(existingAuth);
+            filter.setSkipIfAlreadyAuthenticated(false);
+            everythingWorks();
+        } finally {
+            SecurityContextHolder.clearContext();
+        }
     }
 
     private void authenticationFails() throws IOException, ServletException {
         // stubbing
-        when(request.getHeader(HEADER)).thenReturn(TOKEN_PREFIX+TEST_TOKEN_BASE64);
+        when(request.getHeader(HEADER)).thenReturn(TOKEN_PREFIX + TEST_TOKEN_BASE64);
         when(authenticationManager.authenticate(any(Authentication.class))).thenThrow(BCE);
 
         // testing
@@ -145,19 +194,17 @@ public class SpnegoAuthenticationProcessingFilterTest {
         // future version should call some error handler
         verify(chain, never()).doFilter(any(ServletRequest.class), any(ServletResponse.class));
     }
-    
+
     private void createHandler() {
         successHandler = mock(AuthenticationSuccessHandler.class);
         failureHandler = mock(AuthenticationFailureHandler.class);
         filter.setSuccessHandler(successHandler);
         filter.setFailureHandler(failureHandler);
     }
-    
 
     @After
     public void after() {
         SecurityContextHolder.clearContext();
     }
-
 
 }
