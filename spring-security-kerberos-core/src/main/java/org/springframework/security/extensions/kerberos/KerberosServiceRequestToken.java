@@ -51,7 +51,7 @@ public class KerberosServiceRequestToken extends AbstractAuthenticationToken {
      * @param token the Kerberos/SPNEGO token
      * @see UserDetails
      */
-    public KerberosServiceRequestToken(Object principal, Collection<GrantedAuthority> authorities, byte[] token) {
+    public KerberosServiceRequestToken(Object principal, Collection<? extends GrantedAuthority> authorities, byte[] token) {
         super(authorities);
         this.token = token;
         this.principal = principal;
