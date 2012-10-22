@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<book xmlns="http://docbook.org/ns/docbook" version="5.0"
+    xml:id="spring-framework-reference"
+    xmlns:xi="http://www.w3.org/2001/XInclude"
+    xmlns:xlink="http://www.w3.org/1999/xlink">
+  <bookinfo>
+    <title>Spring Security Kerberos Reference Manual</title>
+
+    <productname>Spring Framework</productname>
+
+    <releaseinfo>${version}</releaseinfo>
+
+    <mediaobject>
+      <imageobject role="fo">
+        <imagedata align="center" fileref="images/logo-pdf.png" format="PNG"
+                   width="240" />
+      </imageobject>
+    </mediaobject>
+
+    <authorgroup>
+      <author>
+        <firstname>Mike</firstname>
+        <surname>Wiesner</surname>
+      </author>
+    </authorgroup>
+
+    <copyright>
+      <year>2004-2012</year>
+
+      <holder>Mike Wiesner</holder>
+    </copyright>
+
+    <legalnotice>
+      <para>Copies of this document may be made for your own use and for
+      distribution to others, provided that you do not charge any fee for such
+      copies and further provided that each copy contains this Copyright
+      Notice, whether distributed in print or electronically.</para>
+    </legalnotice>
+  </bookinfo>
+
+  <!-- front matter -->
+
+  <toc></toc>
+
+  <part id="spring-security-kerberos-introduction">
+    <title>Overview of Spring Security Kerberos</title>
+
+    <partintro id="spring-security-kerberos-intro">
+        <para>The Kerberos Extension was created by Mike Wiesner. For additional information refer to the links below.
+          </para>
+        <itemizedlist>
+            <listitem>
+                <para><ulink url="http://forum.springsource.org/">The second milestone</ulink> of the extension is now available.
+                    You'll find more detailed information in Mike Wiesner's
+                    <ulink url="http://blog.springsource.com/2009/09/28/spring-security-kerberos/">blog article</ulink></para>
+            </listitem>
+
+            <listitem>
+                <para>For
+                    updated samples refer to the
+                    <ulink url="https://github.com/SpringSource/spring-security-kerberos/tree/master/spring-security-kerberos-sample">spring-security-kerberos-sample</ulink>.</para>
+            </listitem>
+
+            <listitem>
+                <para>The JavaDoc is available online <ulink url="http://static.springsource.org/spring-security/site/extensions/krb/docs/1.0.x/apidocs/index.html">Here</ulink> </para>
+            </listitem>
+
+            <listitem>
+                <para>Documentation coming soon</para>
+            </listitem>
+        </itemizedlist>
+    </partintro>
+  </part>
+</book>
