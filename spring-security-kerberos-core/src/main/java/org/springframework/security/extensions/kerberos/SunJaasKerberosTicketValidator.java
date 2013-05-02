@@ -115,7 +115,14 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
         if (keyTabLocation instanceof ClassPathResource) {
             LOG.warn("Your keytab is in the classpath. This file needs special protection and shouldn't be in the classpath. JAAS may also not be able to load this file from classpath.");
         }
-        LoginConfig loginConfig = new LoginConfig(this.keyTabLocation.getURL().toExternalForm(), this.servicePrincipal,
+        String keyTabLocationAsString = this.keyTabLocation.getURL().toExternalForm();
+        // We need to remove the file prefix (if there is one), as it is not supported in Java 7 anymore.
+        // As Java 6 accepts it with and without the prefix, we don't need to check for Java 7
+        if (keyTabLocationAsString.startsWith("file:"))
+        {
+        	keyTabLocationAsString = keyTabLocationAsString.substring(5);
+        }
+        LoginConfig loginConfig = new LoginConfig(keyTabLocationAsString, this.servicePrincipal,
                 this.debug);
         Set<Principal> princ = new HashSet<Principal>(1);
         princ.add(new KerberosPrincipal(this.servicePrincipal));
