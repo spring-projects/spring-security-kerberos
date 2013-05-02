@@ -77,7 +77,6 @@ public class KerberosServiceAuthenticationProvider implements
     /* (non-Javadoc)
      * @see org.springframework.security.authentication.AuthenticationProvider#authenticate(org.springframework.security.core.Authentication)
      */
-    @Override
     public Authentication authenticate(Authentication authentication)
             throws AuthenticationException {
         KerberosServiceRequestToken auth = (KerberosServiceRequestToken) authentication;
@@ -109,7 +108,6 @@ public class KerberosServiceAuthenticationProvider implements
     /* (non-Javadoc)
      * @see org.springframework.security.authentication.AuthenticationProvider#supports(java.lang.Class)
      */
-    @Override
     public boolean supports(Class<? extends Object> auth) {
         return KerberosServiceRequestToken.class.isAssignableFrom(auth);
     }
@@ -117,7 +115,6 @@ public class KerberosServiceAuthenticationProvider implements
     /* (non-Javadoc)
      * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
      */
-    @Override
     public void afterPropertiesSet() throws Exception {
         Assert.notNull(this.ticketValidator, "ticketValidator must be specified");
         Assert.notNull(this.userDetailsService, "userDetailsService must be specified");

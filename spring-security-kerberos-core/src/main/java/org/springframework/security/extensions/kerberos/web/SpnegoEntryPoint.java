@@ -42,7 +42,6 @@ public class SpnegoEntryPoint implements AuthenticationEntryPoint {
     /* (non-Javadoc)
      * @see org.springframework.security.web.AuthenticationEntryPoint#commence(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, org.springframework.security.core.AuthenticationException)
      */
-    @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
             AuthenticationException ex) throws IOException, ServletException {
         if (LOG.isDebugEnabled()) {

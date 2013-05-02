@@ -4,3 +4,7 @@ build/
 bin/
 *.iml
 .gradle/
+.classpath
+.DS_Store
+.project
+.settings

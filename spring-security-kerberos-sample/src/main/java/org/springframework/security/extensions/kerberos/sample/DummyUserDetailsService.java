@@ -39,7 +39,6 @@ public class DummyUserDetailsService implements UserDetailsService {
 	/* (non-Javadoc)
 	 * @see org.springframework.security.core.userdetails.UserDetailsService#loadUserByUsername(java.lang.String)
 	 */
-	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException, DataAccessException {
 		return new User(username, "notUsed", true, true,true,true, AuthorityUtils.createAuthorityList("ROLE_USER"));
 	}

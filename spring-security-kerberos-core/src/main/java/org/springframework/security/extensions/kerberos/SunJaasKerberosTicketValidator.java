@@ -109,7 +109,6 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
     /* (non-Javadoc)
      * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
      */
-    @Override
     public void afterPropertiesSet() throws Exception {
         Assert.notNull(this.servicePrincipal, "servicePrincipal must be specified");
         Assert.notNull(this.keyTabLocation, "keyTab must be specified");
@@ -140,7 +139,6 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
             this.kerberosTicket = kerberosTicket;
         }
 
-        @Override
         public String run() throws Exception {
             GSSContext context = GSSManager.getInstance().createContext((GSSCredential) null);
             context.acceptSecContext(kerberosTicket, 0, kerberosTicket.length);

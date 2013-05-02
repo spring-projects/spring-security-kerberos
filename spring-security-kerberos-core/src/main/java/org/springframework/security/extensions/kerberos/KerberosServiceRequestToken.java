@@ -102,7 +102,6 @@ public class KerberosServiceRequestToken extends AbstractAuthenticationToken {
     /* (non-Javadoc)
      * @see org.springframework.security.core.Authentication#getCredentials()
      */
-    @Override
     public Object getCredentials() {
         return null;
     }
@@ -110,7 +109,6 @@ public class KerberosServiceRequestToken extends AbstractAuthenticationToken {
     /* (non-Javadoc)
      * @see org.springframework.security.core.Authentication#getPrincipal()
      */
-    @Override
     public Object getPrincipal() {
         return this.principal;
     }

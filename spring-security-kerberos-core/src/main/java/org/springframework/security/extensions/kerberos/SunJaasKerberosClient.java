@@ -50,7 +50,6 @@ public class SunJaasKerberosClient implements KerberosClient {
 
     private static final Log LOG = LogFactory.getLog(SunJaasKerberosClient.class);
 
-    @Override
     public String login(String username, String password) {
         LOG.debug("Trying to authenticate " + username + " with Kerberos");
         String validatedUsername;
@@ -106,7 +105,6 @@ public class SunJaasKerberosClient implements KerberosClient {
             this.password = password;
         }
 
-        @Override
         public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
             for (Callback callback : callbacks) {
                 if (callback instanceof NameCallback) {
