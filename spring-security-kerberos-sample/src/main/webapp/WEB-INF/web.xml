@@ -12,10 +12,10 @@
     </filter-mapping>
     <context-param>
 		<param-name>contextConfigLocation</param-name>
-		<param-value>/WEB-INF/spnego.xml</param-value>
-<!--		<param-value>/WEB-INF/spnego-with-form-login.xml</param-value>-->
-<!--		<param-value>/WEB-INF/spnego-with-server-side-kerberos-option.xml</param-value>-->
-<!--		<param-value>/WEB-INF/server-side-kerberos.xml</param-value>	-->
+<!-- 		<param-value>/WEB-INF/spnego.xml</param-value> -->
+<!-- 		<param-value>/WEB-INF/spnego-with-form-login.xml</param-value> -->
+		<param-value>/WEB-INF/spnego-with-server-side-kerberos-option.xml</param-value>
+<!-- 		<param-value>/WEB-INF/server-side-kerberos.xml</param-value>	 -->
 	</context-param>
 
 
