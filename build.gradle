@@ -87,6 +87,14 @@ project('spring-security-kerberos-core') {
     description = 'Spring Security Kerberos Core'
 
     dependencies {
+		compile "org.springframework:spring-core:$springVersion"
+		compile "org.springframework:spring-beans:$springVersion"
+		compile "org.springframework:spring-aop:$springVersion"
+		compile "org.springframework:spring-expression:$springVersion"
+		compile "org.springframework:spring-context:$springVersion"
+		compile "org.springframework:spring-tx:$springVersion"
+		compile "org.springframework:spring-jdbc:$springVersion"
+		compile "org.springframework:spring-web:$springVersion"
         compile "org.springframework.security:spring-security-core:$springSecurityVersion"
         compile "org.springframework.security:spring-security-web:$springSecurityVersion"
         compile("commons-logging:commons-logging:1.1.1", optional)
@@ -101,7 +109,15 @@ project('spring-security-kerberos-sample') {
 
     description = 'Spring Security Kerberos Sample'
     dependencies {
-        compile project(":spring-security-kerberos-core")
+		compile "org.springframework:spring-core:$springVersion"
+		compile "org.springframework:spring-beans:$springVersion"
+		compile "org.springframework:spring-aop:$springVersion"
+		compile "org.springframework:spring-expression:$springVersion"
+		compile "org.springframework:spring-context:$springVersion"
+		compile "org.springframework:spring-tx:$springVersion"
+		compile "org.springframework:spring-jdbc:$springVersion"
+		compile "org.springframework:spring-web:$springVersion"
+		compile project(":spring-security-kerberos-core")
         compile("javax.servlet:servlet-api:2.5", provided)
         compile("org.springframework.security:spring-security-config:$springSecurityVersion")
 		compile('log4j:log4j:1.2.17')
@@ -109,7 +125,7 @@ project('spring-security-kerberos-sample') {
 }
 
 configure(rootProject) {
-    description = 'Spring Framework'
+    description = 'Spring Security Kerberos Extension'
 
     apply plugin: 'docbook-reference'
 
