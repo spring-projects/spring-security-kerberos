@@ -163,10 +163,11 @@ public class SpnegoAuthenticationProcessingFilter extends GenericFilterBean {
                 return;
             }
             sessionStrategy.onAuthentication(authentication, request, response);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
             if (successHandler != null) {
                 successHandler.onAuthenticationSuccess(request, response, authentication);
             }
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            
         }
 
         chain.doFilter(request, response);
