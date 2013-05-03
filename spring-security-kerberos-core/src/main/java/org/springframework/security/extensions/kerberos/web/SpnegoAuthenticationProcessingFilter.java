@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -36,6 +37,7 @@ import org.springframework.security.extensions.kerberos.KerberosServiceRequestTo
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.security.web.authentication.session.NullAuthenticatedSessionStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 import org.springframework.util.Assert;
@@ -109,7 +111,8 @@ import org.springframework.web.filter.GenericFilterBean;
  * @see SpnegoEntryPoint
  */
 public class SpnegoAuthenticationProcessingFilter extends GenericFilterBean {
-
+	
+	private AuthenticationDetailsSource<HttpServletRequest,?> authenticationDetailsSource = new WebAuthenticationDetailsSource();
     private AuthenticationManager authenticationManager;
     private AuthenticationSuccessHandler successHandler;
     private AuthenticationFailureHandler failureHandler;
@@ -146,6 +149,7 @@ public class SpnegoAuthenticationProcessingFilter extends GenericFilterBean {
             byte[] base64Token = header.substring(10).getBytes("UTF-8");
             byte[] kerberosTicket = Base64.decode(base64Token);
             KerberosServiceRequestToken authenticationRequest = new KerberosServiceRequestToken(kerberosTicket);
+            authenticationRequest.setDetails(authenticationDetailsSource.buildDetails(request));
             Authentication authentication;
             try {
                 authentication = authenticationManager.authenticate(authenticationRequest);
@@ -229,6 +233,12 @@ public class SpnegoAuthenticationProcessingFilter extends GenericFilterBean {
      */
     public void setSessionAuthenticationStrategy(SessionAuthenticationStrategy sessionStrategy) {
         this.sessionStrategy = sessionStrategy;
+    }
+    
+
+    public void setAuthenticationDetailsSource(AuthenticationDetailsSource<HttpServletRequest,?> authenticationDetailsSource) {
+        Assert.notNull(authenticationDetailsSource, "AuthenticationDetailsSource required");
+        this.authenticationDetailsSource = authenticationDetailsSource;
     }
 
     /*

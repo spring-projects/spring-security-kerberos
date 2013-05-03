@@ -41,6 +41,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.extensions.kerberos.KerberosServiceRequestToken;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 
 /**
  * Test class for {@link SpnegoAuthenticationProcessingFilter}
@@ -58,6 +59,7 @@ public class SpnegoAuthenticationProcessingFilterTest {
     private FilterChain chain;
     private AuthenticationSuccessHandler successHandler;
     private AuthenticationFailureHandler failureHandler;
+    private WebAuthenticationDetailsSource detailsSource;
 
     // data
     private static final byte[] TEST_TOKEN = "TestToken".getBytes();
@@ -72,6 +74,7 @@ public class SpnegoAuthenticationProcessingFilterTest {
     public void before() throws Exception {
         // mocking
         authenticationManager = mock(AuthenticationManager.class);
+        detailsSource = new WebAuthenticationDetailsSource();
         filter = new SpnegoAuthenticationProcessingFilter();
         filter.setAuthenticationManager(authenticationManager);
         request = mock(HttpServletRequest.class);
@@ -97,7 +100,9 @@ public class SpnegoAuthenticationProcessingFilterTest {
     private void everythingWorks() throws IOException, ServletException {
         // stubbing
         when(request.getHeader(HEADER)).thenReturn(TOKEN_PREFIX + TEST_TOKEN_BASE64);
-        when(authenticationManager.authenticate(new KerberosServiceRequestToken(TEST_TOKEN))).thenReturn(AUTHENTICATION);
+        KerberosServiceRequestToken requestToken = new KerberosServiceRequestToken(TEST_TOKEN);
+        requestToken.setDetails(detailsSource.buildDetails(request));
+        when(authenticationManager.authenticate(requestToken)).thenReturn(AUTHENTICATION);
 
         // testing
         filter.doFilter(request, response, chain);

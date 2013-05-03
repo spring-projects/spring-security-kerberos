@@ -44,6 +44,7 @@ public class KerberosAuthenticationProvider implements AuthenticationProvider {
         String validatedUsername = kerberosClient.login(auth.getName(), auth.getCredentials().toString());
         UserDetails userDetails = this.userDetailsService.loadUserByUsername(validatedUsername);
         UsernamePasswordAuthenticationToken output = new UsernamePasswordAuthenticationToken(userDetails, auth.getCredentials(), userDetails.getAuthorities());
+        output.setDetails(authentication.getDetails());
         return output;
         
     }

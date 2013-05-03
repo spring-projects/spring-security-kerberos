@@ -87,7 +87,10 @@ public class KerberosServiceAuthenticationProvider implements
         UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
         userDetailsChecker.check(userDetails);
         additionalAuthenticationChecks(userDetails, auth);
-        return new KerberosServiceRequestToken(userDetails, userDetails.getAuthorities(), token);
+        KerberosServiceRequestToken responseAuth = new KerberosServiceRequestToken(userDetails, userDetails.getAuthorities(), token);
+        responseAuth.setDetails(authentication.getDetails());
+        return  responseAuth;
+        		
     }
 
 

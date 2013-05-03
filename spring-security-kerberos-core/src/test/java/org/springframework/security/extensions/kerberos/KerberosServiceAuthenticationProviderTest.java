@@ -68,35 +68,44 @@ public class KerberosServiceAuthenticationProviderTest {
 
     @Test
     public void testEverythingWorks() throws Exception {
-        Authentication output = callProviderAndReturnUser(USER_DETAILS);
+        Authentication output = callProviderAndReturnUser(USER_DETAILS, INPUT_TOKEN);
         assertNotNull(output);
         assertEquals(TEST_USER, output.getName());
         assertEquals(AUTHORITY_LIST, output.getAuthorities());
         assertEquals(USER_DETAILS, output.getPrincipal());
     }
+    
+    @Test
+    public void testAuthenticationDetailsPropagation() throws Exception {
+    	KerberosServiceRequestToken requestToken = new KerberosServiceRequestToken(TEST_TOKEN);
+    	requestToken.setDetails("TestDetails");
+        Authentication output = callProviderAndReturnUser(USER_DETAILS, requestToken);
+        assertNotNull(output);
+        assertEquals(requestToken.getDetails(), output.getDetails());
+    }
 
     @Test(expected=DisabledException.class)
     public void testUserIsDisabled() throws Exception {
         User disabledUser = new User(TEST_USER, "empty", false, true, true,true, AUTHORITY_LIST);
-        callProviderAndReturnUser(disabledUser);
+        callProviderAndReturnUser(disabledUser, INPUT_TOKEN);
     }
 
     @Test(expected=AccountExpiredException.class)
     public void testUserAccountIsExpired() throws Exception {
         User expiredUser = new User(TEST_USER, "empty", true, false, true,true, AUTHORITY_LIST);
-        callProviderAndReturnUser(expiredUser);
+        callProviderAndReturnUser(expiredUser, INPUT_TOKEN);
     }
 
     @Test(expected=CredentialsExpiredException.class)
     public void testUserCredentialsExpired() throws Exception {
         User credExpiredUser = new User(TEST_USER, "empty", true, true, false ,true, AUTHORITY_LIST);
-        callProviderAndReturnUser(credExpiredUser);
+        callProviderAndReturnUser(credExpiredUser, INPUT_TOKEN);
     }
 
     @Test(expected=LockedException.class)
     public void testUserAccountLockedCredentialsExpired() throws Exception {
         User lockedUser = new User(TEST_USER, "empty", true, true, true ,false, AUTHORITY_LIST);
-        callProviderAndReturnUser(lockedUser);
+        callProviderAndReturnUser(lockedUser, INPUT_TOKEN);
     }
 
     @Test(expected=UsernameNotFoundException.class)
@@ -119,13 +128,13 @@ public class KerberosServiceAuthenticationProviderTest {
         provider.authenticate(INPUT_TOKEN);
     }
 
-    private Authentication callProviderAndReturnUser(UserDetails disabledUser) {
+    private Authentication callProviderAndReturnUser(UserDetails userDetails, Authentication inputToken) {
         // stubbing
         when(ticketValidator.validateTicket(TEST_TOKEN)).thenReturn(TEST_USER);
-        when(userDetailsService.loadUserByUsername(TEST_USER)).thenReturn(disabledUser);
+        when(userDetailsService.loadUserByUsername(TEST_USER)).thenReturn(userDetails);
 
         // testing
-        return provider.authenticate(INPUT_TOKEN);
+        return provider.authenticate(inputToken);
     }
 
 }
