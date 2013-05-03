@@ -35,6 +35,9 @@ import org.springframework.security.extensions.kerberos.KerberosServiceAuthentic
 import org.springframework.security.extensions.kerberos.KerberosServiceRequestToken;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
+import org.springframework.security.web.authentication.session.NullAuthenticatedSessionStrategy;
+import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 import org.springframework.util.Assert;
 import org.springframework.web.filter.GenericFilterBean;
 
@@ -110,6 +113,7 @@ public class SpnegoAuthenticationProcessingFilter extends GenericFilterBean {
     private AuthenticationManager authenticationManager;
     private AuthenticationSuccessHandler successHandler;
     private AuthenticationFailureHandler failureHandler;
+    private SessionAuthenticationStrategy sessionStrategy = new NullAuthenticatedSessionStrategy();
     private boolean skipIfAlreadyAuthenticated = true;
 
 
@@ -158,6 +162,7 @@ public class SpnegoAuthenticationProcessingFilter extends GenericFilterBean {
                 }
                 return;
             }
+            sessionStrategy.onAuthentication(authentication, request, response);
             if (successHandler != null) {
                 successHandler.onAuthenticationSuccess(request, response, authentication);
             }
@@ -211,6 +216,18 @@ public class SpnegoAuthenticationProcessingFilter extends GenericFilterBean {
      */
     public void setSkipIfAlreadyAuthenticated(boolean skipIfAlreadyAuthenticated) {
         this.skipIfAlreadyAuthenticated = skipIfAlreadyAuthenticated;
+    }
+    
+    /**
+     * The session handling strategy which will be invoked immediately after an authentication request is
+     * successfully processed by the <tt>AuthenticationManager</tt>. Used, for example, to handle changing of the
+     * session identifier to prevent session fixation attacks.
+     *
+     * @param sessionStrategy the implementation to use. If not set a null implementation is
+     * used.
+     */
+    public void setSessionAuthenticationStrategy(SessionAuthenticationStrategy sessionStrategy) {
+        this.sessionStrategy = sessionStrategy;
     }
 
     /*
