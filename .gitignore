@@ -8,3 +8,4 @@ bin/
 .DS_Store
 .project
 .settings
+kerberos-user.properties
