@@ -1,0 +1,71 @@
+---
+# The name of your project
+title: Spring Security Kerberos
+
+badges:
+
+  # Specify your project's twitter handle, if any. Delete if none.
+  twitter: SpringSecurity
+
+  # Customize your project's badges. Delete any entries that do not apply.
+  custom:
+    - name: Source (GitHub)
+      url:  https://github.com/spring-projects/spring-security-kerberos
+      icon: github
+
+    - name: Issues (JIRA)
+      url:  http://jira.springsource.org/browse/SES
+      icon: tracking
+
+    - name: CI (Bamboo)
+      url:  https://build.springsource.org/browse/SES
+      icon: ci
+
+    - name: Forum
+      url:  http://forum.stage.springsource.org/forum/spring-projects/security
+      icon: forum
+
+    - name: StackOverflow
+      url:  http://stackoverflow.com/questions/tagged/spring-security
+      icon: stackoverflow
+
+---
+<!DOCTYPE HTML>
+<html lang="en-US">
+
+<!-- Specify the parent of this project (or delete if none) to influence the rendering of the breadcrumb -->
+{% capture parent_link %}
+[Spring Security]({{site.projects_site_url}}/spring-security)
+{% endcapture %}
+
+
+{% capture billboard_description %}
+
+Spring Security Extension for use with Kerberos.
+
+{% endcapture %}
+
+{% capture main_content %}
+
+With the Spring Security Kerberos Extension, your users are authenticated against your web application just by opening the URL. There is no need to enter a username/password and no need to install additional software.
+
+<span id="quick-start"></span>
+## Quick Start
+
+{% include download_widget.md %}
+
+{% endcapture %}
+
+{% capture related_resources %}
+
+### Resources
+
+* [Quick Start](http://blog.springsource.com/2009/09/28/spring-security-kerberos/)
+* [Sample](https://github.com/SpringSource/spring-security-kerberos/tree/master/spring-security-kerberos-sample)
+* [Spring Security]({{site.projects_site_url}}/spring-security)
+
+{% endcapture %}
+
+
+{% include project_page.html %}
+</html>
