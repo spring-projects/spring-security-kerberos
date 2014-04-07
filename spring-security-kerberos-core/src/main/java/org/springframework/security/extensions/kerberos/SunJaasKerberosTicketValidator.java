@@ -61,14 +61,15 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
     /* (non-Javadoc)
      * @see org.springframework.security.extensions.kerberos.KerberosTicketValidator#validateTicket(byte[])
      */
-    public String validateTicket(byte[] token) {
-        String username = null;
+    public KerberosTicketValidation validateTicket(byte[] token) {
         try {
-            username = Subject.doAs(this.serviceSubject, new KerberosValidateAction(token));
-        } catch (PrivilegedActionException e) {
-            throw new BadCredentialsException("Kerberos validation not succesfull", e);
+            return Subject.doAs(this.serviceSubject,
+                    new KerberosValidateAction(token));
         }
-        return username;
+        catch (PrivilegedActionException e) {
+            throw new BadCredentialsException(
+                    "Kerberos validation not succesful", e);
+        }
     }
 
     /** The service principal of the application.
@@ -139,21 +140,26 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
      * @author Mike Wiesner
      * @since 1.0
      */
-    private static class KerberosValidateAction implements PrivilegedExceptionAction<String> {
+    private class KerberosValidateAction implements PrivilegedExceptionAction<KerberosTicketValidation> {
         byte[] kerberosTicket;
 
         public KerberosValidateAction(byte[] kerberosTicket) {
             this.kerberosTicket = kerberosTicket;
         }
 
-        public String run() throws Exception {
-            GSSContext context = GSSManager.getInstance().createContext((GSSCredential) null);
-            context.acceptSecContext(kerberosTicket, 0, kerberosTicket.length);
+        @Override
+        public KerberosTicketValidation run() throws Exception {
+            GSSContext context = GSSManager.getInstance().createContext(
+                (GSSCredential) null);
+            byte[] responseToken = context.acceptSecContext(kerberosTicket, 0,
+                kerberosTicket.length);
+            
             String user = context.getSrcName().toString();
-            context.dispose();
-            return user;
-        }
 
+            // context.dispose();
+            return new KerberosTicketValidation(user, servicePrincipal,
+                responseToken, context);
+        }
     }
 
     /**

@@ -36,7 +36,6 @@ import org.springframework.security.extensions.kerberos.KerberosServiceAuthentic
 import org.springframework.security.extensions.kerberos.KerberosServiceRequestToken;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.security.web.authentication.session.NullAuthenticatedSessionStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
@@ -142,11 +141,14 @@ public class SpnegoAuthenticationProcessingFilter extends GenericFilterBean {
 
         String header = request.getHeader("Authorization");
 
-        if ((header != null) && header.startsWith("Negotiate ")) {
+        if (header != null
+            && (header.startsWith("Negotiate ") || header
+                .startsWith("Kerberos "))) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Received Negotiate Header for request " + request.getRequestURL() + ": " + header);
             }
-            byte[] base64Token = header.substring(10).getBytes("UTF-8");
+            byte[] base64Token = header.substring(header.indexOf(" ") + 1)
+                    .getBytes("UTF-8");
             byte[] kerberosTicket = Base64.decode(base64Token);
             KerberosServiceRequestToken authenticationRequest = new KerberosServiceRequestToken(kerberosTicket);
             authenticationRequest.setDetails(authenticationDetailsSource.buildDetails(request));

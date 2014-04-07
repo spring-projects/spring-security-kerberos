@@ -26,6 +26,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsChecker;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.extensions.kerberos.KerberosTicketValidator.KerberosTicketValidation;
 import org.springframework.security.extensions.kerberos.web.SpnegoAuthenticationProcessingFilter;
 import org.springframework.util.Assert;
 
@@ -82,15 +83,16 @@ public class KerberosServiceAuthenticationProvider implements
         KerberosServiceRequestToken auth = (KerberosServiceRequestToken) authentication;
         byte[] token = auth.getToken();
         LOG.debug("Try to validate Kerberos Token");
-        String username = this.ticketValidator.validateTicket(token);
-        LOG.debug("Succesfully validated " + username);
-        UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+        KerberosTicketValidation ticketValidation = this.ticketValidator.validateTicket(token);
+        LOG.debug("Succesfully validated " + ticketValidation.username());
+        UserDetails userDetails = this.userDetailsService.loadUserByUsername(ticketValidation.username());
         userDetailsChecker.check(userDetails);
         additionalAuthenticationChecks(userDetails, auth);
-        KerberosServiceRequestToken responseAuth = new KerberosServiceRequestToken(userDetails, userDetails.getAuthorities(), token);
+        KerberosServiceRequestToken responseAuth = new KerberosServiceRequestToken(
+                userDetails, ticketValidation,
+                userDetails.getAuthorities(), token);
         responseAuth.setDetails(authentication.getDetails());
-        return  responseAuth;
-        		
+        return  responseAuth;        		
     }
 
 
