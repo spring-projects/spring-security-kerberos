@@ -49,6 +49,26 @@ import org.springframework.security.extensions.kerberos.web.SpnegoAuthentication
  * @see SpnegoAuthenticationProcessingFilter
  */
 
+/**
+ * @author Jeremy.Stone
+ *
+ */
+/**
+ * @author Jeremy.Stone
+ *
+ */
+/**
+ * @author Jeremy.Stone
+ *
+ */
+/**
+ * @author Jeremy.Stone
+ *
+ */
+/**
+ * @author Jeremy.Stone
+ * 
+ */
 public class KerberosServiceRequestToken extends AbstractAuthenticationToken {
 
     private static final long serialVersionUID = 395488921064775014L;
@@ -59,8 +79,11 @@ public class KerberosServiceRequestToken extends AbstractAuthenticationToken {
 
     private final KerberosTicketValidation ticketValidation;
 
-    /** Creates an authenticated token, normally used as an output of an authentication provider.
-     * @param principal the user principal (mostly of instance <code>UserDetails</code>
+    /**
+     * Creates an authenticated token, normally used as an output of an
+     * authentication provider.
+     * @param principal the user principal (mostly of instance
+     * <code>UserDetails</code>
      * @param ticketValidation result of ticket validation
      * @param authorities the authorities which are granted to the user
      * @param token the Kerberos/SPNEGO token
@@ -79,7 +102,7 @@ public class KerberosServiceRequestToken extends AbstractAuthenticationToken {
     /**
      * Creates an unauthenticated instance which should then be authenticated by
      * <code>KerberosServiceAuthenticationProvider/code>
-     *
+     * 
      * @param token Kerberos/SPNEGO token
      * @see KerberosServiceAuthenticationProvider
      */
@@ -118,14 +141,18 @@ public class KerberosServiceRequestToken extends AbstractAuthenticationToken {
         return true;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.springframework.security.core.Authentication#getCredentials()
      */
     public Object getCredentials() {
         return null;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.springframework.security.core.Authentication#getPrincipal()
      */
     public Object getPrincipal() {
@@ -200,5 +227,50 @@ public class KerberosServiceRequestToken extends AbstractAuthenticationToken {
                                 new MessageProp(true));
                     }
                 });
+    }
+
+    /**
+     * Unwraps an encrypted message using the gss context
+     * 
+     * @param data
+     * @return the decrypted message
+     * @throws PrivilegedActionException
+     */
+    public byte[] decrypt(final byte[] data) throws PrivilegedActionException {
+        return decrypt(data, 0, data.length);
+    }
+
+    /**
+     * Wraps an message using the gss context
+     * 
+     * @param data
+     * @param offset
+     * @param length
+     * @return the encrypted message
+     * @throws PrivilegedActionException
+     */
+    public byte[] encrypt(final byte[] data, final int offset, final int length)
+            throws PrivilegedActionException {
+
+        return Subject.doAs(getTicketValidation().subject(),
+                new PrivilegedExceptionAction<byte[]>() {
+                    public byte[] run() throws Exception {
+                        final GSSContext context = getTicketValidation()
+                                .getGssContext();
+                        return context.wrap(data, offset, length,
+                                new MessageProp(true));
+                    }
+                });
+    }
+
+    /**
+     * Wraps an message using the gss context
+     * 
+     * @param data
+     * @return the encrypted message
+     * @throws PrivilegedActionException
+     */
+    public byte[] encrypt(final byte[] data) throws PrivilegedActionException {
+        return encrypt(data, 0, data.length);
     }
 }

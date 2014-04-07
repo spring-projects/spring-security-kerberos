@@ -55,6 +55,7 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
     private String servicePrincipal;
     private Resource keyTabLocation;
     private Subject serviceSubject;
+    private boolean holdOnToGSSContext;
     private boolean debug = false;
     private static final Log LOG = LogFactory.getLog(SunJaasKerberosTicketValidator.class);
 
@@ -106,6 +107,17 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
     public void setDebug(boolean debug) {
         this.debug = debug;
     }
+    
+    /**
+     * Determines whether to hold on to the {@link GSSContext GSS security context} or
+     * otherwise {@link GSSContext#dispose() dispose} of it immediately (the default behaviour).
+     * <p>Holding on to the GSS context allows decrypt and encrypt operations for subsequent 
+     * interactions with the principal.
+     * @param holdOnToGSSContext
+     */
+    public void setHoldOnToGSSContext(boolean holdOnToGSSContext) {
+        this.holdOnToGSSContext = holdOnToGSSContext;
+    }
 
     /* (non-Javadoc)
      * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
@@ -156,9 +168,11 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
             
             String user = context.getSrcName().toString();
 
-            // context.dispose();
+            if (!holdOnToGSSContext) {
+                context.dispose();
+            }
             return new KerberosTicketValidation(user, servicePrincipal,
-                responseToken, context);
+                    responseToken, context);
         }
     }
 
