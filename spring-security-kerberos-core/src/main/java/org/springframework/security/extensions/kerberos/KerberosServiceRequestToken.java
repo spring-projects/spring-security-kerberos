@@ -48,27 +48,6 @@ import org.springframework.security.extensions.kerberos.web.SpnegoAuthentication
  * @see KerberosServiceAuthenticationProvider
  * @see SpnegoAuthenticationProcessingFilter
  */
-
-/**
- * @author Jeremy.Stone
- *
- */
-/**
- * @author Jeremy.Stone
- *
- */
-/**
- * @author Jeremy.Stone
- *
- */
-/**
- * @author Jeremy.Stone
- *
- */
-/**
- * @author Jeremy.Stone
- * 
- */
 public class KerberosServiceRequestToken extends AbstractAuthenticationToken {
 
     private static final long serialVersionUID = 395488921064775014L;
