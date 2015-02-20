@@ -1,92 +1,90 @@
 buildscript {
-    repositories {
-        maven { url 'http://repo.springsource.org/plugins-release' }
-    }
-    dependencies {
-        classpath 'org.springframework.build.gradle:docbook-reference-plugin:0.1.5'
-    }
+	repositories {
+		maven { url 'http://repo.springsource.org/plugins-release' }
+	}
+	dependencies {
+		classpath("org.springframework.build.gradle:propdeps-plugin:0.0.7")
+		classpath("org.springframework.build.gradle:spring-io-plugin:0.0.3.RELEASE")
+		classpath('org.asciidoctor:asciidoctor-gradle-plugin:1.5.2')
+		classpath("io.spring.gradle:docbook-reference-plugin:0.3.0")
+	}
 }
 
 configure(allprojects) {
-    apply plugin: 'java'
-    apply plugin: 'eclipse-wtp'
-    apply plugin: 'idea'
+	apply plugin: 'java'
+	apply plugin: 'eclipse'
+	apply plugin: 'idea'
 
-    group = 'org.springframework.security.kerberos'
+	group = 'org.springframework.security.kerberos'
 
-    sourceCompatibility=1.6
-    targetCompatibility=1.6
+	sourceCompatibility=1.6
+	targetCompatibility=1.6
 
-    ext.junitVersion = '4.10'
-    ext.springSecurityVersion = '3.1.4.RELEASE'
-    ext.springVersion = '3.2.2.RELEASE'
+	[compileJava, compileTestJava]*.options*.compilerArgs = ['-Xlint:none']
 
-    [compileJava, compileTestJava]*.options*.compilerArgs = ['-Xlint:none']
+	test.systemProperty("java.awt.headless", "true")
 
-    test.systemProperty("java.awt.headless", "true")
+	repositories {
+		mavenCentral()
+		maven { url 'http://repo.spring.io/libs-release' }
+	}
 
-    repositories {
-        mavenCentral()
-    }
-
-    // servlet-api (2.5) and tomcat-servlet-api (3.0) classpath entries should not be
-    // exported to dependent projects in Eclipse to avoid false compilation errors due
-    // to changing APIs across these versions
-    eclipse.classpath.file.whenMerged { classpath ->
-        classpath.entries.findAll { entry -> entry.path.contains('servlet-api') }*.exported = false
-    }
+	// servlet-api (2.5) and tomcat-servlet-api (3.0) classpath entries should not be
+	// exported to dependent projects in Eclipse to avoid false compilation errors due
+	// to changing APIs across these versions
+	eclipse.classpath.file.whenMerged { classpath ->
+		classpath.entries.findAll { entry -> entry.path.contains('servlet-api') }*.exported = false
+	}
 }
 
 configure(subprojects) { subproject ->
-    apply from: "${rootProject.projectDir}/publish-maven.gradle"
+	apply from: "${rootProject.projectDir}/publish-maven.gradle"
 
-    jar {
-        manifest.attributes['Created-By'] =
-            "${System.getProperty('java.version')} (${System.getProperty('java.specification.vendor')})"
-        manifest.attributes['Implementation-Title'] = subproject.name
-        manifest.attributes['Implementation-Version'] = subproject.version
+	jar {
+		manifest.attributes['Created-By'] = "${System.getProperty('java.version')} (${System.getProperty('java.specification.vendor')})"
+		manifest.attributes['Implementation-Title'] = subproject.name
+		manifest.attributes['Implementation-Version'] = subproject.version
 
-        from("${rootProject.projectDir}/src/dist") {
-            include "license.txt"
-            include "notice.txt"
-            into "META-INF"
-            expand(copyright: new Date().format('yyyy'), version: project.version)
-        }
-    }
+		from("${rootProject.projectDir}/src/dist") {
+			include "license.txt"
+			include "notice.txt"
+			into "META-INF"
+			expand(copyright: new Date().format('yyyy'), version: project.version)
+		}
+	}
 
-    javadoc {
-        options.memberLevel = org.gradle.external.javadoc.JavadocMemberLevel.PROTECTED
-        options.author = true
-        options.header = project.name
-        //options.overview = "${projectDir}/src/main/java/overview.html"
-    }
+	javadoc {
+		options.memberLevel = org.gradle.external.javadoc.JavadocMemberLevel.PROTECTED
+		options.author = true
+		options.header = project.name
+	}
 
-    task sourcesJar(type: Jar, dependsOn:classes) {
-        classifier = 'sources'
-        from sourceSets.main.allJava.srcDirs
-        include '**/*.java', '**/*.aj'
-    }
+	task sourcesJar(type: Jar, dependsOn:classes) {
+		classifier = 'sources'
+		from sourceSets.main.allJava.srcDirs
+		include '**/*.java', '**/*.aj'
+	}
 
-    task javadocJar(type: Jar) {
-        classifier = 'javadoc'
-        from javadoc
-    }
+	task javadocJar(type: Jar) {
+		classifier = 'javadoc'
+		from javadoc
+	}
 
-    artifacts {
-        archives sourcesJar
-        archives javadocJar
-    }
+	artifacts {
+		archives sourcesJar
+		archives javadocJar
+	}
 
-    dependencies {
-        testCompile "junit:junit:$junitVersion"
-    }
+	dependencies {
+		testCompile "junit:junit:$junitVersion"
+	}
+
 }
 
 
 project('spring-security-kerberos-core') {
-    description = 'Spring Security Kerberos Core'
-
-    dependencies {
+	description = 'Spring Security Kerberos Core'
+	dependencies {
 		compile "org.springframework:spring-core:$springVersion"
 		compile "org.springframework:spring-beans:$springVersion"
 		compile "org.springframework:spring-aop:$springVersion"
@@ -95,20 +93,18 @@ project('spring-security-kerberos-core') {
 		compile "org.springframework:spring-tx:$springVersion"
 		compile "org.springframework:spring-jdbc:$springVersion"
 		compile "org.springframework:spring-web:$springVersion"
-        compile "org.springframework.security:spring-security-core:$springSecurityVersion"
-        compile "org.springframework.security:spring-security-web:$springSecurityVersion"
-        compile("commons-logging:commons-logging:1.1.1", optional)
-        compile("javax.servlet:servlet-api:2.5", provided)
-
-        testCompile "org.mockito:mockito-core:1.9.0"
-    }
+		compile "org.springframework.security:spring-security-core:$springSecurityVersion"
+		compile "org.springframework.security:spring-security-web:$springSecurityVersion"
+		compile("commons-logging:commons-logging:1.1.1", optional)
+		compile("javax.servlet:servlet-api:2.5", provided)
+		testCompile "org.mockito:mockito-core:1.9.0"
+	}
 }
 
 project('spring-security-kerberos-sample') {
-    apply plugin: 'jetty'
-
-    description = 'Spring Security Kerberos Sample'
-    dependencies {
+	apply plugin: 'jetty'
+	description = 'Spring Security Kerberos Sample'
+	dependencies {
 		compile "org.springframework:spring-core:$springVersion"
 		compile "org.springframework:spring-beans:$springVersion"
 		compile "org.springframework:spring-aop:$springVersion"
@@ -118,167 +114,136 @@ project('spring-security-kerberos-sample') {
 		compile "org.springframework:spring-jdbc:$springVersion"
 		compile "org.springframework:spring-web:$springVersion"
 		compile project(":spring-security-kerberos-core")
-        compile("javax.servlet:servlet-api:2.5", provided)
-        compile("org.springframework.security:spring-security-config:$springSecurityVersion")
+		compile("javax.servlet:servlet-api:2.5", provided)
+		compile("org.springframework.security:spring-security-config:$springSecurityVersion")
 		compile('log4j:log4j:1.2.17')
-    }
+	}
 }
 
 configure(rootProject) {
-    description = 'Spring Security Kerberos Extension'
+	description = 'Spring Security Kerberos Extension'
 
-    apply plugin: 'docbook-reference'
+	apply plugin: 'docbook-reference'
 
-    reference {
-        sourceDir = file('src/reference/docbook')
-    }
+	reference {
+	sourceDir = file('src/reference/docbook')
+	}
 
-    // don't publish the default jar for the root project
-    configurations.archives.artifacts.clear()
+	// don't publish the default jar for the root project
+	configurations.archives.artifacts.clear()
 
-    task api(type: Javadoc) {
-        group = 'Documentation'
-        description = 'Generates aggregated Javadoc API documentation.'
-        title = "${rootProject.description} ${version} API"
-        options.memberLevel = org.gradle.external.javadoc.JavadocMemberLevel.PROTECTED
-        options.author = true
-        options.header = rootProject.description
-//        options.overview = 'src/api/overview.html'
-        options.splitIndex = true
-        options.links(
-                'http://docs.jboss.org/jbossas/javadoc/4.0.5/connector'
-        )
-        source subprojects.collect { project ->
-            project.sourceSets.main.allJava
-        }
-        destinationDir = new File(buildDir, "api")
-        classpath = files(subprojects.collect { project ->
-            project.sourceSets.main.compileClasspath
-        })
-        maxMemory = '1024m'
-    }
+	task api(type: Javadoc) {
+		group = 'Documentation'
+		description = 'Generates aggregated Javadoc API documentation.'
+		title = "${rootProject.description} ${version} API"
+		options.memberLevel = org.gradle.external.javadoc.JavadocMemberLevel.PROTECTED
+		options.author = true
+		options.header = rootProject.description
+		options.splitIndex = true
+		options.links(
+			'http://docs.jboss.org/jbossas/javadoc/4.0.5/connector'
+		)
+		source subprojects.collect { project ->
+			project.sourceSets.main.allJava
+		}
+		destinationDir = new File(buildDir, "api")
+		classpath = files(subprojects.collect { project ->
+			project.sourceSets.main.compileClasspath
+		})
+		maxMemory = '1024m'
+	}
 
-    task docsZip(type: Zip) {
-        group = 'Distribution'
-        classifier = 'docs'
-        description = "Builds -${classifier} archive containing api and reference " +
-                "for deployment at static.springframework.org/spring-security-kerberos/docs."
+	task docsZip(type: Zip) {
+		group = 'Distribution'
+		classifier = 'docs'
+		description = "Builds -${classifier} archive containing api and reference " +
+			"for deployment at static.springframework.org/spring-security-kerberos/docs."
 
-        from('src/dist') {
-            include 'changelog.txt'
-        }
+		from('src/dist') {
+			include 'changelog.txt'
+		}
 
-        from (api) {
-            into 'api'
-        }
+		from (api) {
+			into 'api'
+		}
 
-        from (reference) {
-            into 'reference'
-        }
-    }
+		from (reference) {
+			into 'reference'
+		}
+	}
 
-    task schemaZip(type: Zip) {
-        group = 'Distribution'
-        classifier = 'schema'
-        description = "Builds -${classifier} archive containing all " +
-                "XSDs for deployment at static.springframework.org/schema."
+	task distZip(type: Zip, dependsOn: [docsZip]) {
+		group = 'Distribution'
+		classifier = 'dist'
+		description = "Builds -${classifier} archive, containing all jars and docs, " +
+			"suitable for community download page."
 
-        subprojects.each { subproject ->
-            def Properties schemas = new Properties();
+		ext.baseDir = "${project.name}-${project.version}";
 
-            subproject.sourceSets.main.resources.find {
-                it.path.endsWith('META-INF/spring.schemas')
-            }?.withInputStream { schemas.load(it) }
+		from('src/dist') {
+			include 'readme.txt'
+			include 'license.txt'
+			include 'notice.txt'
+			into "${baseDir}"
+			expand(copyright: new Date().format('yyyy'), version: project.version)
+		}
 
-            for (def key : schemas.keySet()) {
-                def shortName = key.replaceAll(/http.*schema.(.*).spring-.*/, '$1')
-                assert shortName != key
-                File xsdFile = subproject.sourceSets.main.resources.find {
-                    it.path.endsWith(schemas.get(key))
-                }
-                assert xsdFile != null
-                into (shortName) {
-                    from xsdFile.path
-                }
-            }
-        }
-    }
+		from(zipTree(docsZip.archivePath)) {
+			into "${baseDir}/docs"
+		}
 
-    task distZip(type: Zip, dependsOn: [docsZip, schemaZip]) {
-        group = 'Distribution'
-        classifier = 'dist'
-        description = "Builds -${classifier} archive, containing all jars and docs, " +
-                "suitable for community download page."
+		subprojects.each { subproject ->
+			into ("${baseDir}/libs") {
+				from subproject.jar
+				if (subproject.tasks.findByPath('sourcesJar')) {
+					from subproject.sourcesJar
+				}
+				if (subproject.tasks.findByPath('javadocJar')) {
+					from subproject.javadocJar
+				}
+			}
+		}
+	}
 
-        ext.baseDir = "${project.name}-${project.version}";
+	// Create an distribution that contains all dependencies (required and optional).
+	// Not published by default; only for use when building from source.
+	task depsZip(type: Zip, dependsOn: distZip) { zipTask ->
+		group = 'Distribution'
+		classifier = 'dist-with-deps'
+		description = "Builds -${classifier} archive, containing everything " +
+			"in the -${distZip.classifier} archive plus all runtime dependencies."
 
-        from('src/dist') {
-            include 'readme.txt'
-            include 'license.txt'
-            include 'notice.txt'
-            into "${baseDir}"
-            expand(copyright: new Date().format('yyyy'), version: project.version)
-        }
+		from zipTree(distZip.archivePath)
 
-        from(zipTree(docsZip.archivePath)) {
-            into "${baseDir}/docs"
-        }
+		gradle.taskGraph.whenReady { taskGraph ->
+			if (taskGraph.hasTask(":${zipTask.name}")) {
+				def projectNames = rootProject.subprojects*.name
+				def artifacts = new HashSet()
+				subprojects.each { subproject ->
+					subproject.configurations.runtime.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+						def dependency = artifact.moduleVersion.id
+						if (!projectNames.contains(dependency.name)) {
+							artifacts << artifact.file
+						}
+					}
+				}
 
-        from(zipTree(schemaZip.archivePath)) {
-            into "${baseDir}/schema"
-        }
+				zipTask.from(artifacts) {
+					into "${distZip.baseDir}/deps"
+				}
+			}
+		}
+	}
 
-        subprojects.each { subproject ->
-            into ("${baseDir}/libs") {
-                from subproject.jar
-                if (subproject.tasks.findByPath('sourcesJar')) {
-                    from subproject.sourcesJar
-                }
-                if (subproject.tasks.findByPath('javadocJar')) {
-                    from subproject.javadocJar
-                }
-            }
-        }
-    }
+	artifacts {
+		archives docsZip
+		archives distZip
+	}
 
-    // Create an distribution that contains all dependencies (required and optional).
-    // Not published by default; only for use when building from source.
-    task depsZip(type: Zip, dependsOn: distZip) { zipTask ->
-        group = 'Distribution'
-        classifier = 'dist-with-deps'
-        description = "Builds -${classifier} archive, containing everything " +
-                "in the -${distZip.classifier} archive plus all runtime dependencies."
+	task wrapper(type: Wrapper) {
+		description = 'Generates gradlew[.bat] scripts'
+		gradleVersion = '2.2.1'
+	}
 
-        from zipTree(distZip.archivePath)
-
-        gradle.taskGraph.whenReady { taskGraph ->
-            if (taskGraph.hasTask(":${zipTask.name}")) {
-                def projectNames = rootProject.subprojects*.name
-                def artifacts = new HashSet()
-                subprojects.each { subproject ->
-                    subproject.configurations.runtime.resolvedConfiguration.resolvedArtifacts.each { artifact ->
-                        def dependency = artifact.moduleVersion.id
-                        if (!projectNames.contains(dependency.name)) {
-                            artifacts << artifact.file
-                        }
-                    }
-                }
-
-                zipTask.from(artifacts) {
-                    into "${distZip.baseDir}/deps"
-                }
-            }
-        }
-    }
-
-    artifacts {
-        archives docsZip
-        archives schemaZip
-        archives distZip
-    }
-
-    task wrapper(type: Wrapper) {
-        description = 'Generates gradlew[.bat] scripts'
-        gradleVersion = '1.1'
-    }
 }
+
