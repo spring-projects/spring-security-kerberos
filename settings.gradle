@@ -1,4 +1,6 @@
 rootProject.name = 'spring-security-kerberos'
 
 include 'spring-security-kerberos-core'
+include 'spring-security-kerberos-client'
+include 'spring-security-kerberos-test'
 include 'spring-security-kerberos-sample'

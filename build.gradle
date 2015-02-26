@@ -76,7 +76,9 @@ configure(subprojects) { subproject ->
 	}
 
 	dependencies {
+		testCompile "org.mockito:mockito-core:$mockitoVersion"
 		testCompile "junit:junit:$junitVersion"
+//		testRuntime("log4j:log4j:$log4jVersion")
 	}
 
 }
@@ -93,11 +95,53 @@ project('spring-security-kerberos-core') {
 		compile "org.springframework:spring-tx:$springVersion"
 		compile "org.springframework:spring-jdbc:$springVersion"
 		compile "org.springframework:spring-web:$springVersion"
-		compile "org.springframework.security:spring-security-core:$springSecurityVersion"
+		compile "org.springframework.security:spring-security-config:$springSecurityVersion"
 		compile "org.springframework.security:spring-security-web:$springSecurityVersion"
-		compile("commons-logging:commons-logging:1.1.1", optional)
-		compile("javax.servlet:servlet-api:2.5", provided)
-		testCompile "org.mockito:mockito-core:1.9.0"
+		compile("javax.servlet:javax.servlet-api:$servletApi3Version", optional)
+	}
+}
+
+project('spring-security-kerberos-client') {
+	description = 'Spring Security Kerberos Client'
+
+	configurations {
+		all*.exclude group: "org.apache.directory.api", module: "api-ldap-schema-data"
+	}
+
+	dependencies {
+		compile project(":spring-security-kerberos-core")
+		compile "org.springframework:spring-web:$springVersion"
+		compile "org.apache.httpcomponents:httpclient:$httpclientVersion"
+		testCompile project(":spring-security-kerberos-test")
+		testCompile "org.springframework.boot:spring-boot-autoconfigure:$springBootVersion"
+		testRuntime "org.apache.tomcat.embed:tomcat-embed-core:$tomcatEmbedVersion"
+		testRuntime "org.apache.tomcat.embed:tomcat-embed-logging-juli:$tomcatEmbedVersion"
+		testRuntime "org.springframework:spring-webmvc:$springVersion"
+	}
+}
+
+project('spring-security-kerberos-test') {
+	description = 'Spring Security Kerberos Test'
+
+	configurations {
+		all*.exclude group: "org.apache.directory.api", module: "api-ldap-schema-data"
+	}
+
+	dependencies {
+		compile "junit:junit:$junitVersion"
+		compile "org.apache.directory.server:apacheds-core-api:$apacheDirServerVersion"
+		compile "org.apache.directory.server:apacheds-interceptor-kerberos:$apacheDirServerVersion"
+		compile "org.apache.directory.server:apacheds-protocol-shared:$apacheDirServerVersion"
+		compile "org.apache.directory.server:apacheds-protocol-kerberos:$apacheDirServerVersion"
+		compile "org.apache.directory.server:apacheds-ldif-partition:$apacheDirServerVersion"
+		compile "org.apache.directory.server:apacheds-mavibot-partition:$apacheDirServerVersion"
+		compile "org.apache.directory.server:apacheds-jdbm-partition:$apacheDirServerVersion"
+		compile "org.apache.directory.server:apacheds-protocol-ldap:$apacheDirServerVersion"
+		compile("org.apache.directory.api:api-all:$apacheDirApiVersion") {
+			exclude group: "xml-apis", module: "xml-apis"
+			exclude group: "xpp3", module: "xpp3"
+			exclude group: "dom4j", module: "dom4j"
+		}
 	}
 }
 
@@ -114,9 +158,9 @@ project('spring-security-kerberos-sample') {
 		compile "org.springframework:spring-jdbc:$springVersion"
 		compile "org.springframework:spring-web:$springVersion"
 		compile project(":spring-security-kerberos-core")
-		compile("javax.servlet:servlet-api:2.5", provided)
+		compile("javax.servlet:servlet-api:$servletApi2Version", provided)
 		compile("org.springframework.security:spring-security-config:$springSecurityVersion")
-		compile('log4j:log4j:1.2.17')
+		compile("log4j:log4j:$log4jVersion")
 	}
 }
 
