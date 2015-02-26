@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 the original author or authors.
+ * Copyright 2009-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.security.extensions.kerberos;
 
 import org.apache.commons.logging.Log;
@@ -28,7 +27,6 @@ import org.springframework.security.core.userdetails.UserDetailsChecker;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.extensions.kerberos.web.SpnegoAuthenticationProcessingFilter;
 import org.springframework.util.Assert;
-
 
 /**
  * <p>Authentication Provider which validates Kerberos Service Tickets
@@ -45,7 +43,6 @@ import org.springframework.util.Assert;
  *
  * @author Mike Wiesner
  * @since 1.0
- * @version $Id$
  * @see KerberosTicketValidator
  * @see UserDetailsService
  * @see SpnegoAuthenticationProcessingFilter
@@ -74,9 +71,7 @@ public class KerberosServiceAuthenticationProvider implements
         this.ticketValidator = ticketValidator;
     }
 
-    /* (non-Javadoc)
-     * @see org.springframework.security.authentication.AuthenticationProvider#authenticate(org.springframework.security.core.Authentication)
-     */
+    @Override
     public Authentication authenticate(Authentication authentication)
             throws AuthenticationException {
         KerberosServiceRequestToken auth = (KerberosServiceRequestToken) authentication;
@@ -90,9 +85,19 @@ public class KerberosServiceAuthenticationProvider implements
         KerberosServiceRequestToken responseAuth = new KerberosServiceRequestToken(userDetails, userDetails.getAuthorities(), token);
         responseAuth.setDetails(authentication.getDetails());
         return  responseAuth;
-        		
+
     }
 
+    @Override
+    public boolean supports(Class<? extends Object> auth) {
+        return KerberosServiceRequestToken.class.isAssignableFrom(auth);
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        Assert.notNull(this.ticketValidator, "ticketValidator must be specified");
+        Assert.notNull(this.userDetailsService, "userDetailsService must be specified");
+    }
 
     /**
      * Allows subclasses to perform any additional checks of a returned <code>UserDetails</code>
@@ -106,21 +111,6 @@ public class KerberosServiceAuthenticationProvider implements
     protected void additionalAuthenticationChecks(UserDetails userDetails, KerberosServiceRequestToken authentication)
             throws AuthenticationException {
 
-    }
-
-    /* (non-Javadoc)
-     * @see org.springframework.security.authentication.AuthenticationProvider#supports(java.lang.Class)
-     */
-    public boolean supports(Class<? extends Object> auth) {
-        return KerberosServiceRequestToken.class.isAssignableFrom(auth);
-    }
-
-    /* (non-Javadoc)
-     * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
-     */
-    public void afterPropertiesSet() throws Exception {
-        Assert.notNull(this.ticketValidator, "ticketValidator must be specified");
-        Assert.notNull(this.userDetailsService, "userDetailsService must be specified");
     }
 
 }

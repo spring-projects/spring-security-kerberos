@@ -78,7 +78,7 @@ configure(subprojects) { subproject ->
 	dependencies {
 		testCompile "org.mockito:mockito-core:$mockitoVersion"
 		testCompile "junit:junit:$junitVersion"
-//		testRuntime("log4j:log4j:$log4jVersion")
+		testRuntime("log4j:log4j:$log4jVersion")
 	}
 
 }

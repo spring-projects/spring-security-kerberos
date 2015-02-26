@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 the original author or authors.
+ * Copyright 2009-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.security.extensions.kerberos;
 
 import java.io.IOException;
@@ -41,19 +40,18 @@ import org.springframework.security.authentication.BadCredentialsException;
  *
  * @author Mike Wiesner
  * @since 1.0
- * @version $Id$
  */
 public class SunJaasKerberosClient implements KerberosClient {
 
     private boolean debug = false;
-    
 
     private static final Log LOG = LogFactory.getLog(SunJaasKerberosClient.class);
 
+    @Override
     public String login(String username, String password) {
         LOG.debug("Trying to authenticate " + username + " with Kerberos");
         String validatedUsername;
-        
+
         try {
             LoginContext loginContext = new LoginContext("", null, new KerberosClientCallbackHandler(username, password),
                     new LoginConfig(this.debug));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 the original author or authors.
+ * Copyright 2010-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,15 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 
 /**
+ * Config for global jaas.
+ *
  * @author Mike Wiesner
  * @since 1.0
- * @version $Id:$
  */
 public class GlobalSunJaasKerberosConfig implements BeanPostProcessor, InitializingBean {
 
     private boolean debug = false;
+
     private String krbConfLocation;
 
     public void afterPropertiesSet() throws Exception {
@@ -38,32 +40,27 @@ public class GlobalSunJaasKerberosConfig implements BeanPostProcessor, Initializ
         }
 
     }
-    
-    
-    /** 
+
+    /**
      * Enable debug logs from the Sun Kerberos Implementation. Default is false.
      */
     public void setDebug(boolean debug) {
         this.debug = debug;
     }
 
-    
-    /** 
+    /**
      * Kerberos config file location can be specified here.
-     * 
+     *
      * @param krbConfLocation
      */
     public void setKrbConfLocation(String krbConfLocation) {
         this.krbConfLocation = krbConfLocation;
     }
 
-    
-    /*
-     *  The following methods are not used here. This Bean implements only BeanPostProcessor to ensure that it
-     *  is created before any other bean is created, because the system properties needed to be set very early
-     *  in the startup-phase, but after the BeanFactoryPostProcessing.
-     */
-   
+    //  The following methods are not used here. This Bean implements only BeanPostProcessor to ensure that it
+    //  is created before any other bean is created, because the system properties needed to be set very early
+    //  in the startup-phase, but after the BeanFactoryPostProcessing.
+
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         return bean;
     }

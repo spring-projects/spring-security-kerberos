@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 the original author or authors.
+ * Copyright 2009-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.security.extensions.kerberos;
 
 import java.util.Arrays;
@@ -34,7 +33,6 @@ import org.springframework.security.extensions.kerberos.web.SpnegoAuthentication
  *
  * @author Mike Wiesner
  * @since 1.0
- * @version $Id$
  * @see KerberosServiceAuthenticationProvider
  * @see SpnegoAuthenticationProcessingFilter
  */
@@ -99,21 +97,18 @@ public class KerberosServiceRequestToken extends AbstractAuthenticationToken {
         return true;
     }
 
-    /* (non-Javadoc)
-     * @see org.springframework.security.core.Authentication#getCredentials()
-     */
+    @Override
     public Object getCredentials() {
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see org.springframework.security.core.Authentication#getPrincipal()
-     */
+    @Override
     public Object getPrincipal() {
         return this.principal;
     }
 
-    /** Returns the Kerberos token
+    /**
+     * Returns the Kerberos token
      */
     public byte[] getToken() {
         return this.token;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 the original author or authors.
+ * Copyright 2009-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.security.extensions.kerberos;
 
 import static org.junit.Assert.*;
@@ -41,7 +40,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
  *
  * @author Mike Wiesner
  * @since 1.0
- * @version $Id$
  */
 public class KerberosServiceAuthenticationProviderTest {
 
@@ -74,7 +72,7 @@ public class KerberosServiceAuthenticationProviderTest {
         assertEquals(AUTHORITY_LIST, output.getAuthorities());
         assertEquals(USER_DETAILS, output.getPrincipal());
     }
-    
+
     @Test
     public void testAuthenticationDetailsPropagation() throws Exception {
     	KerberosServiceRequestToken requestToken = new KerberosServiceRequestToken(TEST_TOKEN);

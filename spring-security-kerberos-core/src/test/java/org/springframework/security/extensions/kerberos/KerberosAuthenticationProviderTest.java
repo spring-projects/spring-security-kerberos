@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 the original author or authors.
+ * Copyright 2009-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.security.extensions.kerberos;
 
 import static org.junit.Assert.*;
@@ -36,20 +35,19 @@ import org.springframework.security.core.userdetails.UserDetailsService;
  *
  * @author Mike Wiesner
  * @since 1.0
- * @version $Id$
  */
 public class KerberosAuthenticationProviderTest {
 
     private KerberosAuthenticationProvider provider;
     private KerberosClient kerberosClient;
     private UserDetailsService userDetailsService;
-    
+
     private static final String TEST_USER = "Testuser@SPRINGSOURCE.ORG";
     private static final String TEST_PASSWORD = "password";
     private static final UsernamePasswordAuthenticationToken INPUT_TOKEN = new UsernamePasswordAuthenticationToken(TEST_USER, TEST_PASSWORD);
     private static final List<GrantedAuthority> AUTHORITY_LIST = AuthorityUtils.createAuthorityList("ROLE_ADMIN");
     private static final UserDetails USER_DETAILS = new User(TEST_USER, "empty", true, true, true,true, AUTHORITY_LIST);
-    
+
     @Before
     public void before() {
         // mocking
@@ -59,16 +57,16 @@ public class KerberosAuthenticationProviderTest {
         this.provider.setKerberosClient(kerberosClient);
         this.provider.setUserDetailsService(userDetailsService);
     }
-    
+
     @Test
     public void testLoginOk() throws Exception {
         when(userDetailsService.loadUserByUsername(TEST_USER)).thenReturn(USER_DETAILS);
         when(kerberosClient.login(TEST_USER, TEST_PASSWORD)).thenReturn(TEST_USER);
-        
+
         Authentication authenticate = provider.authenticate(INPUT_TOKEN);
-        
+
         verify(kerberosClient).login(TEST_USER, TEST_PASSWORD);
-        
+
         assertNotNull(authenticate);
         assertEquals(TEST_USER, authenticate.getName());
         assertEquals(USER_DETAILS, authenticate.getPrincipal());

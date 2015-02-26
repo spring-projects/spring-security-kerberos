@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 the original author or authors.
+ * Copyright 2009-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,10 +45,9 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 
 /**
  * Test class for {@link SpnegoAuthenticationProcessingFilter}
- * 
+ *
  * @author Mike Wiesner
  * @since 1.0
- * @version $Id$
  */
 public class SpnegoAuthenticationProcessingFilterTest {
 
@@ -174,7 +173,7 @@ public class SpnegoAuthenticationProcessingFilterTest {
             SecurityContextHolder.clearContext();
         }
     }
-    
+
     @Test
     public void testAlreadyAuthenticatedNotActive() throws Exception {
         try {

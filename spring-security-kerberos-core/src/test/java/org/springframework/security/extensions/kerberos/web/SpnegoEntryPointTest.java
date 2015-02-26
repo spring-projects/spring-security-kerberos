@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 the original author or authors.
+ * Copyright 2009-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package org.springframework.security.extensions.kerberos.web;
 
 import static org.mockito.Mockito.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Test;
@@ -25,8 +26,8 @@ import org.junit.Test;
  * Test class for {@link SpnegoEntryPoint}
  *
  * @author Mike Wiesner
+ * @author Janne Valkealahti
  * @since 1.0
- * @version $Id$
  */
 public class SpnegoEntryPointTest {
 
@@ -34,9 +35,10 @@ public class SpnegoEntryPointTest {
 
     @Test
     public void testEntryPointOk() throws Exception {
+    	HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
 
-        entryPoint.commence(null, response, null);
+        entryPoint.commence(request, response, null);
 
         verify(response).addHeader("WWW-Authenticate", "Negotiate");
         verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
