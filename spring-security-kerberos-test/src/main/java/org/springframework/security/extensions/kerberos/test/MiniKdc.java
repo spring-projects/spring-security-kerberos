@@ -251,6 +251,7 @@ public class MiniKdc {
 		for (Map.Entry<?, ?> entry : conf.entrySet()) {
 			LOG.info("  {}: {}", entry.getKey(), entry.getValue());
 		}
+		LOG.info("  localhost hostname: {}", InetAddress.getLocalHost().getHostName());
 		LOG.info("---------------------------------------------------------------");
 		this.conf = conf;
 		port = Integer.parseInt(conf.getProperty(KDC_PORT));

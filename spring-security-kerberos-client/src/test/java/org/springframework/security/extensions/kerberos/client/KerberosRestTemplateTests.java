@@ -24,6 +24,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.net.InetAddress;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -69,12 +70,13 @@ public class KerberosRestTemplateTests extends KerberosSecurityTestcase {
 
 		MiniKdc kdc = getKdc();
 		File workDir = getWorkDir();
+		String host = InetAddress.getLocalHost().getHostName();
 
-		String serverPrincipal = "HTTP/localhost";
+		String serverPrincipal = "HTTP/" + host;
 		File serverKeytab = new File(workDir, "server.keytab");
 		kdc.createPrincipal(serverKeytab, serverPrincipal);
 
-		String clientPrincipal = "client/localhost";
+		String clientPrincipal = "client/" + host;
 		File clientKeytab = new File(workDir, "client.keytab");
 		kdc.createPrincipal(clientKeytab, clientPrincipal);
 
@@ -90,7 +92,7 @@ public class KerberosRestTemplateTests extends KerberosSecurityTestcase {
 
 		KerberosRestTemplate restTemplate = new KerberosRestTemplate(clientKeytab.getAbsolutePath(), clientPrincipal);
 
-		String response = restTemplate.getForObject("http://localhost:" + port + "/hello", String.class);
+		String response = restTemplate.getForObject("http://" + host + ":" + port + "/hello", String.class);
 		assertThat(response, is("home"));
     }
 
