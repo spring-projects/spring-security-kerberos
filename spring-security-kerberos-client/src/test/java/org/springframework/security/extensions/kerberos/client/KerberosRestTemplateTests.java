@@ -70,7 +70,7 @@ public class KerberosRestTemplateTests extends KerberosSecurityTestcase {
 
 		MiniKdc kdc = getKdc();
 		File workDir = getWorkDir();
-		String host = InetAddress.getLocalHost().getHostName();
+		String host = InetAddress.getLocalHost().getCanonicalHostName();
 
 		String serverPrincipal = "HTTP/" + host;
 		File serverKeytab = new File(workDir, "server.keytab");

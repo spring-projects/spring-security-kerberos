@@ -252,6 +252,7 @@ public class MiniKdc {
 			LOG.info("  {}: {}", entry.getKey(), entry.getValue());
 		}
 		LOG.info("  localhost hostname: {}", InetAddress.getLocalHost().getHostName());
+		LOG.info("  localhost canonical hostname: {}", InetAddress.getLocalHost().getCanonicalHostName());
 		LOG.info("---------------------------------------------------------------");
 		this.conf = conf;
 		port = Integer.parseInt(conf.getProperty(KDC_PORT));
