@@ -19,6 +19,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -46,12 +47,16 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.security.extensions.kerberos.test.KerberosSecurityTestcase;
 import org.springframework.security.extensions.kerberos.test.MiniKdc;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.client.DefaultResponseErrorHandler;
+import org.springframework.web.client.RestTemplate;
 
 public class KerberosRestTemplateTests extends KerberosSecurityTestcase {
 
@@ -96,6 +101,42 @@ public class KerberosRestTemplateTests extends KerberosSecurityTestcase {
 		assertThat(response, is("home"));
     }
 
+    @Test
+    public void testSpnegoWithForward() throws Exception {
+
+		MiniKdc kdc = getKdc();
+		File workDir = getWorkDir();
+		String host = InetAddress.getLocalHost().getCanonicalHostName();
+
+		String serverPrincipal = "HTTP/" + host;
+		File serverKeytab = new File(workDir, "server.keytab");
+		kdc.createPrincipal(serverKeytab, serverPrincipal);
+
+		context = SpringApplication.run(new Object[] { WebSecurityConfigSpnegoForward.class, VanillaWebConfiguration.class,
+				WebConfiguration.class }, new String[] { "--security.basic.enabled=true",
+				"--security.user.name=username", "--security.user.password=password",
+				"--serverPrincipal=" + serverPrincipal, "--serverKeytab=" + serverKeytab.getAbsolutePath() });
+
+		PortInitListener portInitListener = context.getBean(PortInitListener.class);
+		assertThat(portInitListener.latch.await(10, TimeUnit.SECONDS), is(true));
+		int port = portInitListener.port;
+
+		// TODO: should tweak minikdc so that we can use kerberos principals
+		//       which are not valid, for now just use plain RestTemplate
+
+		// just checking that we get 401 which we skip and
+		// get login page content
+		RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
+		restTemplate.setErrorHandler(new DefaultResponseErrorHandler() {
+			@Override
+			public void handleError(ClientHttpResponse response) throws IOException {
+			}
+		});
+
+		String response = restTemplate.getForObject("http://" + host + ":" + port + "/hello", String.class);
+		assertThat(response, is("login"));
+    }
+
 	protected static class PortInitListener implements ApplicationListener<EmbeddedServletContainerInitializedEvent> {
 
 		public int port;
@@ -134,6 +175,12 @@ public class KerberosRestTemplateTests extends KerberosSecurityTestcase {
     	@ResponseBody
     	public String home() {
     		return "home";
+    	}
+
+    	@RequestMapping(method = RequestMethod.GET, value = "/login")
+    	@ResponseBody
+    	public String login() {
+    		return "login";
     	}
 
 	}
