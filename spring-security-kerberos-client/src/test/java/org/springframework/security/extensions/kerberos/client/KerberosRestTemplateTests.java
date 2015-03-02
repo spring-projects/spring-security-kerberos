@@ -137,6 +137,37 @@ public class KerberosRestTemplateTests extends KerberosSecurityTestcase {
 		assertThat(response, is("login"));
     }
 
+    @Test
+    public void testSpnegoWithSuccessHandler() throws Exception {
+
+		MiniKdc kdc = getKdc();
+		File workDir = getWorkDir();
+		String host = InetAddress.getLocalHost().getCanonicalHostName();
+
+		String serverPrincipal = "HTTP/" + host;
+		File serverKeytab = new File(workDir, "server.keytab");
+		kdc.createPrincipal(serverKeytab, serverPrincipal);
+
+		String clientPrincipal = "client/" + host;
+		File clientKeytab = new File(workDir, "client.keytab");
+		kdc.createPrincipal(clientKeytab, clientPrincipal);
+
+
+		context = SpringApplication.run(new Object[] { WebSecurityConfigSuccessHandler.class, VanillaWebConfiguration.class,
+				WebConfiguration.class }, new String[] { "--security.basic.enabled=true",
+				"--security.user.name=username", "--security.user.password=password",
+				"--serverPrincipal=" + serverPrincipal, "--serverKeytab=" + serverKeytab.getAbsolutePath() });
+
+		PortInitListener portInitListener = context.getBean(PortInitListener.class);
+		assertThat(portInitListener.latch.await(10, TimeUnit.SECONDS), is(true));
+		int port = portInitListener.port;
+
+		KerberosRestTemplate restTemplate = new KerberosRestTemplate(clientKeytab.getAbsolutePath(), clientPrincipal);
+
+		String response = restTemplate.getForObject("http://" + host + ":" + port + "/hello", String.class);
+		assertThat(response, is("home"));
+    }
+
 	protected static class PortInitListener implements ApplicationListener<EmbeddedServletContainerInitializedEvent> {
 
 		public int port;

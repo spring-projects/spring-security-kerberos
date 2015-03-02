@@ -25,6 +25,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsChecker;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.extensions.kerberos.KerberosTicketValidator.KerberosTicketValidation;
 import org.springframework.security.extensions.kerberos.web.SpnegoAuthenticationProcessingFilter;
 import org.springframework.util.Assert;
 
@@ -42,6 +43,7 @@ import org.springframework.util.Assert;
  * You can see an example configuration in <code>SpnegoAuthenticationProcessingFilter</code>.
  *
  * @author Mike Wiesner
+ * @author Jeremy Stone
  * @since 1.0
  * @see KerberosTicketValidator
  * @see UserDetailsService
@@ -56,36 +58,22 @@ public class KerberosServiceAuthenticationProvider implements
     private UserDetailsService userDetailsService;
     private UserDetailsChecker userDetailsChecker = new AccountStatusUserDetailsChecker();
 
-
-    /** The <code>UserDetailsService</code> to use, for loading the user properties
-     * and the <code>GrantedAuthorities</code>.
-     */
-    public void setUserDetailsService(UserDetailsService userDetailsService) {
-        this.userDetailsService = userDetailsService;
-    }
-
-    /** The <code>KerberosTicketValidator</code> to use, for validating
-     * the Kerberos/SPNEGO tickets.
-     */
-    public void setTicketValidator(KerberosTicketValidator ticketValidator) {
-        this.ticketValidator = ticketValidator;
-    }
-
     @Override
     public Authentication authenticate(Authentication authentication)
             throws AuthenticationException {
         KerberosServiceRequestToken auth = (KerberosServiceRequestToken) authentication;
         byte[] token = auth.getToken();
         LOG.debug("Try to validate Kerberos Token");
-        String username = this.ticketValidator.validateTicket(token);
-        LOG.debug("Succesfully validated " + username);
-        UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+        KerberosTicketValidation ticketValidation = this.ticketValidator.validateTicket(token);
+        LOG.debug("Succesfully validated " + ticketValidation.username());
+        UserDetails userDetails = this.userDetailsService.loadUserByUsername(ticketValidation.username());
         userDetailsChecker.check(userDetails);
         additionalAuthenticationChecks(userDetails, auth);
-        KerberosServiceRequestToken responseAuth = new KerberosServiceRequestToken(userDetails, userDetails.getAuthorities(), token);
+        KerberosServiceRequestToken responseAuth = new KerberosServiceRequestToken(
+                userDetails, ticketValidation,
+                userDetails.getAuthorities(), token);
         responseAuth.setDetails(authentication.getDetails());
         return  responseAuth;
-
     }
 
     @Override
@@ -100,6 +88,26 @@ public class KerberosServiceAuthenticationProvider implements
     }
 
     /**
+     * The <code>UserDetailsService</code> to use, for loading the user properties
+     * and the <code>GrantedAuthorities</code>.
+     *
+     * @param userDetailsService the new user details service
+     */
+    public void setUserDetailsService(UserDetailsService userDetailsService) {
+        this.userDetailsService = userDetailsService;
+    }
+
+    /**
+     * The <code>KerberosTicketValidator</code> to use, for validating
+     * the Kerberos/SPNEGO tickets.
+     *
+     * @param ticketValidator the new ticket validator
+     */
+    public void setTicketValidator(KerberosTicketValidator ticketValidator) {
+        this.ticketValidator = ticketValidator;
+    }
+
+    /**
      * Allows subclasses to perform any additional checks of a returned <code>UserDetails</code>
      * for a given authentication request.
      *
@@ -110,7 +118,6 @@ public class KerberosServiceAuthenticationProvider implements
      */
     protected void additionalAuthenticationChecks(UserDetails userDetails, KerberosServiceRequestToken authentication)
             throws AuthenticationException {
-
     }
 
 }

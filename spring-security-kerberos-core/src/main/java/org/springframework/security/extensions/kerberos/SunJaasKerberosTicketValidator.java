@@ -46,6 +46,7 @@ import org.springframework.util.Assert;
  * is needed.
  *
  * @author Mike Wiesner
+ * @author Jeremy Stone
  * @since 1.0
  */
 public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, InitializingBean {
@@ -53,18 +54,18 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
     private String servicePrincipal;
     private Resource keyTabLocation;
     private Subject serviceSubject;
+    private boolean holdOnToGSSContext;
     private boolean debug = false;
     private static final Log LOG = LogFactory.getLog(SunJaasKerberosTicketValidator.class);
 
     @Override
-    public String validateTicket(byte[] token) {
-        String username = null;
+    public KerberosTicketValidation validateTicket(byte[] token) {
         try {
-            username = Subject.doAs(this.serviceSubject, new KerberosValidateAction(token));
-        } catch (PrivilegedActionException e) {
-            throw new BadCredentialsException("Kerberos validation not succesfull", e);
+            return Subject.doAs(this.serviceSubject, new KerberosValidateAction(token));
         }
-        return username;
+        catch (PrivilegedActionException e) {
+            throw new BadCredentialsException("Kerberos validation not succesful", e);
+        }
     }
 
     @Override
@@ -120,7 +121,9 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
         this.keyTabLocation = keyTabLocation;
     }
 
-    /** Enables the debug mode of the JAAS Kerberos login module
+    /**
+     * Enables the debug mode of the JAAS Kerberos login module.
+     *
      * @param debug default is false
      */
     public void setDebug(boolean debug) {
@@ -128,24 +131,38 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
     }
 
     /**
+     * Determines whether to hold on to the {@link GSSContext GSS security context} or
+     * otherwise {@link GSSContext#dispose() dispose} of it immediately (the default behaviour).
+     * <p>Holding on to the GSS context allows decrypt and encrypt operations for subsequent
+     * interactions with the principal.
+     *
+     * @param holdOnToGSSContext true if should hold on to context
+     */
+    public void setHoldOnToGSSContext(boolean holdOnToGSSContext) {
+        this.holdOnToGSSContext = holdOnToGSSContext;
+    }
+
+    /**
      * This class is needed, because the validation must run with previously generated JAAS subject
      * which belongs to the service principal and was loaded out of the keytab during startup.
      */
-    private static class KerberosValidateAction implements PrivilegedExceptionAction<String> {
+    private class KerberosValidateAction implements PrivilegedExceptionAction<KerberosTicketValidation> {
         byte[] kerberosTicket;
 
         public KerberosValidateAction(byte[] kerberosTicket) {
             this.kerberosTicket = kerberosTicket;
         }
 
-        public String run() throws Exception {
-            GSSContext context = GSSManager.getInstance().createContext((GSSCredential) null);
-            context.acceptSecContext(kerberosTicket, 0, kerberosTicket.length);
-            String user = context.getSrcName().toString();
-            context.dispose();
-            return user;
+        @Override
+        public KerberosTicketValidation run() throws Exception {
+			GSSContext context = GSSManager.getInstance().createContext((GSSCredential) null);
+			byte[] responseToken = context.acceptSecContext(kerberosTicket, 0, kerberosTicket.length);
+			String user = context.getSrcName().toString();
+			if (!holdOnToGSSContext) {
+				context.dispose();
+			}
+			return new KerberosTicketValidation(user, servicePrincipal, responseToken, context);
         }
-
     }
 
     /**

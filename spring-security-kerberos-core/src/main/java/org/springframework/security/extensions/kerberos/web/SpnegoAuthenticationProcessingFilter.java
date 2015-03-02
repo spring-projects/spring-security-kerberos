@@ -103,6 +103,7 @@ import org.springframework.web.filter.GenericFilterBean;
  *
  *
  * @author Mike Wiesner
+ * @author Jeremy Stone
  * @since 1.0
  * @see KerberosServiceAuthenticationProvider
  * @see SpnegoEntryPoint
@@ -133,11 +134,11 @@ public class SpnegoAuthenticationProcessingFilter extends GenericFilterBean {
 
         String header = request.getHeader("Authorization");
 
-        if ((header != null) && header.startsWith("Negotiate ")) {
+        if (header != null && (header.startsWith("Negotiate ") || header.startsWith("Kerberos "))) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Received Negotiate Header for request " + request.getRequestURL() + ": " + header);
             }
-            byte[] base64Token = header.substring(10).getBytes("UTF-8");
+            byte[] base64Token = header.substring(header.indexOf(" ") + 1).getBytes("UTF-8");
             byte[] kerberosTicket = Base64.decode(base64Token);
             KerberosServiceRequestToken authenticationRequest = new KerberosServiceRequestToken(kerberosTicket);
             authenticationRequest.setDetails(authenticationDetailsSource.buildDetails(request));

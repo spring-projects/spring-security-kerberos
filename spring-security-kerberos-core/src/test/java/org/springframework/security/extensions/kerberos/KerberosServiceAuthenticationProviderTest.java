@@ -34,11 +34,13 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.extensions.kerberos.KerberosTicketValidator.KerberosTicketValidation;
 
 /**
  * Test class for {@link KerberosServiceAuthenticationProvider}
  *
  * @author Mike Wiesner
+ * @author Jeremy Stone
  * @since 1.0
  */
 public class KerberosServiceAuthenticationProviderTest {
@@ -49,7 +51,11 @@ public class KerberosServiceAuthenticationProviderTest {
 
     // data
     private static final byte[] TEST_TOKEN = "TestToken".getBytes();
+    private static final byte[] RESPONSE_TOKEN = "ResponseToken".getBytes();
     private static final String TEST_USER = "Testuser@SPRINGSOURCE.ORG";
+
+    private static final KerberosTicketValidation TICKET_VALIDATION = new KerberosTicketValidation(TEST_USER, "XXX", RESPONSE_TOKEN, null);
+
     private static final List<GrantedAuthority> AUTHORITY_LIST = AuthorityUtils.createAuthorityList("ROLE_ADMIN");
     private static final UserDetails USER_DETAILS = new User(TEST_USER, "empty", true, true, true,true, AUTHORITY_LIST);
     private static final KerberosServiceRequestToken INPUT_TOKEN = new KerberosServiceRequestToken(TEST_TOKEN);
@@ -109,7 +115,7 @@ public class KerberosServiceAuthenticationProviderTest {
     @Test(expected=UsernameNotFoundException.class)
     public void testUsernameNotFound() throws Exception {
         // stubbing
-        when(ticketValidator.validateTicket(TEST_TOKEN)).thenReturn(TEST_USER);
+        when(ticketValidator.validateTicket(TEST_TOKEN)).thenReturn(TICKET_VALIDATION);
         when(userDetailsService.loadUserByUsername(TEST_USER)).thenThrow(new UsernameNotFoundException(""));
 
         // testing
@@ -128,7 +134,7 @@ public class KerberosServiceAuthenticationProviderTest {
 
     private Authentication callProviderAndReturnUser(UserDetails userDetails, Authentication inputToken) {
         // stubbing
-        when(ticketValidator.validateTicket(TEST_TOKEN)).thenReturn(TEST_USER);
+        when(ticketValidator.validateTicket(TEST_TOKEN)).thenReturn(TICKET_VALIDATION);
         when(userDetailsService.loadUserByUsername(TEST_USER)).thenReturn(userDetails);
 
         // testing
