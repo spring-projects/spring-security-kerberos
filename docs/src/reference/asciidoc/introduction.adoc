@@ -1,0 +1,10 @@
+[[introduction]]
+= Introduction
+
+Spring Security Kerberos is an extension of Spring Security for
+application developers to Kerberos concepts with Spring.
+
+== Requirements
+
+Spring Security Kerberos {revnumber} is built and tested with JDK 7, Spring
+Framework {spring-version}.
