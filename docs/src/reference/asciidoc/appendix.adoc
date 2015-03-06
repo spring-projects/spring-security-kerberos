@@ -1,0 +1,218 @@
+[[appendices]]
+= Appendices
+
+:numbered!:
+
+[appendix]
+== Crash Course to Kerberos
+In any authentication process there are usually a three parties
+involved.
+
+image:images/drawio-kerb-cc1.png[]
+
+First is a `client` which sometimes is a client computer but in most
+of the scenarios it is the actual user sitting on a computer and
+trying to access resources. Then there is the `resource` user is trying
+to access. In this example it is a web server.
+
+Then there is a `Key Distribution Center` or `KDC`. In a case of
+Windows environment this would be a `Domain Controller`. `KDC` is the
+one which really brings everything together and thus is the most
+critical component in your environment. Because of this it is also
+considered as a single point of failure.
+
+Initially when `Kerberos` environment is setup and domain users
+principals created into to a database, encryption keys are also
+created. These encryption keys are based on shared secrets(i.e. user
+password) and actual passwords are never kept in a clear text.
+Effectively `KDC` has its own key and other keys for domain users.
+
+Interestingly there is no communication between a `resource` and a
+`KDC` during the authentication process.
+
+image:images/drawio-kerb-cc2.png[]
+
+When client wants to authenticate itself with a resource it first
+needs to communicate with a `KDC`. `Client` will craft a special package
+which contains encrypted and unencrypted parts. Unencrypted part
+contains i.e. information about a user and encrypted part other
+information which is part of a protocol. `Client` will encrypt package
+data with its own key.
+
+When `KDC` receives this authentication package from a client it
+checks who this client claims to be from an unencrypted part and based
+on that information it uses `client` decryption key it already have in
+its database. If this decryption is succesfull `KDC` knows that this
+`client` is the one it claims to be.
+
+What KDC returns to a client is a ticket called `Ticket Granting
+Ticket` which is signed by a KDC's own private key. Later when
+`client` sends back this ticket it can try to decrypt it and if that
+operation is succesfull it knows that it was a ticket it itself
+originally signed and gave to a `client`.
+
+image:images/drawio-kerb-cc3.png[]
+
+When client wants to get a ticket which it can use to authenticate
+with a service, `TGT` is send to `KDC` which then signs a service ticket
+with service's own key. This a moment when a trust between
+`client` and `service` is created. This service ticket contains data
+which only `service` itself is able to decrypt.
+
+image:images/drawio-kerb-cc4.png[]
+
+When `client` is authenticating with a service it sends previously
+received service ticket to a service which then thinks that I don't
+know anything about this guy but he have me an authentication ticket.
+What `service` can do next is try to decrypt that ticket and if that
+operation is succesfull it knows that only other party who knows my
+credentials is the `KDC` and because I trust him I can also trust this
+client claiming to be who he is.
+
+[appendix]
+== Setup Kerberos Environments
+Doing a production setup of Kerberos environment is out of scope of
+this document but this appendix provides some help to get you
+started for setting up needed components for development.
+
+=== Setup MIT Kerberos
+First action is to setup a new realm and a database.
+
+[source,text,indent=0]
+----
+# kdb5_util create -s -r EXAMPLE.ORG
+Loading random data
+Initializing database '/var/lib/krb5kdc/principal' for realm 'EXAMPLE.ORG',
+master key name 'K/M@EXAMPLE.ORG'
+You will be prompted for the database Master Password.
+It is important that you NOT FORGET this password.
+Enter KDC database master key: 
+Re-enter KDC database master key to verify: 
+----
+
+`kadmin` command can be used to administer Kerberos environment but
+you can't yet use it because there are no admin users in a database.
+
+[source,text,indent=0]
+----
+root@neo:/etc/krb5kdc# kadmin
+Authenticating as principal root/admin@EXAMPLE.ORG with password.
+kadmin: Client not found in Kerberos database while initializing
+kadmin interface
+----
+
+Lets use `kadmin.local` command to create one.
+
+[source,text,indent=0]
+----
+root@neo:/etc/krb5kdc# kadmin.local 
+Authenticating as principal root/admin@EXAMPLE.ORG with password.
+
+kadmin.local:  listprincs
+K/M@EXAMPLE.ORG
+kadmin/admin@EXAMPLE.ORG
+kadmin/changepw@EXAMPLE.ORG
+kadmin/cypher@EXAMPLE.ORG
+krbtgt/EXAMPLE.ORG@EXAMPLE.ORG
+
+kadmin.local:  addprinc root/admin@EXAMPLE.ORG
+WARNING: no policy specified for root/admin@EXAMPLE.ORG; defaulting to
+no policy
+Enter password for principal "root/admin@EXAMPLE.ORG": 
+Re-enter password for principal "root/admin@EXAMPLE.ORG": 
+Principal "root/admin@EXAMPLE.ORG" created.
+----
+
+Then enable admins by modifying `kadm5.acl` file and restart Kerberos
+services.
+
+[source,text,indent=0]
+----
+# cat /etc/krb5kdc/kadm5.acl 
+# This file Is the access control list for krb5 administration.
+*/admin *
+----
+
+Now you can use `kadmin` with previously created `root/admin`
+principal. Lets create our first user.
+
+[source,text,indent=0]
+----
+kadmin:  addprinc user1
+WARNING: no policy specified for user1@EXAMPLE.ORG; defaulting to no
+policy
+Enter password for principal "user1@EXAMPLE.ORG": 
+Re-enter password for principal "user1@EXAMPLE.ORG": 
+Principal "user1@EXAMPLE.ORG" created.
+
+----
+
+Lets create a service ticket for tomcat and export credentials to a
+keytab file named `tomcat.keytab`.
+
+[source,text,indent=0]
+----
+kadmin:  addprinc -randkey HTTP/neo.example.org@EXAMPLE.ORG
+WARNING: no policy specified for HTTP/neo.example.org@EXAMPLE.ORG;
+defaulting to no policy
+Principal "HTTP/neo.example.org@EXAMPLE.ORG" created.
+
+kadmin:  ktadd -k /tmp/tomcat.keytab HTTP/neo.example.org@EXAMPLE.ORG
+Entry for principal HTTP/neo.example.org@EXAMPLE.ORG with kvno 2, encryption type aes256-cts-hmac-sha1-96 added to keytab WRFILE:/tmp/tomcat2.keytab.
+Entry for principal HTTP/neo.example.org@EXAMPLE.ORG with kvno 2, encryption type arcfour-hmac added to keytab WRFILE:/tmp/tomcat2.keytab.
+Entry for principal HTTP/neo.example.org@EXAMPLE.ORG with kvno 2, encryption type des3-cbc-sha1 added to keytab WRFILE:/tmp/tomcat2.keytab.
+Entry for principal HTTP/neo.example.org@EXAMPLE.ORG with kvno 2, encryption type des-cbc-crc added to keytab WRFILE:/tmp/tomcat2.keytab.
+----
+
+
+=== Setup Windows Domain Controller
+
+This was tested using `Windows Server 2012 R2`
+
+- Normal domain controller and active directory setup was done.
+- Used dns domain `example.org` and windows domain `EXAMPLE`.
+- I created various domain users like `user1`, `user2`, `user3`,
+  `tomcat` and set passwords to `Password#`.
+
+I eventually also added all ip's of my vm's to AD's dns server for
+that not to cause any trouble.
+
+[source,text]
+----
+Name: WIN-EKBO0EQ7TS7.example.org
+Address: 172.16.101.135
+
+Name: win8vm.example.org
+Address: 172.16.101.136
+
+Name: neo.example.org
+Address: 172.16.101.1
+----
+
+Service Principal Name(SPN) needs to be setup with `HTTP` and a
+server name `neo.example.org` where tomcat servlet container is run. This
+is used with `tomcat` domain user and its `keytab` is then used as a
+service credential.
+
+[source,text]
+----
+PS C:\> setspn -A HTTP/neo.example.org tomcat
+----
+
+I exported keytab file which is copied to linux server running tomcat.
+
+[source,text]
+----
+PS C:\> ktpass /out c:\tomcat.keytab /mapuser tomcat@EXAMPLE.ORG /princ HTTP/neo.example.org@EXAMPLE.ORG /pass Password# /ptype KRB5_NT_PRINCIPAL /crypto All
+ Targeting domain controller: WIN-EKBO0EQ7TS7.example.org
+ Using legacy password setting method
+ Successfully mapped HTTP/neo.example.org to tomcat.
+----
+
+[appendix]
+== Troubleshooting
+This appendix provides generic information about troubleshooting
+errors and problems.
+
+
+

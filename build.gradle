@@ -186,22 +186,31 @@ configure(rootProject) {
 	}
 
 	asciidoctor {
-	sourceDir = file("docs/src/reference/asciidoc")
-	backends = ['docbook5']
-	options eruby: 'erubis'
-	attributes docinfo: '',
-		copycss : '',
-		icons : 'font',
-		'source-highlighter': 'prettify',
-		sectanchors : '',
-		toc2: '',
-		idprefix: '',
-		idseparator: '-',
-		doctype: 'book',
-		numbered: '',
-		'spring-version' : springVersion,
-		revnumber : project.version
+		sourceDir = file("docs/src/reference/asciidoc")
+		backends = ['docbook5']
+		options eruby: 'erubis'
+		attributes docinfo: '',
+			copycss : '',
+			icons : 'font',
+			'source-highlighter': 'prettify',
+			sectanchors : '',
+			toc2: '',
+			idprefix: '',
+			idseparator: '-',
+			doctype: 'book',
+			numbered: '',
+			'spring-version' : springVersion,
+			revnumber : project.version
 	}
+
+	task copyDocsSamples(type: Copy) {
+		from 'spring-security-kerberos-core/src/test/java/org/springframework/security/extensions/kerberos/docs/'
+		include '**/*.java'
+		include '**/*.xml'
+		into 'docs/src/reference/asciidoc/samples'
+	}
+	asciidoctor.dependsOn copyDocsSamples
+
 
 	// don't publish the default jar for the root project
 	configurations.archives.artifacts.clear()

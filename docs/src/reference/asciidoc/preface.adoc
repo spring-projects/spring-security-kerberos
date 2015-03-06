@@ -1,6 +1,5 @@
 [preface]
 == Preface
-TBD
 
 This reference documentations contains following parts.
 

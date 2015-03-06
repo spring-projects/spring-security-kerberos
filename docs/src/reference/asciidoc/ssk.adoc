@@ -4,11 +4,42 @@
 This part of the reference documentation explains the core functionality
 that Spring Security Kerberos provides to any Spring based application.
 
-<<ssk-config>> describes the generic configuration support.
+<<ssk-authprovider>> describes the authentication provider support.
+
+<<ssk-spnego>> describes the spnego negotiate support.
 
 
-[[ssk-config]]
-== Spring Security Kerberos Configuration
+[[ssk-authprovider]]
+== Authentication Provider
 
-TBD
+Provider configuration using JavaConfig.
+
+[source,java,indent=0]
+----
+include::samples/AuthProviderConfig.java[tags=snippetA]
+----
+
+Provider configuration using xml.
+
+[source,xml,indent=0]
+----
+include::samples/AuthProviderConfig.xml[tags=snippetA]
+----
+
+[[ssk-spnego]]
+== Spnego Negotiate
+
+Spnego configuration using JavaConfig.
+
+[source,java,indent=0]
+----
+include::samples/SpnegoConfig.java[tags=snippetA]
+----
+
+Spnego configuration using xml.
+
+[source,xml,indent=0]
+----
+include::samples/SpnegoConfig.xml[tags=snippetA]
+----
 

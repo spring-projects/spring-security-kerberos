@@ -18,3 +18,4 @@ include::introduction.adoc[]
 [[springandssk]]
 include::ssk.adoc[]
 
+include::appendix.adoc[]
