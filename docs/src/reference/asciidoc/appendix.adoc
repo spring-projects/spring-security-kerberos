@@ -4,6 +4,16 @@
 :numbered!:
 
 [appendix]
+== Material Used in this Document
+Dummy UserDetailsService used in samples because we don't have a real
+user source.
+
+[source,java,indent=0]
+----
+include::samples/DummyUserDetailsService.java[tags=snippetA]
+----
+
+[appendix]
 == Crash Course to Kerberos
 In any authentication process there are usually a three parties
 involved.
@@ -21,7 +31,7 @@ one which really brings everything together and thus is the most
 critical component in your environment. Because of this it is also
 considered as a single point of failure.
 
-Initially when `Kerberos` environment is setup and domain users
+Initially when `Kerberos` environment is setup and domain user
 principals created into to a database, encryption keys are also
 created. These encryption keys are based on shared secrets(i.e. user
 password) and actual passwords are never kept in a clear text.
@@ -32,7 +42,7 @@ Interestingly there is no communication between a `resource` and a
 
 image:images/drawio-kerb-cc2.png[]
 
-When client wants to authenticate itself with a resource it first
+When client wants to authenticate itself with a `resource` it first
 needs to communicate with a `KDC`. `Client` will craft a special package
 which contains encrypted and unencrypted parts. Unencrypted part
 contains i.e. information about a user and encrypted part other
@@ -40,7 +50,7 @@ information which is part of a protocol. `Client` will encrypt package
 data with its own key.
 
 When `KDC` receives this authentication package from a client it
-checks who this client claims to be from an unencrypted part and based
+checks who this `client` claims to be from an unencrypted part and based
 on that information it uses `client` decryption key it already have in
 its database. If this decryption is succesfull `KDC` knows that this
 `client` is the one it claims to be.
@@ -66,8 +76,8 @@ received service ticket to a service which then thinks that I don't
 know anything about this guy but he have me an authentication ticket.
 What `service` can do next is try to decrypt that ticket and if that
 operation is succesfull it knows that only other party who knows my
-credentials is the `KDC` and because I trust him I can also trust this
-client claiming to be who he is.
+credentials is the `KDC` and because I trust him I can also trust that
+this client is a one he claims to be.
 
 [appendix]
 == Setup Kerberos Environments
@@ -75,6 +85,7 @@ Doing a production setup of Kerberos environment is out of scope of
 this document but this appendix provides some help to get you
 started for setting up needed components for development.
 
+[[setupmitkerberos]]
 === Setup MIT Kerberos
 First action is to setup a new realm and a database.
 
@@ -144,7 +155,17 @@ policy
 Enter password for principal "user1@EXAMPLE.ORG": 
 Re-enter password for principal "user1@EXAMPLE.ORG": 
 Principal "user1@EXAMPLE.ORG" created.
+----
 
+If you like you can create a keytab file for this user.
+
+[source,text,indent=0]
+----
+kadmin:  ktadd -k /tmp/user1.keytab user1@EXAMPLE.ORG
+Entry for principal user1@EXAMPLE.ORG with kvno 2, encryption type aes256-cts-hmac-sha1-96 added to keytab WRFILE:/tmp/user1.keytab.
+Entry for principal user1@EXAMPLE.ORG with kvno 2, encryption type arcfour-hmac added to keytab WRFILE:/tmp/user1.keytab.
+Entry for principal user1@EXAMPLE.ORG with kvno 2, encryption type des3-cbc-sha1 added to keytab WRFILE:/tmp/user1.keytab.
+Entry for principal user1@EXAMPLE.ORG with kvno 2, encryption type des-cbc-crc added to keytab WRFILE:/tmp/user1.keytab.
 ----
 
 Lets create a service ticket for tomcat and export credentials to a
@@ -164,7 +185,7 @@ Entry for principal HTTP/neo.example.org@EXAMPLE.ORG with kvno 2, encryption typ
 Entry for principal HTTP/neo.example.org@EXAMPLE.ORG with kvno 2, encryption type des-cbc-crc added to keytab WRFILE:/tmp/tomcat2.keytab.
 ----
 
-
+[[setupwinkerberos]]
 === Setup Windows Domain Controller
 
 This was tested using `Windows Server 2012 R2`
@@ -214,5 +235,88 @@ PS C:\> ktpass /out c:\tomcat.keytab /mapuser tomcat@EXAMPLE.ORG /princ HTTP/neo
 This appendix provides generic information about troubleshooting
 errors and problems.
 
+[IMPORTANT]
+====
+If you think environment and configuration is correctly setup, do
+double check and ask other person to check possible obvious mistakes
+or typos. Kerberos setup is generally very brittle and it is not
+always very easy to debug where the problem lies.
+====
 
+
+[source,text]
+----
+GSSException: Failure unspecified at GSS-API level (Mechanism level:
+Invalid argument (400) - Cannot find key of appropriate type to
+decrypt AP REP - RC4 with HMAC)
+----
+
+If you see abore error indicating missing key type, this will happen
+with two different use cases. Firstly your JVM may not support
+appropriate encryption type or it is disabled in your `krb5.conf`
+file.
+
+[source,text]
+----
+default_tkt_enctypes = rc4-hmac
+default_tgs_enctypes = rc4-hmac
+----
+
+Second case is less obvious and hard to track because it will lead
+into same error. This specific `GSSException` is throws also if you
+simply don't have a required encryption key which then may be caused
+by a misconfiguration in your kerberos server or a simply typo in your
+principal.
+
+[appendix]
+[[browserspnegoconfig]]
+== Configure Browsers for Spnego Negotiation
+
+=== Firefox
+Complete following steps to ensure that your Firefox browser is
+enabled to perform Spnego authentication.
+
+- Open Firefox.
+- At address field, type *about:config*.
+- In filter/search, type *negotiate*.
+- Parameter *network.negotiate-auth.trusted-uris* may be set to
+  default *https://* which doesn't work for you. Replace this with
+  your server address.
+
+=== Chrome
+
+With Google Chrome you generally need to set command-line parameters
+order to white list servers with Chrome will negotiate. 
+
+[source,text]
+----
+--auth-server-whitelist="*.example.com"
+--auth-negotiate-delegate-whitelist="*.example.com"
+----
+
+You can see which policies are enable by typing *chrome://policy/*
+into Chrome's address bar.
+
+With Linux Chrome will also read policy files from
+`/etc/opt/chrome/policies/managed` directory.
+
+.mypolicy.json
+[source,json]
+----
+{
+  "AuthServerWhitelist" : "*.example.org",
+  "AuthNegotiateDelegateWhitelist" : "*.example.org",
+  "DisableAuthNegotiateCnameLookup" : true,
+  "EnableAuthNegotiatePort" : true
+}
+----
+
+=== Internet Explorer
+Complete following steps to ensure that your Internet Explorer browser
+is enabled to perform Spnego authentication.
+
+- Open Internet Explorer.
+- Click *Tools > Intenet Options > Security* tab.
+- In *Local intranet* section make sure your server is trusted by i.e.
+  adding it into a list.
 

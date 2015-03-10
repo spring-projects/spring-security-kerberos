@@ -1,0 +1,169 @@
+[[springsecuritykerberossamples]]
+= Spring Security Kerberos Samples
+
+This part of the reference documentation is introducing samples
+projects. Generally samples can be either compiled manually by
+building main distribution from
+https://github.com/spring-projects/spring-security-kerberos or using
+nightly snapshots or actual release builds.
+
+- http://repo.spring.io/libs-snapshot/org/springframework/security/kerberos/
+- http://repo.spring.io/libs-release/org/springframework/security/kerberos/
+
+[IMPORTANT]
+====
+If you download and run sample from a maven repo it will not work
+until a correct configuration is applied. See notes below for specific
+samples.
+====
+
+<<samples-sec-server-win-auth>> sample for Windows environment
+
+<<samples-sec-server-client-auth>> sample using server side authenticator
+
+<<samples-sec-server-spnego-form-auth>> sample using ticket validation
+with spnego and form
+
+<<samples-sec-server-spnego-form-auth-xml>> sample using ticket
+validation with spnego and form (xml config)
+
+[[samples-sec-server-win-auth]]
+== Security Server Windows Auth Sample
+Goals of this sample:
+
+- In windows environment, User will be able to logon to application
+  with Windows Active directory Credential which has been entered
+  during log on to windows. There should not be any ask for
+  userid/password credentials.
+- In non-windows environment, User will be presented with a screen
+  to provide Active directory credentials.
+
+[source,yaml,indent=0]
+----
+server:
+    port: 8080
+    app:
+        ad-domain: EXAMPLE.ORG
+        ad-server: ldap://WIN-EKBO0EQ7TS7.example.org/
+        service-principal: HTTP/neo.example.org@EXAMPLE.ORG
+        keytab-location: /tmp/tomcat.keytab
+----
+In above you can see the default configuration for this sample. You
+can override these settings using a normal Spring Boot tricks like
+using command-line options or custom `application.yml` file.
+
+Run a server.
+[source,text,subs="attributes"]
+----
+$ java -jar sec-server-win-auth-{revnumber}.jar
+----
+
+[NOTE]
+====
+See <<setupwinkerberos>> for more instructions how to work with
+windows kerberos environment.
+====
+
+Login to `Windows 8.1` using domain credentials and access sample
+
+image:images/ie1.png[]
+image:images/ie2.png[]
+
+Access sample application from a non windows vm and use domain
+credentials manually.
+
+image:images/ff1.png[]
+image:images/ff2.png[]
+image:images/ff3.png[]
+
+
+[[samples-sec-server-client-auth]]
+== Security Server Side Auth Sample
+This sample demonstrates how server is able to authenticate user
+against kerberos environment using his credentials passed in via a
+form login.
+
+Run a server.
+[source,text,subs="attributes"]
+----
+$ java -jar sec-server-client-auth-{revnumber}.jar
+----
+
+[source,yaml,indent=0]
+----
+server:
+    port: 8080
+----
+
+[[samples-sec-server-spnego-form-auth]]
+== Security Server Spnego and Form Auth Sample
+This sample demonstrates how a server can be configured to accept a
+Spnego based negotiation from a browser while still being able to fall
+back to a form based authentication.
+
+Using a `user1` principal <<setupmitkerberos>>, do a kerberos login
+either using credentials.
+[source,text]
+----
+$ kinit user1
+Password for user1@EXAMPLE.ORG: 
+
+$ klist
+Ticket cache: FILE:/tmp/krb5cc_1000
+Default principal: user1@EXAMPLE.ORG
+
+Valid starting     Expires            Service principal
+10/03/15 17:18:45  11/03/15 03:18:45  krbtgt/EXAMPLE.ORG@EXAMPLE.ORG
+  renew until 11/03/15 17:18:40
+----
+
+or using a keytab file.
+
+[source,text]
+----
+$ kinit -kt user1.keytab user1
+
+$ klist
+Ticket cache: FILE:/tmp/krb5cc_1000
+Default principal: user1@EXAMPLE.ORG
+
+Valid starting     Expires            Service principal
+10/03/15 17:25:03  11/03/15 03:25:03  krbtgt/EXAMPLE.ORG@EXAMPLE.ORG
+  renew until 11/03/15 17:25:03
+----
+
+Run a server.
+[source,text,subs="attributes"]
+----
+$ java -jar sec-server-spnego-form-auth-{revnumber}.jar
+----
+
+Now you should be able to open your browser and let it do Spnego
+authentication with existing ticket.
+
+[NOTE]
+====
+See <<browserspnegoconfig>> for more instructions for configuring
+browsers to use Spnego.
+====
+
+[source,yaml,indent=0]
+----
+server:
+    port: 8080
+app:
+    service-principal: HTTP/neo.example.org@EXAMPLE.ORG
+    keytab-location: /tmp/tomcat.keytab
+----
+
+[[samples-sec-server-spnego-form-auth-xml]]
+== Security Server Spnego and Form Auth Xml Sample
+This is a same sample than <<samples-sec-server-spnego-form-auth>> but
+using xml based configuration instead of JavaConfig.
+
+Run a server.
+[source,text,subs="attributes"]
+----
+$ java -jar sec-server-spnego-form-auth-xml-{revnumber}.jar
+----
+

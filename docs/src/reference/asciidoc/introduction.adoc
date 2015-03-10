@@ -6,5 +6,6 @@ application developers to Kerberos concepts with Spring.
 
 == Requirements
 
-Spring Security Kerberos {revnumber} is built and tested with JDK 7, Spring
-Framework {spring-version}.
+Spring Security Kerberos {revnumber} is built and tested with JDK 7,
+Spring Security {spring-security-version} and Spring Framework {spring-version}.
+

@@ -207,6 +207,7 @@ configure(rootProject) {
 			doctype: 'book',
 			numbered: '',
 			'spring-version' : springVersion,
+			'spring-security-version' : springSecurityVersion,
 			revnumber : project.version
 	}
 

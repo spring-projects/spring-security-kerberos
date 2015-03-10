@@ -8,3 +8,8 @@ This reference documentations contains following parts.
 <<springsecuritykerberos>> describes the usage of Spring Security
 Kerberos
 
+<<springsecuritykerberossamples>> describes the usage of Spring
+Security Kerberos Samples
+
+<<appendices>> generic support material
+

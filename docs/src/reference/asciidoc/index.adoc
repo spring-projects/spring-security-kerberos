@@ -17,5 +17,5 @@ include::introduction.adoc[]
 
 [[springandssk]]
 include::ssk.adoc[]
-
+include::samples.adoc[]
 include::appendix.adoc[]
