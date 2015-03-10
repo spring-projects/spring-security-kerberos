@@ -1,0 +1,5 @@
+server:
+    port: 8080
+app:
+    service-principal: HTTP/neo.example.org@EXAMPLE.ORG
+    keytab-location: /tmp/tomcat.keytab

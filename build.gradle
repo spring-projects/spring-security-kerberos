@@ -7,6 +7,13 @@ buildscript {
 		classpath("org.springframework.build.gradle:spring-io-plugin:0.0.3.RELEASE")
 		classpath('org.asciidoctor:asciidoctor-gradle-plugin:1.5.2')
 		classpath("io.spring.gradle:docbook-reference-plugin:0.3.0")
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion")
+	}
+}
+
+def sampleProjects() {
+	subprojects.findAll { project ->
+		project.name.contains('sec-server') && project.name != 'spring-security-kerberos-samples-common'
 	}
 }
 
@@ -161,6 +168,25 @@ project('spring-security-kerberos-sample') {
 		compile("javax.servlet:servlet-api:$servletApi2Version", provided)
 		compile("org.springframework.security:spring-security-config:$springSecurityVersion")
 		compile("log4j:log4j:$log4jVersion")
+	}
+}
+
+project('spring-security-kerberos-samples-common') {
+	dependencies {
+		compile project(":spring-security-kerberos-core")
+	}
+}
+
+configure(sampleProjects()) {
+	apply plugin: 'spring-boot'
+	dependencies {
+		compile project(":spring-security-kerberos-samples-common")
+		compile "org.springframework.boot:spring-boot-starter-thymeleaf:$springBootVersion"
+		compile "org.springframework.security:spring-security-ldap:$springSecurityVersion"
+		testCompile "org.springframework:spring-test:$springVersion"
+		testCompile "org.hamcrest:hamcrest-core:$hamcrestVersion"
+		testCompile "org.hamcrest:hamcrest-library:$hamcrestVersion"
+		testCompile "junit:junit:$junitVersion"
 	}
 }
 
