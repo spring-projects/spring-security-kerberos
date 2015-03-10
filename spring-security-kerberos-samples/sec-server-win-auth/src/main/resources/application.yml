@@ -1,0 +1,7 @@
+server:
+    port: 8080
+app:
+    ad-domain: EXAMPLE.ORG
+    ad-server: ldap://WIN-EKBO0EQ7TS7.example.org/
+    service-principal: HTTP/neo.example.org@EXAMPLE.ORG
+    keytab-location: /tmp/tomcat.keytab
