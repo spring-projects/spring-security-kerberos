@@ -8,6 +8,8 @@ that Spring Security Kerberos provides to any Spring based application.
 
 <<ssk-spnego>> describes the spnego negotiate support.
 
+<<ssk-resttemplate>> describes the RestTemplate support.
+
 
 [[ssk-authprovider]]
 == Authentication Provider
@@ -41,5 +43,33 @@ Spnego configuration using xml.
 [source,xml,indent=0]
 ----
 include::samples/SpnegoConfig.xml[tags=snippetA]
+----
+
+[[ssk-resttemplate]]
+== Using KerberosRestTemplate
+
+If there is a need to access Kerberos protected web resources
+programmatically we have `KerberosRestTemplate` which extends
+`RestTemplate` and does necessary login actions prior to delegating to
+actual RestTemplate methods. You basically have few options to
+configure this template.
+
+- Leave keyTabLocation and userPrincipal empty if you want to
+  use cached ticket.
+- Use keyTabLocation and userPrincipal if you want to use
+  keytab file.
+- Use loginOptions if you want to customise Krb5LoginModule options.
+- Use a customised httpClient.
+
+With ticket cache.
+[source,java,indent=0]
+----
+include::samples/KerberosRestTemplateConfig.java[tags=snippetA]
+----
+
+With keytab file.
+[source,java,indent=0]
+----
+include::samples/KerberosRestTemplateConfig.java[tags=snippetB]
 ----
 

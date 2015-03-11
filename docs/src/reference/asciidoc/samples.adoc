@@ -27,6 +27,8 @@ with spnego and form
 <<samples-sec-server-spnego-form-auth-xml>> sample using ticket
 validation with spnego and form (xml config)
 
+<<samples-sec-client-rest-template>> sample for KerberosRestTemplate
+
 [[samples-sec-server-win-auth]]
 == Security Server Windows Auth Sample
 Goals of this sample:
@@ -102,7 +104,7 @@ Spnego based negotiation from a browser while still being able to fall
 back to a form based authentication.
 
 Using a `user1` principal <<setupmitkerberos>>, do a kerberos login
-either using credentials.
+manually using credentials.
 [source,text]
 ----
 $ kinit user1
@@ -121,11 +123,11 @@ or using a keytab file.
 
 [source,text]
 ----
-$ kinit -kt user1.keytab user1
+$ kinit -kt user2.keytab user1
 
 $ klist
 Ticket cache: FILE:/tmp/krb5cc_1000
-Default principal: user1@EXAMPLE.ORG
+Default principal: user2@EXAMPLE.ORG
 
 Valid starting     Expires            Service principal
 10/03/15 17:25:03  11/03/15 03:25:03  krbtgt/EXAMPLE.ORG@EXAMPLE.ORG
@@ -165,5 +167,68 @@ Run a server.
 [source,text,subs="attributes"]
 ----
 $ java -jar sec-server-spnego-form-auth-xml-{revnumber}.jar
+----
+
+[[samples-sec-client-rest-template]]
+== Security Client KerberosRestTemplate Sample
+This is a sample using a Spring RestTemplate to access Kerberos
+protected resource. You can use this together with
+<<samples-sec-server-spnego-form-auth>>.
+
+Default application is configured as shown below.
+[source,yaml,indent=0]
+----
+app:
+    user-principal: user2@EXAMPLE.ORG
+    keytab-location: /tmp/user2.keytab
+    access-url: http://neo.example.org:8080/hello
+----
+
+
+Using a `user1` principal <<setupmitkerberos>>, do a kerberos login
+manually using credentials.
+[source,text,subs="attributes"]
+----
+$ java -jar sec-client-rest-template-{revnumber}.jar --app.user-principal --app.keytab-location
+----
+
+[NOTE]
+====
+In above we simply set `app.user-principal` and `app.keytab-location`
+to empty values which disables a use of keytab file.
+====
+
+If operation is succesfull you should see below output with `user1@EXAMPLE.ORG`.
+[source,text]
+----
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+  <head>
+    <title>Spring Security Kerberos Example</title>
+  </head>
+  <body>
+    <h1>Hello user1@EXAMPLE.ORG!</h1>
+  </body>
+</html>
+----
+
+Or use a `user2` with a keytab file.
+[source,text,subs="attributes"]
+----
+$ java -jar sec-client-rest-template-{revnumber}.jar
+----
+
+If operation is succesfull you should see below output with `user2@EXAMPLE.ORG`.
+[source,text]
+----
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+  <head>
+    <title>Spring Security Kerberos Example</title>
+  </head>
+  <body>
+    <h1>Hello user2@EXAMPLE.ORG!</h1>
+  </body>
+</html>
 ----
 

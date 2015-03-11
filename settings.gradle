@@ -8,6 +8,7 @@ include 'spring-security-kerberos-samples:sec-server-client-auth'
 include 'spring-security-kerberos-samples:sec-server-spnego-form-auth'
 include 'spring-security-kerberos-samples:sec-server-spnego-form-auth-xml'
 include 'spring-security-kerberos-samples:sec-server-win-auth'
+include 'spring-security-kerberos-samples:sec-client-rest-template'
 
 rootProject.children.find {
 	if (it.name == 'spring-security-kerberos-samples') {

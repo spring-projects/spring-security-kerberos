@@ -16,3 +16,6 @@ project('sec-server-spnego-form-auth-xml') {
   description = 'Security Server Spnego and Form Auth Xml Sample'
 }
 
+project('sec-client-rest-template') {
+  description = 'Security Client RestTemplate Sample'
+}

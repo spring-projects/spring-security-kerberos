@@ -145,7 +145,7 @@ services.
 ----
 
 Now you can use `kadmin` with previously created `root/admin`
-principal. Lets create our first user.
+principal. Lets create our first user `user1`.
 
 [source,text,indent=0]
 ----
@@ -157,15 +157,22 @@ Re-enter password for principal "user1@EXAMPLE.ORG":
 Principal "user1@EXAMPLE.ORG" created.
 ----
 
-If you like you can create a keytab file for this user.
+Lets create our second user `user2` and export a keytab file.
 
 [source,text,indent=0]
 ----
-kadmin:  ktadd -k /tmp/user1.keytab user1@EXAMPLE.ORG
-Entry for principal user1@EXAMPLE.ORG with kvno 2, encryption type aes256-cts-hmac-sha1-96 added to keytab WRFILE:/tmp/user1.keytab.
-Entry for principal user1@EXAMPLE.ORG with kvno 2, encryption type arcfour-hmac added to keytab WRFILE:/tmp/user1.keytab.
-Entry for principal user1@EXAMPLE.ORG with kvno 2, encryption type des3-cbc-sha1 added to keytab WRFILE:/tmp/user1.keytab.
-Entry for principal user1@EXAMPLE.ORG with kvno 2, encryption type des-cbc-crc added to keytab WRFILE:/tmp/user1.keytab.
+kadmin:  addprinc user2
+WARNING: no policy specified for user2@EXAMPLE.ORG; defaulting to no
+policy
+Enter password for principal "user2@EXAMPLE.ORG": 
+Re-enter password for principal "user2@EXAMPLE.ORG": 
+Principal "user2@EXAMPLE.ORG" created.
+
+kadmin:  ktadd -k /tmp/user2.keytab user2@EXAMPLE.ORG
+Entry for principal user2@EXAMPLE.ORG with kvno 2, encryption type aes256-cts-hmac-sha1-96 added to keytab WRFILE:/tmp/user2.keytab.
+Entry for principal user2@EXAMPLE.ORG with kvno 2, encryption type arcfour-hmac added to keytab WRFILE:/tmp/user2.keytab.
+Entry for principal user2@EXAMPLE.ORG with kvno 2, encryption type des3-cbc-sha1 added to keytab WRFILE:/tmp/user2.keytab.
+Entry for principal user2@EXAMPLE.ORG with kvno 2, encryption type des-cbc-crc added to keytab WRFILE:/tmp/user2.keytab.
 ----
 
 Lets create a service ticket for tomcat and export credentials to a

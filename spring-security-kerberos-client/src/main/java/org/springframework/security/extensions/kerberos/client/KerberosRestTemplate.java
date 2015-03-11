@@ -20,6 +20,7 @@ import java.security.Principal;
 import java.security.PrivilegedAction;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.security.auth.Subject;
@@ -41,6 +42,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestClientException;
@@ -48,7 +50,16 @@ import org.springframework.web.client.RestTemplate;
 
 /**
  * {@code RestTemplate} that is able to make kerberos SPNEGO authenticated REST
- * requests.
+ * requests. Under a hood this {@code KerberosRestTemplate} is using {@link HttpClient} to
+ * support Kerberos.
+ *
+ * <p>Generally this template can be configured in few different ways.
+ * <ul>
+ *   <li>Leave keyTabLocation and userPrincipal empty if you want to use cached ticket</li>
+ *   <li>Use keyTabLocation and userPrincipal if you want to use keytab file</li>
+ *   <li>Use loginOptions if you want to customise Krb5LoginModule options</li>
+ *   <li>Use a customised httpClient</li>
+ * </ul>
  *
  * @author Janne Valkealahti
  *
@@ -58,18 +69,97 @@ public class KerberosRestTemplate extends RestTemplate {
 	private static final Credentials credentials = new NullCredentials();
 
 	private final String keyTabLocation;
-	private final String servicePrincipalName;
+	private final String userPrincipal;
+	private final Map<String, Object> loginOptions;
 
-	public KerberosRestTemplate(String keyTabLocation, String servicePrincipalName) {
-		this(keyTabLocation, servicePrincipalName, buildHttpClient());
+	/**
+	 * Instantiates a new kerberos rest template.
+	 */
+	public KerberosRestTemplate() {
+		this(null, null, null, buildHttpClient());
 	}
 
-	public KerberosRestTemplate(String keyTabLocation, String servicePrincipalName, HttpClient httpClient) {
+	/**
+	 * Instantiates a new kerberos rest template.
+	 *
+	 * @param httpClient the http client
+	 */
+	public KerberosRestTemplate(HttpClient httpClient) {
+		this(null, null, null, httpClient);
+	}
+
+	/**
+	 * Instantiates a new kerberos rest template.
+	 *
+	 * @param keyTabLocation the key tab location
+	 * @param userPrincipal the user principal
+	 */
+	public KerberosRestTemplate(String keyTabLocation, String userPrincipal) {
+		this(keyTabLocation, userPrincipal, buildHttpClient());
+	}
+
+	/**
+	 * Instantiates a new kerberos rest template.
+	 *
+	 * @param keyTabLocation the key tab location
+	 * @param userPrincipal the user principal
+	 * @param httpClient the http client
+	 */
+	public KerberosRestTemplate(String keyTabLocation, String userPrincipal, HttpClient httpClient) {
+		this(keyTabLocation, userPrincipal, null, httpClient);
+	}
+
+	/**
+	 * Instantiates a new kerberos rest template.
+	 *
+	 * @param loginOptions the login options
+	 */
+	public KerberosRestTemplate(Map<String, Object> loginOptions) {
+		this(null, null, loginOptions, buildHttpClient());
+	}
+
+	/**
+	 * Instantiates a new kerberos rest template.
+	 *
+	 * @param loginOptions the login options
+	 * @param httpClient the http client
+	 */
+	public KerberosRestTemplate(Map<String, Object> loginOptions, HttpClient httpClient) {
+		this(null, null, loginOptions, httpClient);
+	}
+
+	/**
+	 * Instantiates a new kerberos rest template.
+	 *
+	 * @param keyTabLocation the key tab location
+	 * @param userPrincipal the user principal
+	 * @param loginOptions the login options
+	 */
+	public KerberosRestTemplate(String keyTabLocation, String userPrincipal, Map<String, Object> loginOptions) {
+		this(keyTabLocation, userPrincipal, loginOptions, buildHttpClient());
+	}
+
+	/**
+	 * Instantiates a new kerberos rest template.
+	 *
+	 * @param keyTabLocation the key tab location
+	 * @param userPrincipal the user principal
+	 * @param loginOptions the login options
+	 * @param httpClient the http client
+	 */
+	private KerberosRestTemplate(String keyTabLocation, String userPrincipal, Map<String, Object> loginOptions, HttpClient httpClient) {
 		super(new HttpComponentsClientHttpRequestFactory(httpClient));
 		this.keyTabLocation = keyTabLocation;
-		this.servicePrincipalName = servicePrincipalName;
+		this.userPrincipal = userPrincipal;
+		this.loginOptions = loginOptions;
 	}
 
+	/**
+	 * Builds the default instance of {@link HttpClient} having kerberos
+	 * support.
+	 *
+	 * @return the http client with spneno auth scheme
+	 */
 	private static HttpClient buildHttpClient() {
 		HttpClientBuilder builder = HttpClientBuilder.create();
 		Lookup<AuthSchemeProvider> authSchemeRegistry = RegistryBuilder.<AuthSchemeProvider> create()
@@ -87,9 +177,9 @@ public class KerberosRestTemplate extends RestTemplate {
 			final ResponseExtractor<T> responseExtractor) throws RestClientException {
 
 		try {
-			ClientLoginConfig loginConfig = new ClientLoginConfig(keyTabLocation, servicePrincipalName, true);
+			ClientLoginConfig loginConfig = new ClientLoginConfig(keyTabLocation, userPrincipal, loginOptions);
 			Set<Principal> princ = new HashSet<Principal>(1);
-			princ.add(new KerberosPrincipal(servicePrincipalName));
+			princ.add(new KerberosPrincipal(userPrincipal));
 			Subject sub = new Subject(false, princ, new HashSet<Object>(), new HashSet<Object>());
 			LoginContext lc = new LoginContext("", sub, null, loginConfig);
 			lc.login();
@@ -115,28 +205,39 @@ public class KerberosRestTemplate extends RestTemplate {
 	private static class ClientLoginConfig extends Configuration {
 
 		private final String keyTabLocation;
-		private final String servicePrincipalName;
-		private final boolean debug;
+		private final String userPrincipal;
+		private final Map<String, Object> loginOptions;
 
-		public ClientLoginConfig(String keyTabLocation, String servicePrincipalName, boolean debug) {
+		public ClientLoginConfig(String keyTabLocation, String userPrincipal, Map<String, Object> loginOptions) {
 			super();
 			this.keyTabLocation = keyTabLocation;
-			this.servicePrincipalName = servicePrincipalName;
-			this.debug = debug;
+			this.userPrincipal = userPrincipal;
+			this.loginOptions = loginOptions;
 		}
 
 		@Override
 		public AppConfigurationEntry[] getAppConfigurationEntry(String name) {
-			HashMap<String, String> options = new HashMap<String, String>();
-			options.put("useKeyTab", "true");
-			options.put("keyTab", this.keyTabLocation);
-			options.put("principal", this.servicePrincipalName);
-			options.put("storeKey", "true");
-			options.put("doNotPrompt", "true");
-			if (this.debug) {
-				options.put("debug", "true");
+
+			Map<String, Object> options = new HashMap<String, Object>();
+
+			// if we don't have keytab or principal only option is to rely on
+			// credentials cache.
+			if (!StringUtils.hasText(keyTabLocation) || !StringUtils.hasText(userPrincipal)) {
+				// cache
+				options.put("useTicketCache", "true");
+			} else {
+				// keytab
+				options.put("useKeyTab", "true");
+				options.put("keyTab", this.keyTabLocation);
+				options.put("principal", this.userPrincipal);
+				options.put("storeKey", "true");
 			}
+			options.put("doNotPrompt", "true");
 			options.put("isInitiator", "true");
+
+			if (loginOptions != null) {
+				options.putAll(loginOptions);
+			}
 
 			return new AppConfigurationEntry[] { new AppConfigurationEntry(
 					"com.sun.security.auth.module.Krb5LoginModule",
