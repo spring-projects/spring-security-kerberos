@@ -32,7 +32,7 @@ critical component in your environment. Because of this it is also
 considered as a single point of failure.
 
 Initially when `Kerberos` environment is setup and domain user
-principals created into to a database, encryption keys are also
+principals created into a database, encryption keys are also
 created. These encryption keys are based on shared secrets(i.e. user
 password) and actual passwords are never kept in a clear text.
 Effectively `KDC` has its own key and other keys for domain users.
