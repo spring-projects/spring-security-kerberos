@@ -33,10 +33,10 @@ import org.springframework.security.extensions.kerberos.KerberosTicketValidator.
 import org.springframework.security.extensions.kerberos.web.SpnegoAuthenticationProcessingFilter;
 
 /**
- * Holds the Kerberos/SPNEGO token for requesting a kerberized service and is
- * also the output of <code>KerberosServiceAuthenticationProvider</code>.<br>
- * Will mostly be created in <code>SpnegoAuthenticationProcessingFilter</code>
- * and authenticated in <code>KerberosServiceAuthenticationProvider</code>.
+ * <p>Holds the Kerberos/SPNEGO token for requesting a kerberized service and is
+ * also the output of <code>KerberosServiceAuthenticationProvider</code>.</p>
+ * <p>Will mostly be created in <code>SpnegoAuthenticationProcessingFilter</code>
+ * and authenticated in <code>KerberosServiceAuthenticationProvider</code>.</p>
  *
  * This token cannot be re-authenticated, as you will get a Kerberos Reply
  * error.
@@ -78,7 +78,7 @@ public class KerberosServiceRequestToken extends AbstractAuthenticationToken {
 
     /**
      * Creates an unauthenticated instance which should then be authenticated by
-     * <code>KerberosServiceAuthenticationProvider/code>.
+     * <code>KerberosServiceAuthenticationProvider</code>.
      *
      * @param token Kerberos/SPNEGO token
      * @see KerberosServiceAuthenticationProvider
@@ -130,6 +130,7 @@ public class KerberosServiceRequestToken extends AbstractAuthenticationToken {
 
     /**
      * Returns the Kerberos token
+     * @return the token data
      */
     public byte[] getToken() {
         return this.token;
@@ -176,7 +177,7 @@ public class KerberosServiceRequestToken extends AbstractAuthenticationToken {
      * @param offset data offset
      * @param length data length
      * @return the decrypted message
-     * @throws PrivilegedActionException
+     * @throws PrivilegedActionException if jaas throws and error
      */
 	public byte[] decrypt(final byte[] data, final int offset, final int length) throws PrivilegedActionException {
 		return Subject.doAs(getTicketValidation().subject(), new PrivilegedExceptionAction<byte[]>() {
@@ -190,9 +191,9 @@ public class KerberosServiceRequestToken extends AbstractAuthenticationToken {
     /**
      * Unwraps an encrypted message using the gss context
      *
-     * @param data
+     * @param data the data
      * @return the decrypted message
-     * @throws PrivilegedActionException
+     * @throws PrivilegedActionException if jaas throws and error
      */
     public byte[] decrypt(final byte[] data) throws PrivilegedActionException {
         return decrypt(data, 0, data.length);
@@ -201,11 +202,11 @@ public class KerberosServiceRequestToken extends AbstractAuthenticationToken {
     /**
      * Wraps an message using the gss context
      *
-     * @param data
-     * @param offset
-     * @param length
+     * @param data the data
+     * @param offset data offset
+     * @param length data length
      * @return the encrypted message
-     * @throws PrivilegedActionException
+     * @throws PrivilegedActionException if jaas throws and error
      */
     public byte[] encrypt(final byte[] data, final int offset, final int length) throws PrivilegedActionException {
 		return Subject.doAs(getTicketValidation().subject(), new PrivilegedExceptionAction<byte[]>() {
@@ -219,9 +220,9 @@ public class KerberosServiceRequestToken extends AbstractAuthenticationToken {
     /**
      * Wraps an message using the gss context
      *
-     * @param data
+     * @param data the data
      * @return the encrypted message
-     * @throws PrivilegedActionException
+     * @throws PrivilegedActionException if jaas throws and error
      */
     public byte[] encrypt(final byte[] data) throws PrivilegedActionException {
         return encrypt(data, 0, data.length);

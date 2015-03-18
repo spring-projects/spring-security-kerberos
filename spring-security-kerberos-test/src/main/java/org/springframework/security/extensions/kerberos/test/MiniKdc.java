@@ -74,22 +74,20 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * Mini KDC based on Apache Directory Server that can be embedded in testcases
- * or used from command line as a standalone KDC.
- * <p/>
+ * <p>Mini KDC based on Apache Directory Server that can be embedded in testcases
+ * or used from command line as a standalone KDC.</p>
  * <b>From within testcases:</b>
- * <p/>
- * MiniKdc sets 2 System properties when started and un-sets them when stopped:
+ * <p>MiniKdc sets 2 System properties when started and un-sets them when stopped:</p>
  * <ul>
  * <li>java.security.krb5.conf: set to the MiniKDC real/host/port</li>
  * <li>sun.security.krb5.debug: set to the debug value provided in the
  * configuration</li>
  * </ul>
- * Because of this, multiple MiniKdc instances cannot be started in parallel.
+ * <p>Because of this, multiple MiniKdc instances cannot be started in parallel.
  * For example, running testcases in parallel that start a KDC each. To
  * accomplish this a single MiniKdc should be used for all testcases running in
- * parallel.
- * <p/>
+ * parallel.</p>
+ *
  * MiniKdc default configuration values are:
  * <ul>
  * <li>org.name=EXAMPLE (used to create the REALM)</li>
@@ -103,7 +101,6 @@ import java.util.UUID;
  * <li>debug=false</li>
  * </ul>
  * The generated krb5.conf forces TCP connections.
- * <p/>
  *
  * @author Original Hadoop MiniKdc Authors
  * @author Janne Valkealahti
@@ -208,10 +205,9 @@ public class MiniKdc {
 	}
 
 	/**
-	 * Convenience method that returns MiniKdc default configuration.
-	 * <p/>
-	 * The returned configuration is a copy, it can be customized before using
-	 * it to create a MiniKdc.
+	 * <p>Convenience method that returns MiniKdc default configuration.</p>
+	 * <p>The returned configuration is a copy, it can be customized before using
+	 * it to create a MiniKdc.</p>
 	 *
 	 * @return a MiniKdc default configuration.
 	 */
@@ -466,8 +462,6 @@ public class MiniKdc {
 
 	/**
 	 * Stops the MiniKdc
-	 *
-	 * @throws Exception
 	 */
 	public synchronized void stop() {
 		if (kdc != null) {

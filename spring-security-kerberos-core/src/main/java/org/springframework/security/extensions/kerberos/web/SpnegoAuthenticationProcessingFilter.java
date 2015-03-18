@@ -46,9 +46,7 @@ import org.springframework.web.filter.GenericFilterBean;
  * and creates a {@link KerberosServiceRequestToken} out if it. It will then
  * call the {@link AuthenticationManager}.
  *
- * <p>
- * A typical Spring Security configuration might look like this:
- * </p>
+ * <p>A typical Spring Security configuration might look like this:</p>
  *
  * <pre>
  * &lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
@@ -94,10 +92,10 @@ import org.springframework.web.filter.GenericFilterBean;
  * &lt;/beans&gt;
  * </pre>
  *
- * If you get a "GSSException: Channel binding mismatch (Mechanism
+ * <p>If you get a "GSSException: Channel binding mismatch (Mechanism
  * level:ChannelBinding not provided!) have a look at this <a
- * href="http://bugs.sun.com/view_bug.do?bug_id=6851973">bug</a>.<br />
- * A workaround unti this is fixed in the JVM is to change
+ * href="http://bugs.sun.com/view_bug.do?bug_id=6851973">bug</a>.</p>
+ * <p>A workaround unti this is fixed in the JVM is to change</p>
  * HKEY_LOCAL_MACHINE\System
  * \CurrentControlSet\Control\LSA\SuppressExtendedProtection to 0x02
  *
@@ -186,9 +184,9 @@ public class SpnegoAuthenticationProcessingFilter extends GenericFilterBean {
     }
 
     /**
-     * This handler is called after a successful authentication. One can add
-     * additional authentication behavior by setting this.<br />
-     * Default is null, which means nothing additional happens
+     * <p>This handler is called after a successful authentication. One can add
+     * additional authentication behavior by setting this.</p>
+     * <p>Default is null, which means nothing additional happens</p>
      *
      * @param successHandler the authentication success handler
      */
@@ -197,12 +195,12 @@ public class SpnegoAuthenticationProcessingFilter extends GenericFilterBean {
     }
 
     /**
-     * This handler is called after a failure authentication. In most cases you
+     * <p>This handler is called after a failure authentication. In most cases you
      * only get Kerberos/SPNEGO failures with a wrong server or network
      * configurations and not during runtime. If the client encounters an error,
      * he will just stop the communication with server and therefore this
-     * handler will not be called in this case.<br />
-     * Default is null, which means that the Filter returns the HTTP 500 code
+     * handler will not be called in this case.</p>
+     * <p>Default is null, which means that the Filter returns the HTTP 500 code</p>
      *
      * @param failureHandler the authentication failure handler
      */
