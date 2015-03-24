@@ -6,5 +6,6 @@
     </head>
     <body>
         <h1 th:inline="text">Hello [[${#httpServletRequest.remoteUser}]]!</h1>
+        <h1 th:inline="text">User principal is [[${#httpServletRequest.userPrincipal}]]!</h1>
     </body>
 </html>

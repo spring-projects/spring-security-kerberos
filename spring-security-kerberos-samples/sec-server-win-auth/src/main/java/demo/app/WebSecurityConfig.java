@@ -9,16 +9,16 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.servlet.configuration.EnableWebMvcSecurity;
-import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.extensions.kerberos.KerberosServiceAuthenticationProvider;
 import org.springframework.security.extensions.kerberos.SunJaasKerberosTicketValidator;
+import org.springframework.security.extensions.kerberos.client.KerberosLdapContextSource;
+import org.springframework.security.extensions.kerberos.client.config.SunJaasKrb5LoginConfig;
 import org.springframework.security.extensions.kerberos.web.SpnegoAuthenticationProcessingFilter;
 import org.springframework.security.extensions.kerberos.web.SpnegoEntryPoint;
 import org.springframework.security.ldap.authentication.ad.ActiveDirectoryLdapAuthenticationProvider;
+import org.springframework.security.ldap.search.FilterBasedLdapUserSearch;
+import org.springframework.security.ldap.userdetails.LdapUserDetailsMapper;
+import org.springframework.security.ldap.userdetails.LdapUserDetailsService;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 @Configuration
@@ -36,6 +36,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Value("${app.keytab-location}")
 	private String keytabLocation;
+
+	@Value("${app.ldap-search-base}")
+	private String ldapSearchBase;
+
+	@Value("${app.ldap-search-filter}")
+	private String ldapSearchFilter;
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
@@ -87,7 +93,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	public KerberosServiceAuthenticationProvider kerberosServiceAuthenticationProvider() {
 		KerberosServiceAuthenticationProvider provider = new KerberosServiceAuthenticationProvider();
 		provider.setTicketValidator(sunJaasKerberosTicketValidator());
-		provider.setUserDetailsService(dummyUserDetailsService());
+		provider.setUserDetailsService(ldapUserDetailsService());
 		return provider;
 	}
 
@@ -101,17 +107,24 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
-	public DummyUserDetailsService dummyUserDetailsService() {
-		return new DummyUserDetailsService();
+	public KerberosLdapContextSource kerberosLdapContextSource() {
+		KerberosLdapContextSource contextSource = new KerberosLdapContextSource(adServer);
+		SunJaasKrb5LoginConfig loginConfig = new SunJaasKrb5LoginConfig();
+		loginConfig.setKeyTabLocation(new FileSystemResource(keytabLocation));
+		loginConfig.setServicePrincipal(servicePrincipal);
+		loginConfig.setDebug(true);
+		loginConfig.setIsInitiator(true);
+		contextSource.setLoginConfig(loginConfig);
+		return contextSource;
 	}
 
-	static class DummyUserDetailsService implements UserDetailsService {
-
-		public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-			return new User(username, "notUsed", true, true, true, true,
-					AuthorityUtils.createAuthorityList("ROLE_USER"));
-		}
-
+	@Bean
+	public LdapUserDetailsService ldapUserDetailsService() {
+		FilterBasedLdapUserSearch userSearch =
+				new FilterBasedLdapUserSearch(ldapSearchBase, ldapSearchFilter, kerberosLdapContextSource());
+		LdapUserDetailsService service = new LdapUserDetailsService(userSearch);
+		service.setUserDetailsMapper(new LdapUserDetailsMapper());
+		return service;
 	}
 
 }

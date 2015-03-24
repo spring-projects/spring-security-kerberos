@@ -27,6 +27,7 @@ configure(allprojects) {
 	apply plugin: 'java'
 	apply plugin: 'eclipse'
 	apply plugin: 'idea'
+	apply plugin: 'propdeps'
 
 	group = 'org.springframework.security.kerberos'
 
@@ -123,8 +124,8 @@ project('spring-security-kerberos-client') {
 	dependencies {
 		compile project(":spring-security-kerberos-core")
 		compile "org.springframework:spring-web:$springVersion"
-		compile "org.springframework.security:spring-security-ldap:$springSecurityVersion"
 		compile "org.apache.httpcomponents:httpclient:$httpclientVersion"
+		optional("org.springframework.security:spring-security-ldap:$springSecurityVersion")
 		testCompile project(":spring-security-kerberos-test")
 		testCompile "org.springframework.boot:spring-boot-autoconfigure:$springBootVersion"
 		testRuntime "org.apache.tomcat.embed:tomcat-embed-core:$tomcatEmbedVersion"
@@ -168,6 +169,7 @@ configure(sampleServerProjects()) {
 	apply plugin: 'spring-boot'
 	dependencies {
 		compile project(":spring-security-kerberos-samples-common")
+		compile project(":spring-security-kerberos-client")
 		compile "org.springframework.boot:spring-boot-starter-thymeleaf:$springBootVersion"
 		compile "org.springframework.security:spring-security-ldap:$springSecurityVersion"
 		testCompile "org.springframework:spring-test:$springVersion"

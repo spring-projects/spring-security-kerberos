@@ -20,7 +20,10 @@ import java.util.HashMap;
 import javax.security.auth.login.AppConfigurationEntry;
 import javax.security.auth.login.Configuration;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 
@@ -29,74 +32,81 @@ import org.springframework.util.Assert;
  * Krb5LoginModule.
  *
  * @author Nelson Rodrigues
+ * @author Janne Valkealahti
  *
  */
 public class SunJaasKrb5LoginConfig extends Configuration implements InitializingBean {
 
-    private String servicePrincipal;
-    private Resource keyTabLocation;
-    private Boolean useTicketCache = false;
-    private Boolean isInitiator = false;
-    private Boolean debug = false;
+	private static final Log LOG = LogFactory.getLog(SunJaasKrb5LoginConfig.class);
 
-    private String keyTabExternalForm;
+	private String servicePrincipal;
+	private Resource keyTabLocation;
+	private Boolean useTicketCache = false;
+	private Boolean isInitiator = false;
+	private Boolean debug = false;
+	private String keyTabLocationAsString;
 
-    public void setServicePrincipal(String servicePrincipal) {
-        this.servicePrincipal = servicePrincipal;
-    }
+	public void setServicePrincipal(String servicePrincipal) {
+		this.servicePrincipal = servicePrincipal;
+	}
 
-    public void setKeyTabLocation(Resource keyTabLocation) {
-        this.keyTabLocation = keyTabLocation;
-    }
+	public void setKeyTabLocation(Resource keyTabLocation) {
+		this.keyTabLocation = keyTabLocation;
+	}
 
-    public void setUseTicketCache(Boolean useTicketCache) {
-        this.useTicketCache = useTicketCache;
-    }
+	public void setUseTicketCache(Boolean useTicketCache) {
+		this.useTicketCache = useTicketCache;
+	}
 
-    public void setIsInitiator(Boolean isInitiator) {
-        this.isInitiator = isInitiator;
-    }
+	public void setIsInitiator(Boolean isInitiator) {
+		this.isInitiator = isInitiator;
+	}
 
-    public void setDebug(Boolean debug) {
-        this.debug = debug;
-    }
+	public void setDebug(Boolean debug) {
+		this.debug = debug;
+	}
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        Assert.hasText(servicePrincipal, "servicePrincipal must be specified");
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		Assert.hasText(servicePrincipal, "servicePrincipal must be specified");
 
-        if (!useTicketCache) {
-            Assert.notNull(keyTabLocation,
-                    "keyTabLocation must be specified when useTicketCache is false");
-            this.keyTabExternalForm = keyTabLocation.getURL().toExternalForm();
-        }
-    }
+		if (keyTabLocation != null && keyTabLocation instanceof ClassPathResource) {
+			LOG.warn("Your keytab is in the classpath. This file needs special protection and shouldn't be in the classpath. JAAS may also not be able to load this file from classpath.");
+		}
 
-    @Override
-    public AppConfigurationEntry[] getAppConfigurationEntry(String name) {
-        HashMap<String, String> options = new HashMap<String, String>();
+		if (!useTicketCache) {
+			Assert.notNull(keyTabLocation, "keyTabLocation must be specified when useTicketCache is false");
+			keyTabLocationAsString = keyTabLocation.getURL().toExternalForm();
+			if (keyTabLocationAsString.startsWith("file:")) {
+				keyTabLocationAsString = keyTabLocationAsString.substring(5);
+			}
+		}
+	}
 
-        options.put("principal", this.servicePrincipal);
+	@Override
+	public AppConfigurationEntry[] getAppConfigurationEntry(String name) {
+		HashMap<String, String> options = new HashMap<String, String>();
 
-        if (this.keyTabLocation != null) {
-            options.put("useKeyTab", "true");
-            options.put("keyTab", this.keyTabExternalForm);
-            options.put("storeKey", "true");
-        }
+		options.put("principal", this.servicePrincipal);
 
-        options.put("doNotPrompt", "true");
+		if (this.keyTabLocation != null) {
+			options.put("useKeyTab", "true");
+			options.put("keyTab", keyTabLocationAsString);
+			options.put("storeKey", "true");
+		}
 
-        if (useTicketCache) {
-            options.put("useTicketCache", "true");
-            options.put("renewTGT", "true");
-        }
+		options.put("doNotPrompt", "true");
 
-        options.put("isInitiator", this.isInitiator.toString());
-        options.put("debug", this.debug.toString());
+		if (useTicketCache) {
+			options.put("useTicketCache", "true");
+			options.put("renewTGT", "true");
+		}
 
-        return new AppConfigurationEntry[] { new AppConfigurationEntry(
-                "com.sun.security.auth.module.Krb5LoginModule",
-                AppConfigurationEntry.LoginModuleControlFlag.REQUIRED, options), };
-    }
+		options.put("isInitiator", this.isInitiator.toString());
+		options.put("debug", this.debug.toString());
+
+		return new AppConfigurationEntry[] { new AppConfigurationEntry("com.sun.security.auth.module.Krb5LoginModule",
+				AppConfigurationEntry.LoginModuleControlFlag.REQUIRED, options), };
+	}
 
 }

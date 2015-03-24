@@ -63,77 +63,87 @@ import org.springframework.util.Assert;
  * @author Nelson Rodrigues
  *
  */
-public class KerberosLdapContextSource extends DefaultSpringSecurityContextSource implements
-        InitializingBean {
+public class KerberosLdapContextSource extends DefaultSpringSecurityContextSource implements InitializingBean {
 
-    private Configuration loginConfig;
+	private Configuration loginConfig;
 
-    public KerberosLdapContextSource(String url) {
-        super(url);
-    }
+	/**
+	 * Instantiates a new kerberos ldap context source.
+	 *
+	 * @param url the url
+	 */
+	public KerberosLdapContextSource(String url) {
+		super(url);
+	}
 
-    public KerberosLdapContextSource(List<String> urls, String baseDn) {
-        super(urls, baseDn);
-    }
+	/**
+	 * Instantiates a new kerberos ldap context source.
+	 *
+	 * @param urls the urls
+	 * @param baseDn the base dn
+	 */
+	public KerberosLdapContextSource(List<String> urls, String baseDn) {
+		super(urls, baseDn);
+	}
 
-    /**
-     * The login configuration to get the serviceSubject from LoginContext
-     *
-     * @param loginConfig
-     */
-    public void setLoginConfig(Configuration loginConfig) {
-        this.loginConfig = loginConfig;
-    }
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		super.afterPropertiesSet();
+		Assert.notNull(this.loginConfig, "loginConfig must be specified");
+	}
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        super.afterPropertiesSet();
 
-        Assert.notNull(this.loginConfig, "loginConfig must be specified");
-    }
+	@SuppressWarnings("unchecked")
+	@Override
+	protected DirContext getDirContextInstance(final @SuppressWarnings("rawtypes") Hashtable environment)
+			throws NamingException {
+		environment.put(Context.SECURITY_AUTHENTICATION, "GSSAPI");
 
-    private Subject login() throws AuthenticationException {
-        try {
-            LoginContext lc = new LoginContext(KerberosLdapContextSource.class.getSimpleName(),
-                    null, null, this.loginConfig);
+		Subject serviceSubject = login();
 
-            lc.login();
+		final NamingException[] suppressedException = new NamingException[] { null };
+		DirContext dirContext = Subject.doAs(serviceSubject, new PrivilegedAction<DirContext>() {
 
-            return lc.getSubject();
-        } catch (LoginException e) {
-            AuthenticationException ae = new AuthenticationException(e.getMessage());
-            ae.initCause(e);
-            throw ae;
-        }
-    }
+			@Override
+			public DirContext run() {
+				try {
+					return KerberosLdapContextSource.super.getDirContextInstance(environment);
+				} catch (NamingException e) {
+					suppressedException[0] = e;
+					return null;
+				}
+			}
+		});
 
-    @SuppressWarnings("unchecked")
-    @Override
-    protected DirContext getDirContextInstance(
-            final @SuppressWarnings("rawtypes") Hashtable environment) throws NamingException {
-        environment.put(Context.SECURITY_AUTHENTICATION, "GSSAPI");
+		if (suppressedException[0] != null) {
+			throw suppressedException[0];
+		}
 
-        Subject serviceSubject = login();
+		return dirContext;
+	}
 
-        final NamingException[] suppressedException = new NamingException[] { null };
-        DirContext dirContext = Subject.doAs(serviceSubject, new PrivilegedAction<DirContext>() {
+	/**
+	 * The login configuration to get the serviceSubject from LoginContext
+	 *
+	 * @param loginConfig the login config
+	 */
+	public void setLoginConfig(Configuration loginConfig) {
+		this.loginConfig = loginConfig;
+	}
 
-            @Override
-            public DirContext run() {
-                try {
-                    return KerberosLdapContextSource.super.getDirContextInstance(environment);
-                } catch (NamingException e) {
-                    suppressedException[0] = e;
-                    return null;
-                }
-            }
-        });
+	private Subject login() throws AuthenticationException {
+		try {
+			LoginContext lc = new LoginContext(KerberosLdapContextSource.class.getSimpleName(), null, null,
+					this.loginConfig);
 
-        if (suppressedException[0] != null) {
-            throw suppressedException[0];
-        }
+			lc.login();
 
-        return dirContext;
-    }
+			return lc.getSubject();
+		} catch (LoginException e) {
+			AuthenticationException ae = new AuthenticationException(e.getMessage());
+			ae.initCause(e);
+			throw ae;
+		}
+	}
 
 }
