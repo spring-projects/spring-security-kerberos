@@ -2,19 +2,14 @@
 = Spring Security Kerberos Samples
 
 This part of the reference documentation is introducing samples
-projects. Generally samples can be either compiled manually by
-building main distribution from
-https://github.com/spring-projects/spring-security-kerberos or using
-nightly snapshots or actual release builds.
-
-- http://repo.spring.io/libs-snapshot/org/springframework/security/kerberos/
-- http://repo.spring.io/libs-release/org/springframework/security/kerberos/
+projects. Samples can be compiled manually by building main
+distribution from
+https://github.com/spring-projects/spring-security-kerberos.
 
 [IMPORTANT]
 ====
-If you download and run sample from a maven repo it will not work
-until a correct configuration is applied. See notes below for specific
-samples.
+If you run sample as is it will not work until a correct configuration
+is applied. See notes below for specific samples.
 ====
 
 <<samples-sec-server-win-auth>> sample for Windows environment
@@ -49,6 +44,8 @@ server:
         ad-server: ldap://WIN-EKBO0EQ7TS7.example.org/
         service-principal: HTTP/neo.example.org@EXAMPLE.ORG
         keytab-location: /tmp/tomcat.keytab
+        ldap-search-base: dc=example,dc=org
+        ldap-search-filter: "(| (userPrincipalName={0}) (sAMAccountName={0}))"
 ----
 In above you can see the default configuration for this sample. You
 can override these settings using a normal Spring Boot tricks like

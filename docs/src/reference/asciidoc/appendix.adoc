@@ -197,6 +197,15 @@ Entry for principal HTTP/neo.example.org@EXAMPLE.ORG with kvno 2, encryption typ
 
 This was tested using `Windows Server 2012 R2`
 
+[TIP]
+====
+Internet is full of good articles and videos how to setup Windows AD
+but these two are quite usefull
+http://www.rackspace.com/knowledge_center/article/installing-active-directory-on-windows-server-2012[Rackspace] and
+http://social.technet.microsoft.com/wiki/contents/articles/12370.windows-server-2012-set-up-your-first-domain-controller-step-by-step.aspx[Microsoft
+Technet].
+====
+
 - Normal domain controller and active directory setup was done.
 - Used dns domain `example.org` and windows domain `EXAMPLE`.
 - I created various domain users like `user1`, `user2`, `user3`,
