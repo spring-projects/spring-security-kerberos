@@ -54,6 +54,14 @@ def customizePom(pom, gradleProject) {
                     name = 'Mike Wiesner'
                     email = 'mwiesner@vmware.com'
                 }
+                developer {
+                    id = 'jvalkeal'
+                    name = 'Janne Valkealahti'
+                    email = 'jvalkealahti@pivotal.io'
+                    properties {
+                        twitter = 'tunebluez'
+                    }
+                }
             }
         }
     }
