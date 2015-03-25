@@ -23,30 +23,30 @@
 	</sec:authentication-manager>
 
 	<bean id="kerberosAuthenticationProvider"
-		class="org.springframework.security.extensions.kerberos.KerberosAuthenticationProvider">
+		class="org.springframework.security.kerberos.KerberosAuthenticationProvider">
 		<property name="userDetailsService" ref="dummyUserDetailsService"/>
 		<property name="kerberosClient">
-			<bean class="org.springframework.security.extensions.kerberos.SunJaasKerberosClient">
+			<bean class="org.springframework.security.kerberos.SunJaasKerberosClient">
 				<property name="debug" value="true"/>
 			</bean>
 		</property>
 	</bean>
 
 	<bean id="spnegoEntryPoint"
-		class="org.springframework.security.extensions.kerberos.web.SpnegoEntryPoint" >
+		class="org.springframework.security.kerberos.web.SpnegoEntryPoint" >
 		<constructor-arg value="/login" />
 	</bean>
 
 	<bean id="spnegoAuthenticationProcessingFilter"
-		class="org.springframework.security.extensions.kerberos.web.SpnegoAuthenticationProcessingFilter">
+		class="org.springframework.security.kerberos.web.SpnegoAuthenticationProcessingFilter">
 		<property name="authenticationManager" ref="authenticationManager" />
 	</bean>
 
 	<bean id="kerberosServiceAuthenticationProvider"
-		class="org.springframework.security.extensions.kerberos.KerberosServiceAuthenticationProvider">
+		class="org.springframework.security.kerberos.KerberosServiceAuthenticationProvider">
 		<property name="ticketValidator">
 			<bean
-				class="org.springframework.security.extensions.kerberos.SunJaasKerberosTicketValidator">
+				class="org.springframework.security.kerberos.SunJaasKerberosTicketValidator">
 				<property name="servicePrincipal" value="${app.service-principal}" />
 				<property name="keyTabLocation" value="${app.keytab-location}" />
 				<property name="debug" value="true" />

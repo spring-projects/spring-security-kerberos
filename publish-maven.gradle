@@ -31,10 +31,10 @@ def customizePom(pom, gradleProject) {
         generatedPom.project {
             name = gradleProject.description
             description = gradleProject.description
-            url = 'http://static.springsource.org/spring-security/site/extensions/krb/index.html'
+            url = 'http://projects.spring.io/spring-security-kerberos'
             organization {
                 name = 'SpringSource'
-                url = 'http://springsource.org/spring-security-kerberos'
+                url = 'http://projects.spring.io/spring-security-kerberos/'
             }
             licenses {
                 license {

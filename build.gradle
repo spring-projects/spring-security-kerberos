@@ -233,8 +233,8 @@ configure(rootProject) {
 	}
 
 	task copyDocsSamples(type: Copy) {
-		from 'spring-security-kerberos-core/src/test/java/org/springframework/security/extensions/kerberos/docs/'
-		from 'spring-security-kerberos-client/src/test/java/org/springframework/security/extensions/kerberos/client/docs/'
+		from 'spring-security-kerberos-core/src/test/java/org/springframework/security/kerberos/docs/'
+		from 'spring-security-kerberos-client/src/test/java/org/springframework/security/kerberos/client/docs/'
 		include '**/*.java'
 		include '**/*.xml'
 		into 'docs/src/reference/asciidoc/samples'
