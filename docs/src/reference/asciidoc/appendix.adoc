@@ -259,6 +259,7 @@ or typos. Kerberos setup is generally very brittle and it is not
 always very easy to debug where the problem lies.
 ====
 
+.Cannot find key of appropriate type to decrypt
 
 [source,text]
 ----
@@ -283,6 +284,130 @@ into same error. This specific `GSSException` is throws also if you
 simply don't have a required encryption key which then may be caused
 by a misconfiguration in your kerberos server or a simply typo in your
 principal.
+
+.Using wrong kerberos configuration
+
+{zwsp} +
+
+In most system all commands and libraries will search kerberos
+configuration either from a default locations or special locations
+like JDKs. It's easy to get mixed up especially if working from unix
+systems, which already may have default settings to work with MIT
+kerberos, towards Windows domains.
+
+This is a specific example what happens with `ldapsearch` trying to
+query Windows AD using kerberos authentication.
+
+[source,text]
+----
+$ ldapsearch -H ldap://WIN-EKBO0EQ7TS7.example.org -b "dc=example,dc=org"
+SASL/GSSAPI authentication started
+ldap_sasl_interactive_bind_s: Local error (-2)
+  additional info: SASL(-1): generic failure: GSSAPI Error:
+  Unspecified GSS failure.  Minor code may provide more information
+  (No Kerberos credentials available)
+----
+
+Well that doesn't look good and is a simple indication that I don't
+have a valid kerberos tickets as shown below.
+
+[source,text]
+----
+$ klist 
+klist: Credentials cache file '/tmp/krb5cc_1000' not found
+----
+
+We already have a keytab file we exported from Windows AD to be used
+with tomcat running on Linux. Lets try to use that to authenticate
+with Windows AD. 
+
+You can have a dedicated config file which usually can be used with
+native Linux commands and JVMs via system propertys.
+
+[source,text]
+----
+$ cat krb5.ini
+[libdefaults]
+default_realm = EXAMPLE.ORG
+default_keytab_name = /tmp/tomcat.keytab
+forwardable=true
+
+[realms]
+EXAMPLE.ORG = {
+  kdc = WIN-EKBO0EQ7TS7.example.org:88
+}
+
+[domain_realm]
+example.org=EXAMPLE.ORG
+.example.org=EXAMPLE.ORG
+----
+
+Lets use that config and a keytab to get initial credentials.
+
+[source,text]
+----
+$ env KRB5_CONFIG=/path/to/krb5.ini kinit -kt tomcat.keytab HTTP/neo.example.org@EXAMPLE.ORG
+
+$ klist
+Ticket cache: FILE:/tmp/krb5cc_1000
+Default principal: HTTP/neo.example.org@EXAMPLE.ORG
+
+Valid starting     Expires            Service principal
+26/03/15 09:04:37  26/03/15 19:04:37  krbtgt/EXAMPLE.ORG@EXAMPLE.ORG
+  renew until 27/03/15 09:04:37
+----
+
+Lets see what happens if we now try to do a simple query against
+Windows AD.
+
+[source,text]
+----
+$ ldapsearch -H ldap://WIN-EKBO0EQ7TS7.example.org -b "dc=example,dc=org"
+SASL/GSSAPI authentication started
+ldap_sasl_interactive_bind_s: Local error (-2)
+  additional info: SASL(-1): generic failure: GSSAPI Error:
+  Unspecified GSS failure.  Minor code may provide more information
+  (KDC returned error string: PROCESS_TGS)
+----
+
+This may be simply because `ldapsearch` is getting confused and simply
+using wrong configuration. You can tell `ldapsearch` to use a
+different configuration via `KRB5_CONFIG` env variable just like we
+did with `kinit`. You can also use `KRB5_TRACE=/dev/stderr` to get
+more verbose output of what native libraries are doing.
+
+[source,text]
+----
+$ env KRB5_CONFIG=/path/to/krb5.ini ldapsearch -H ldap://WIN-EKBO0EQ7TS7.example.org -b "dc=example,dc=org"
+
+$ klist
+Ticket cache: FILE:/tmp/krb5cc_1000
+Default principal: HTTP/neo.example.org@EXAMPLE.ORG
+
+Valid starting     Expires            Service principal
+26/03/15 09:11:03  26/03/15 19:11:03  krbtgt/EXAMPLE.ORG@EXAMPLE.ORG
+  renew until 27/03/15 09:11:03
+  26/03/15 09:11:44  26/03/15 19:11:03
+  ldap/win-ekbo0eq7ts7.example.org@EXAMPLE.ORG
+    renew until 27/03/15 09:11:03
+----
+
+Above you can see what happened if query was successful by looking
+kerberos tickets. Now you can experiment with further query commands
+i.e. if you working with `KerberosLdapContextSource`.
+
+[source,text]
+----
+$ ldapsearch -H ldap://WIN-EKBO0EQ7TS7.example.org \
+-b "dc=example,dc=org" \
+"(| (userPrincipalName=user2@EXAMPLE.ORG)
+(sAMAccountName=user2@EXAMPLE.ORG))" \
+dn
+
+...
+# test user, example.org
+dn: CN=test user,DC=example,DC=org
+----
 
 [appendix]
 [[browserspnegoconfig]]

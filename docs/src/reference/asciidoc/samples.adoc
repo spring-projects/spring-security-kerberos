@@ -57,6 +57,13 @@ Run a server.
 $ java -jar sec-server-win-auth-{revnumber}.jar
 ----
 
+[IMPORTANT]
+====
+You may need to use custom kerberos config with Linux either by using
+`-Djava.security.krb5.conf=/path/to/krb5.ini` or
+`GlobalSunJaasKerberosConfig` bean.
+====
+
 [NOTE]
 ====
 See <<setupwinkerberos>> for more instructions how to work with
