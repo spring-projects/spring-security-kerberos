@@ -101,16 +101,22 @@ project('spring-security-kerberos-core') {
 	description = 'Spring Security Kerberos Core'
 	dependencies {
 		compile "org.springframework:spring-core:$springVersion"
-		compile "org.springframework:spring-beans:$springVersion"
-		compile "org.springframework:spring-aop:$springVersion"
-		compile "org.springframework:spring-expression:$springVersion"
-		compile "org.springframework:spring-context:$springVersion"
-		compile "org.springframework:spring-tx:$springVersion"
-		compile "org.springframework:spring-jdbc:$springVersion"
+		compile "org.springframework.security:spring-security-core:$springSecurityVersion"
+	}
+}
+
+project('spring-security-kerberos-web') {
+	description = 'Spring Security Kerberos Web'
+	dependencies {
+		compile project(":spring-security-kerberos-core")
+		compile "org.springframework:spring-core:$springVersion"
 		compile "org.springframework:spring-web:$springVersion"
-		compile "org.springframework.security:spring-security-config:$springSecurityVersion"
 		compile "org.springframework.security:spring-security-web:$springSecurityVersion"
+
 		compile("javax.servlet:javax.servlet-api:$servletApi3Version", optional)
+
+		testCompile "org.springframework.security:spring-security-config:$springSecurityVersion"
+		testCompile "org.springframework:spring-test:$springVersion"
 	}
 }
 
@@ -125,8 +131,12 @@ project('spring-security-kerberos-client') {
 		compile project(":spring-security-kerberos-core")
 		compile "org.springframework:spring-web:$springVersion"
 		compile "org.apache.httpcomponents:httpclient:$httpclientVersion"
+
 		optional("org.springframework.security:spring-security-ldap:$springSecurityVersion")
+
 		testCompile project(":spring-security-kerberos-test")
+		testCompile project(":spring-security-kerberos-web")
+		testCompile "org.springframework.security:spring-security-config:$springSecurityVersion"
 		testCompile "org.springframework.boot:spring-boot-autoconfigure:$springBootVersion"
 		testRuntime "org.apache.tomcat.embed:tomcat-embed-core:$tomcatEmbedVersion"
 		testRuntime "org.apache.tomcat.embed:tomcat-embed-logging-juli:$tomcatEmbedVersion"
@@ -174,8 +184,16 @@ configure(sampleServerProjects()) {
 	dependencies {
 		compile project(":spring-security-kerberos-samples-common")
 		compile project(":spring-security-kerberos-client")
+		compile project(":spring-security-kerberos-web")
 		compile "org.springframework.boot:spring-boot-starter-thymeleaf:$springBootVersion"
+		compile "org.springframework.security:spring-security-config:$springSecurityVersion"
 		compile "org.springframework.security:spring-security-ldap:$springSecurityVersion"
+		compile "org.springframework:spring-beans:$springVersion"
+		compile "org.springframework:spring-aop:$springVersion"
+		compile "org.springframework:spring-expression:$springVersion"
+		compile "org.springframework:spring-context:$springVersion"
+		compile "org.springframework:spring-tx:$springVersion"
+		compile "org.springframework:spring-jdbc:$springVersion"
 		testCompile "org.springframework:spring-test:$springVersion"
 		testCompile "org.hamcrest:hamcrest-core:$hamcrestVersion"
 		testCompile "org.hamcrest:hamcrest-library:$hamcrestVersion"
@@ -190,7 +208,15 @@ configure(sampleClientProjects()) {
 	dependencies {
 		compile project(":spring-security-kerberos-samples-common")
 		compile project(":spring-security-kerberos-client")
+		compile "org.springframework:spring-tx:$springVersion"
+		compile "org.springframework:spring-jdbc:$springVersion"
 		compile "org.springframework.boot:spring-boot-starter:$springBootVersion"
+		compile "org.springframework:spring-beans:$springVersion"
+		compile "org.springframework:spring-aop:$springVersion"
+		compile "org.springframework:spring-expression:$springVersion"
+		compile "org.springframework:spring-context:$springVersion"
+		compile "org.springframework:spring-tx:$springVersion"
+		compile "org.springframework:spring-jdbc:$springVersion"
 		testCompile "org.springframework:spring-test:$springVersion"
 		testCompile "org.hamcrest:hamcrest-core:$hamcrestVersion"
 		testCompile "org.hamcrest:hamcrest-library:$hamcrestVersion"
@@ -239,7 +265,8 @@ configure(rootProject) {
 	}
 
 	task copyDocsSamples(type: Copy) {
-		from 'spring-security-kerberos-core/src/test/java/org/springframework/security/kerberos/docs/'
+		from 'spring-security-kerberos-web/src/test/java/org/springframework/security/kerberos/docs/'
+		from 'spring-security-kerberos-web/src/test/resources/org/springframework/security/kerberos/docs/'
 		from 'spring-security-kerberos-client/src/test/java/org/springframework/security/kerberos/client/docs/'
 		include '**/*.java'
 		include '**/*.xml'

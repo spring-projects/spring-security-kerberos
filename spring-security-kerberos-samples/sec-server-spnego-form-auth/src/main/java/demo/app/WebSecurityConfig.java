@@ -9,12 +9,12 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.servlet.configuration.EnableWebMvcSecurity;
-import org.springframework.security.kerberos.KerberosAuthenticationProvider;
-import org.springframework.security.kerberos.KerberosServiceAuthenticationProvider;
-import org.springframework.security.kerberos.SunJaasKerberosClient;
-import org.springframework.security.kerberos.SunJaasKerberosTicketValidator;
-import org.springframework.security.kerberos.web.SpnegoAuthenticationProcessingFilter;
-import org.springframework.security.kerberos.web.SpnegoEntryPoint;
+import org.springframework.security.kerberos.authentication.KerberosAuthenticationProvider;
+import org.springframework.security.kerberos.authentication.KerberosServiceAuthenticationProvider;
+import org.springframework.security.kerberos.authentication.sun.SunJaasKerberosClient;
+import org.springframework.security.kerberos.authentication.sun.SunJaasKerberosTicketValidator;
+import org.springframework.security.kerberos.web.authentication.SpnegoAuthenticationProcessingFilter;
+import org.springframework.security.kerberos.web.authentication.SpnegoEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 import demo.DummyUserDetailsService;
