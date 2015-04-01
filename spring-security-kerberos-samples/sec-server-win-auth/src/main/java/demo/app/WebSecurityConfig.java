@@ -109,13 +109,18 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Bean
 	public KerberosLdapContextSource kerberosLdapContextSource() {
 		KerberosLdapContextSource contextSource = new KerberosLdapContextSource(adServer);
+		contextSource.setLoginConfig(loginConfig());
+		return contextSource;
+	}
+
+	@Bean
+	public SunJaasKrb5LoginConfig loginConfig() {
 		SunJaasKrb5LoginConfig loginConfig = new SunJaasKrb5LoginConfig();
 		loginConfig.setKeyTabLocation(new FileSystemResource(keytabLocation));
 		loginConfig.setServicePrincipal(servicePrincipal);
 		loginConfig.setDebug(true);
 		loginConfig.setIsInitiator(true);
-		contextSource.setLoginConfig(loginConfig);
-		return contextSource;
+		return loginConfig;
 	}
 
 	@Bean
