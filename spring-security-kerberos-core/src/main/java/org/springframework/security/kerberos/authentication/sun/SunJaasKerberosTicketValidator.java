@@ -160,10 +160,16 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
 			GSSContext context = GSSManager.getInstance().createContext((GSSCredential) null);
 			byte[] responseToken = context.acceptSecContext(kerberosTicket, 0, kerberosTicket.length);
 			String user = context.getSrcName().toString();
+
+			GSSCredential delegationCredential = null;
+			if (context.getCredDelegState()) {
+				delegationCredential = context.getDelegCred();
+			}
+
 			if (!holdOnToGSSContext) {
 				context.dispose();
 			}
-			return new KerberosTicketValidation(user, servicePrincipal, responseToken, context);
+			return new KerberosTicketValidation(user, servicePrincipal, responseToken, context, delegationCredential);
         }
     }
 
