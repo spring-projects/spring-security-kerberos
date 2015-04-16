@@ -18,6 +18,10 @@ public class KerberosTicketValidation {
 	private final String servicePrincipal;
 	private final GSSCredential delegationCredential;
 
+	public KerberosTicketValidation(String username, String servicePrincipal, byte[] responseToken, GSSContext gssContext) {
+		this(username, servicePrincipal, responseToken, gssContext, null);
+	}
+	
 	public KerberosTicketValidation(String username, String servicePrincipal, byte[] responseToken, GSSContext gssContext, GSSCredential delegationCredential) {
 		this.username = username;
 		this.servicePrincipal = servicePrincipal;
