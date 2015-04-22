@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.security.kerberos.client;
+package org.springframework.security.kerberos.client.ldap;
 
 import java.security.PrivilegedAction;
 import java.util.Hashtable;
