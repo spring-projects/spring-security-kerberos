@@ -33,6 +33,7 @@ import org.apache.commons.logging.LogFactory;
 import org.ietf.jgss.GSSContext;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSManager;
+import org.ietf.jgss.GSSName;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -159,11 +160,14 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
         public KerberosTicketValidation run() throws Exception {
 			GSSContext context = GSSManager.getInstance().createContext((GSSCredential) null);
 			byte[] responseToken = context.acceptSecContext(kerberosTicket, 0, kerberosTicket.length);
-			String user = context.getSrcName().toString();
+			GSSName gssName = context.getSrcName();
+			if (gssName == null) {
+				throw new BadCredentialsException("GSSContext name of the context initiator is null");
+			}
 			if (!holdOnToGSSContext) {
 				context.dispose();
 			}
-			return new KerberosTicketValidation(user, servicePrincipal, responseToken, context);
+			return new KerberosTicketValidation(gssName.toString(), servicePrincipal, responseToken, context);
         }
     }
 
