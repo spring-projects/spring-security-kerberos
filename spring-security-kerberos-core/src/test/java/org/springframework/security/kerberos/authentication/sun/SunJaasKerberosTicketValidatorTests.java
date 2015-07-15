@@ -73,7 +73,7 @@ public class SunJaasKerberosTicketValidatorTests {
 	public void testJdkMsKrb5OIDRegressionTweak() throws Exception {
 		thrown.expect(BadCredentialsException.class);
 		thrown.expectMessage(not(containsString("GSSContext name of the context initiator is null")));
-		thrown.expectMessage(containsString("Kerberos validation not succesful"));
+		thrown.expectMessage(containsString("Kerberos validation not successful"));
 		SunJaasKerberosTicketValidator validator = new SunJaasKerberosTicketValidator();
 		byte[] kerberosTicket = Base64.decode(header.getBytes());
 		validator.validateTicket(kerberosTicket);

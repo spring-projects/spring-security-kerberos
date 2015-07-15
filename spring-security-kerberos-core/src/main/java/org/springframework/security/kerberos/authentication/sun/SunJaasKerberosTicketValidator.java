@@ -68,7 +68,7 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
             return Subject.doAs(this.serviceSubject, new KerberosValidateAction(token));
         }
         catch (PrivilegedActionException e) {
-            throw new BadCredentialsException("Kerberos validation not succesful", e);
+            throw new BadCredentialsException("Kerberos validation not successful", e);
         }
     }
 
