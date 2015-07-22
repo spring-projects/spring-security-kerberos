@@ -421,13 +421,23 @@ enabled to perform Spnego authentication.
 - At address field, type *about:config*.
 - In filter/search, type *negotiate*.
 - Parameter *network.negotiate-auth.trusted-uris* may be set to
-  default *https://* which doesn't work for you. Replace this with
-  your server address.
+  default *https://* which doesn't work for you. Generally speaking
+  this parameter has to replaced with the server address if Kerberos
+  delegation is required.
+- It is recommended to use `https` for all communication.
 
 === Chrome
 
 With Google Chrome you generally need to set command-line parameters
 order to white list servers with Chrome will negotiate. 
+
+- on Windows machines (clients): Chrome shares the configuration with
+  Internet Explorer so if all changes were applied to IE (as described
+  in E.3), nothing has to be passed via command-line parameters.
+- on Linux/Mac OS machines (clients): the command-line parameter
+  `--auth-negotiate-delegate-whitelist` should only used if Kerberos
+  delegation is required (otherwise do not set this parameter).
+- It is recommended to use `https` for all communication.
 
 [source,text]
 ----
