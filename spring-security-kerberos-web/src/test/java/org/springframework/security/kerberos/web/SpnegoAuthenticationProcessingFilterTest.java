@@ -92,6 +92,8 @@ public class SpnegoAuthenticationProcessingFilterTest {
 
     private static final String TOKEN_PREFIX_KERB = "Kerberos ";
 
+    private static final String TOKEN_NTLM = "Negotiate TlRMTVNTUAABAAAAl4II4gAAAAAAAAAAAAAAAAAAAAAGAbEdAAAADw==";
+
 	private static final BadCredentialsException BCE = new BadCredentialsException("");
 
     @Before
@@ -132,7 +134,7 @@ public class SpnegoAuthenticationProcessingFilterTest {
         everythingWorks(tokenPrefix);
 		verify(successHandler).onAuthenticationSuccess(request, response, AUTHENTICATION);
 		verify(failureHandler, never()).onAuthenticationFailure(any(HttpServletRequest.class),
-				any(HttpServletResponse.class), any(AuthenticationException.class));
+                any(HttpServletResponse.class), any(AuthenticationException.class));
     }
 
     private void everythingWorks(String tokenPrefix) throws IOException,
@@ -151,6 +153,19 @@ public class SpnegoAuthenticationProcessingFilterTest {
 
     @Test
     public void testNoHeader() throws Exception {
+        filter.doFilter(request, response, chain);
+        // If the header is not present, the filter is not allowed to call
+        // authenticate()
+		verify(authenticationManager, never()).authenticate(any(Authentication.class));
+        // chain should go on
+		verify(chain).doFilter(request, response);
+		assertEquals(null, SecurityContextHolder.getContext().getAuthentication());
+    }
+
+    @Test
+    public void testNTLMSSPHeader() throws Exception {
+        when(request.getHeader(HEADER)).thenReturn(TOKEN_NTLM);
+
         filter.doFilter(request, response, chain);
         // If the header is not present, the filter is not allowed to call
         // authenticate()
