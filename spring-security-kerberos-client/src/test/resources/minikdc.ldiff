@@ -45,3 +45,42 @@ uid: ldap
 userPassword: secret
 krb5PrincipalName: ldap/${4}@${2}.${3}
 krb5KeyVersionNumber: 0
+
+dn: uid=user1,ou=users,dc=${0},dc=${1}
+objectClass: top
+objectClass: person
+objectClass: inetOrgPerson
+objectClass: krb5principal
+objectClass: krb5kdcentry
+cn: user1
+sn: Service
+uid: user1
+userPassword: secret
+krb5PrincipalName: user1@${2}.${3}
+krb5KeyVersionNumber: 0
+
+dn: uid=webtier,ou=users,dc=${0},dc=${1}
+objectClass: top
+objectClass: person
+objectClass: inetOrgPerson
+objectClass: krb5principal
+objectClass: krb5kdcentry
+cn: webtier
+sn: Service
+uid: webtier
+userPassword: secret
+krb5PrincipalName: HTTP/webtier@${2}.${3}
+krb5KeyVersionNumber: 0
+
+dn: uid=servicetier,ou=users,dc=${0},dc=${1}
+objectClass: top
+objectClass: person
+objectClass: inetOrgPerson
+objectClass: krb5principal
+objectClass: krb5kdcentry
+cn: servicetier
+sn: Service
+uid: servicetier
+userPassword: secret
+krb5PrincipalName: HTTP/servicetier@${2}.${3}
+krb5KeyVersionNumber: 0
