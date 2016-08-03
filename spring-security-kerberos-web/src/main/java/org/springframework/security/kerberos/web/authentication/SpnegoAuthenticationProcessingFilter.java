@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,6 +102,7 @@ import org.springframework.web.filter.GenericFilterBean;
  *
  * @author Mike Wiesner
  * @author Jeremy Stone
+ * @author Denis Angilella
  * @since 1.0
  * @see KerberosServiceAuthenticationProvider
  * @see SpnegoEntryPoint
@@ -114,6 +115,7 @@ public class SpnegoAuthenticationProcessingFilter extends GenericFilterBean {
     private AuthenticationFailureHandler failureHandler;
     private SessionAuthenticationStrategy sessionStrategy = new NullAuthenticatedSessionStrategy();
     private boolean skipIfAlreadyAuthenticated = true;
+    private boolean stopFilterChainOnSuccessfulAuthentication = false;
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
@@ -161,7 +163,9 @@ public class SpnegoAuthenticationProcessingFilter extends GenericFilterBean {
             if (successHandler != null) {
                 successHandler.onAuthenticationSuccess(request, response, authentication);
             }
-
+            if (stopFilterChainOnSuccessfulAuthentication) {
+                return;
+            }
         }
 
         chain.doFilter(request, response);
@@ -244,4 +248,15 @@ public class SpnegoAuthenticationProcessingFilter extends GenericFilterBean {
         this.authenticationDetailsSource = authenticationDetailsSource;
     }
 
+    /**
+     * If set to {@code false} (the default) and authentication is successful, the request will be processed by
+     * the next filter in the chain. If {@code true} and authentication is successful, the filter chain will stop here.
+     *
+     * @since 1.0.2
+     * @param shouldStop set to {@code true} to prevent the next filter in the chain from processing the request
+     *                       after a successful authentication.
+     */
+    public void setStopFilterChainOnSuccessfulAuthentication(boolean shouldStop) {
+        this.stopFilterChainOnSuccessfulAuthentication = shouldStop;
+    }
 }
