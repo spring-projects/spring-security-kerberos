@@ -15,6 +15,7 @@
  */
 package org.springframework.security.kerberos.client;
 
+import java.io.IOException;
 import java.net.URI;
 import java.security.Principal;
 import java.security.PrivilegedAction;
@@ -24,10 +25,16 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.security.auth.Subject;
+import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.callback.NameCallback;
+import javax.security.auth.callback.PasswordCallback;
+import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.kerberos.KerberosPrincipal;
 import javax.security.auth.login.AppConfigurationEntry;
 import javax.security.auth.login.Configuration;
 import javax.security.auth.login.LoginContext;
+import javax.security.auth.login.LoginException;
 
 import org.apache.http.auth.AuthSchemeProvider;
 import org.apache.http.auth.AuthScope;
@@ -57,6 +64,7 @@ import org.springframework.web.client.RestTemplate;
  * <ul>
  *   <li>Leave keyTabLocation and userPrincipal empty if you want to use cached ticket</li>
  *   <li>Use keyTabLocation and userPrincipal if you want to use keytab file</li>
+ *   <li>Use userPrincipal and password if you want to use user/password</li>
  *   <li>Use loginOptions if you want to customise Krb5LoginModule options</li>
  *   <li>Use a customised httpClient</li>
  * </ul>
@@ -70,13 +78,14 @@ public class KerberosRestTemplate extends RestTemplate {
 
 	private final String keyTabLocation;
 	private final String userPrincipal;
+	private final String password;
 	private final Map<String, Object> loginOptions;
 
 	/**
 	 * Instantiates a new kerberos rest template.
 	 */
 	public KerberosRestTemplate() {
-		this(null, null, null, buildHttpClient());
+		this(null, null, null, null, buildHttpClient());
 	}
 
 	/**
@@ -85,7 +94,7 @@ public class KerberosRestTemplate extends RestTemplate {
 	 * @param httpClient the http client
 	 */
 	public KerberosRestTemplate(HttpClient httpClient) {
-		this(null, null, null, httpClient);
+		this(null, null, null, null, httpClient);
 	}
 
 	/**
@@ -106,7 +115,7 @@ public class KerberosRestTemplate extends RestTemplate {
 	 * @param httpClient the http client
 	 */
 	public KerberosRestTemplate(String keyTabLocation, String userPrincipal, HttpClient httpClient) {
-		this(keyTabLocation, userPrincipal, null, httpClient);
+		this(keyTabLocation, userPrincipal, null, null, httpClient);
 	}
 
 	/**
@@ -115,7 +124,7 @@ public class KerberosRestTemplate extends RestTemplate {
 	 * @param loginOptions the login options
 	 */
 	public KerberosRestTemplate(Map<String, Object> loginOptions) {
-		this(null, null, loginOptions, buildHttpClient());
+		this(null, null, null, loginOptions, buildHttpClient());
 	}
 
 	/**
@@ -125,7 +134,7 @@ public class KerberosRestTemplate extends RestTemplate {
 	 * @param httpClient the http client
 	 */
 	public KerberosRestTemplate(Map<String, Object> loginOptions, HttpClient httpClient) {
-		this(null, null, loginOptions, httpClient);
+		this(null, null, null, loginOptions, httpClient);
 	}
 
 	/**
@@ -136,7 +145,19 @@ public class KerberosRestTemplate extends RestTemplate {
 	 * @param loginOptions the login options
 	 */
 	public KerberosRestTemplate(String keyTabLocation, String userPrincipal, Map<String, Object> loginOptions) {
-		this(keyTabLocation, userPrincipal, loginOptions, buildHttpClient());
+		this(keyTabLocation, userPrincipal, null, loginOptions, buildHttpClient());
+	}
+
+	/**
+	 * Instantiates a new kerberos rest template.
+	 *
+	 * @param keyTabLocation the key tab location
+	 * @param userPrincipal the user principal
+	 * @param password the password
+	 * @param loginOptions the login options
+	 */
+	public KerberosRestTemplate(String keyTabLocation, String userPrincipal, String password, Map<String, Object> loginOptions) {
+		this(keyTabLocation, userPrincipal, password, loginOptions, buildHttpClient());
 	}
 
 	/**
@@ -148,9 +169,23 @@ public class KerberosRestTemplate extends RestTemplate {
 	 * @param httpClient the http client
 	 */
 	private KerberosRestTemplate(String keyTabLocation, String userPrincipal, Map<String, Object> loginOptions, HttpClient httpClient) {
+		this(keyTabLocation, userPrincipal, null, loginOptions, httpClient);
+	}
+
+	/**
+	 * Instantiates a new kerberos rest template.
+	 *
+	 * @param keyTabLocation the key tab location
+	 * @param userPrincipal the user principal
+	 * @param password the password
+	 * @param loginOptions the login options
+	 * @param httpClient the http client
+	 */
+	private KerberosRestTemplate(String keyTabLocation, String userPrincipal, String password, Map<String, Object> loginOptions, HttpClient httpClient) {
 		super(new HttpComponentsClientHttpRequestFactory(httpClient));
 		this.keyTabLocation = keyTabLocation;
 		this.userPrincipal = userPrincipal;
+		this.password = password;
 		this.loginOptions = loginOptions;
 	}
 
@@ -172,16 +207,27 @@ public class KerberosRestTemplate extends RestTemplate {
 		return httpClient;
 	}
 
+	/**
+	 * Setup the {@link LoginContext} with credentials and options for authentication against kerberos.
+	 *
+	 * @return the login context
+	 */
+	private LoginContext buildLoginContext() throws LoginException {
+		ClientLoginConfig loginConfig = new ClientLoginConfig(keyTabLocation, userPrincipal, password, loginOptions);
+		Set<Principal> princ = new HashSet<Principal>(1);
+		princ.add(new KerberosPrincipal(userPrincipal));
+		Subject sub = new Subject(false, princ, new HashSet<Object>(), new HashSet<Object>());
+		CallbackHandler callbackHandler = new CallbackHandlerImpl(userPrincipal, password);
+		LoginContext lc = new LoginContext("", sub, callbackHandler, loginConfig);
+		return lc;
+	}
+
 	@Override
 	protected final <T> T doExecute(final URI url, final HttpMethod method, final RequestCallback requestCallback,
 			final ResponseExtractor<T> responseExtractor) throws RestClientException {
 
 		try {
-			ClientLoginConfig loginConfig = new ClientLoginConfig(keyTabLocation, userPrincipal, loginOptions);
-			Set<Principal> princ = new HashSet<Principal>(1);
-			princ.add(new KerberosPrincipal(userPrincipal));
-			Subject sub = new Subject(false, princ, new HashSet<Object>(), new HashSet<Object>());
-			LoginContext lc = new LoginContext("", sub, null, loginConfig);
+			LoginContext lc = buildLoginContext();
 			lc.login();
 			Subject serviceSubject = lc.getSubject();
 			return Subject.doAs(serviceSubject, new PrivilegedAction<T>() {
@@ -206,12 +252,14 @@ public class KerberosRestTemplate extends RestTemplate {
 
 		private final String keyTabLocation;
 		private final String userPrincipal;
+		private final String password;
 		private final Map<String, Object> loginOptions;
 
-		public ClientLoginConfig(String keyTabLocation, String userPrincipal, Map<String, Object> loginOptions) {
+		private ClientLoginConfig(String keyTabLocation, String userPrincipal, String password, Map<String, Object> loginOptions) {
 			super();
 			this.keyTabLocation = keyTabLocation;
 			this.userPrincipal = userPrincipal;
+			this.password = password;
 			this.loginOptions = loginOptions;
 		}
 
@@ -232,7 +280,8 @@ public class KerberosRestTemplate extends RestTemplate {
 				options.put("principal", this.userPrincipal);
 				options.put("storeKey", "true");
 			}
-			options.put("doNotPrompt", "true");
+
+			options.put("doNotPrompt", Boolean.toString(password == null));
 			options.put("isInitiator", "true");
 
 			if (loginOptions != null) {
@@ -260,4 +309,33 @@ public class KerberosRestTemplate extends RestTemplate {
 
 	}
 
+	private static class CallbackHandlerImpl implements CallbackHandler {
+
+		private final String userPrincipal;
+		private final String password;
+
+		private CallbackHandlerImpl(String userPrincipal, String password) {
+			super();
+			this.userPrincipal = userPrincipal;
+			this.password = password;
+		}
+
+		@Override
+		public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
+
+			for (Callback callback : callbacks) {
+				if (callback instanceof NameCallback) {
+					NameCallback nc = (NameCallback)callback;
+					nc.setName(userPrincipal);
+				}
+				else if (callback instanceof PasswordCallback) {
+					PasswordCallback pc = (PasswordCallback)callback;
+					pc.setPassword(password.toCharArray());
+				}
+				else {
+					throw new UnsupportedCallbackException(callback, "Unknown Callback");
+				}
+			}
+		}
+	}
 }
