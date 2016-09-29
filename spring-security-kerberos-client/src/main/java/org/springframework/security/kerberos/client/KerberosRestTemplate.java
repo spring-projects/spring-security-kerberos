@@ -214,7 +214,9 @@ public class KerberosRestTemplate extends RestTemplate {
 	private LoginContext buildLoginContext() throws LoginException {
 		ClientLoginConfig loginConfig = new ClientLoginConfig(keyTabLocation, userPrincipal, password, loginOptions);
 		Set<Principal> princ = new HashSet<Principal>(1);
-		princ.add(new KerberosPrincipal(userPrincipal));
+		if (userPrincipal != null) {
+			princ.add(new KerberosPrincipal(userPrincipal));
+		}
 		Subject sub = new Subject(false, princ, new HashSet<Object>(), new HashSet<Object>());
 		CallbackHandler callbackHandler = new CallbackHandlerImpl(userPrincipal, password);
 		LoginContext lc = new LoginContext("", sub, callbackHandler, loginConfig);
