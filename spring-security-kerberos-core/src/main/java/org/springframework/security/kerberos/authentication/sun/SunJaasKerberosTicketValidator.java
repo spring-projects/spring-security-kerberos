@@ -60,6 +60,7 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
     private Subject serviceSubject;
     private boolean holdOnToGSSContext;
     private boolean debug = false;
+    private boolean refreshKrb5Config = false;
     private static final Log LOG = LogFactory.getLog(SunJaasKerberosTicketValidator.class);
 
     @Override
@@ -87,7 +88,7 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
         	keyTabLocationAsString = keyTabLocationAsString.substring(5);
         }
         LoginConfig loginConfig = new LoginConfig(keyTabLocationAsString, this.servicePrincipal,
-                this.debug);
+                this.debug, this.refreshKrb5Config);
         Set<Principal> princ = new HashSet<Principal>(1);
         princ.add(new KerberosPrincipal(this.servicePrincipal));
         Subject sub = new Subject(false, princ, new HashSet<Object>(), new HashSet<Object>());
@@ -132,6 +133,15 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
      */
     public void setDebug(boolean debug) {
         this.debug = debug;
+    }
+
+    /**
+     * Enables configuration to be refreshed before the login method is called.
+     *
+     * @param refreshKrb5Config Set this to true, if you want the configuration to be refreshed before the login method is called.
+     */
+    public void setRefreshKrb5Config(boolean refreshKrb5Config) {
+        this.refreshKrb5Config = refreshKrb5Config;
     }
 
     /**
@@ -195,11 +205,13 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
         private String keyTabLocation;
         private String servicePrincipalName;
         private boolean debug;
+        private boolean refreshKrb5Config;
 
-        public LoginConfig(String keyTabLocation, String servicePrincipalName, boolean debug) {
+        public LoginConfig(String keyTabLocation, String servicePrincipalName, boolean debug, boolean refreshKrb5Config) {
             this.keyTabLocation = keyTabLocation;
             this.servicePrincipalName = servicePrincipalName;
             this.debug = debug;
+            this.refreshKrb5Config = refreshKrb5Config;
         }
 
         @Override
@@ -212,6 +224,9 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
             options.put("doNotPrompt", "true");
             if (this.debug) {
                 options.put("debug", "true");
+            }
+            if(this.refreshKrb5Config) {
+                options.put("refreshKrb5Config", "true");
             }
             options.put("isInitiator", "false");
 
