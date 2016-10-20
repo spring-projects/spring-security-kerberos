@@ -2,12 +2,17 @@
 
 With the Spring Security Kerberos Extension, your users are authenticated against your web application just by opening the URL. There is no need to enter a username/password and no need to install additional software.
 
+== Code of Conduct
+This project adheres to the Contributor Covenant link:CODE_OF_CONDUCT.adoc[code of conduct].
+By participating, you  are expected to uphold this code. Please report unacceptable behavior to spring-code-of-conduct@pivotal.io.
+
+
 == Downloading Artifacts
 See https://github.com/spring-projects/spring-framework/wiki/Downloading-Spring-artifacts[downloading Spring artifacts] for Maven repository information.
 
 == Documentation
-Be sure to read the http://docs.spring.io/spring-security-kerberos/docs/1.0.0.BUILD-SNAPSHOT/reference/htmlsingle/[Spring Security Kerberos Reference].
-Extensive JavaDoc for the Spring Security Kerberos code is also available in the http://docs.spring.io/spring-security-kerberos/docs/1.0.0.BUILD-SNAPSHOT/api/[Spring Security Kerberos API Documentation].
+Be sure to read the http://docs.spring.io/spring-security-kerberos/docs/1.0.x/reference/htmlsingle/[Spring Security Kerberos Reference].
+Extensive JavaDoc for the Spring Security Kerberos code is also available in the http://docs.spring.io/spring-security-kerberos/docs/1.0.x/api/[Spring Security Kerberos API Documentation].
 
 == Samples
 Samples can be found under `spring-security-kerberos-samples`. Check

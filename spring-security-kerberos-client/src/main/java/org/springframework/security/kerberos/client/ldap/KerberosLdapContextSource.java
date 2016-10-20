@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.security.kerberos.client;
+package org.springframework.security.kerberos.client.ldap;
 
 import java.security.PrivilegedAction;
 import java.util.Hashtable;
@@ -87,8 +87,16 @@ public class KerberosLdapContextSource extends DefaultSpringSecurityContextSourc
 	}
 
 	@Override
-	public void afterPropertiesSet() throws Exception {
-		super.afterPropertiesSet();
+	public void afterPropertiesSet() /*throws Exception*/ {
+		// org.springframework.ldap.core.support.AbstractContextSource in 4.x
+		// doesn't throw Exception for its InitializingBean method, so
+		// we had to remove it from here also. Addition to that
+		// we need to catch super call and re-throw.
+		try {
+			super.afterPropertiesSet();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 		Assert.notNull(this.loginConfig, "loginConfig must be specified");
 	}
 

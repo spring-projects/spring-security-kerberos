@@ -32,7 +32,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ietf.jgss.GSSContext;
 import org.ietf.jgss.GSSCredential;
+import org.ietf.jgss.GSSException;
 import org.ietf.jgss.GSSManager;
+import org.ietf.jgss.GSSName;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -66,7 +68,7 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
             return Subject.doAs(this.serviceSubject, new KerberosValidateAction(token));
         }
         catch (PrivilegedActionException e) {
-            throw new BadCredentialsException("Kerberos validation not succesful", e);
+            throw new BadCredentialsException("Kerberos validation not successful", e);
         }
     }
 
@@ -157,19 +159,31 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
 
         @Override
         public KerberosTicketValidation run() throws Exception {
+			byte[] responseToken = new byte[0];
+			GSSName gssName = null;
 			GSSContext context = GSSManager.getInstance().createContext((GSSCredential) null);
-			byte[] responseToken = context.acceptSecContext(kerberosTicket, 0, kerberosTicket.length);
-			String user = context.getSrcName().toString();
-
-			GSSCredential delegationCredential = null;
-			if (context.getCredDelegState()) {
-				delegationCredential = context.getDelegCred();
+			boolean first = true;
+			while (!context.isEstablished()) {
+				if (first) {
+					kerberosTicket = tweakJdkRegression(kerberosTicket);
+				}
+				responseToken = context.acceptSecContext(kerberosTicket, 0, kerberosTicket.length);
+				gssName = context.getSrcName();
+				if (gssName == null) {
+					throw new BadCredentialsException("GSSContext name of the context initiator is null");
+				}
+				first = false;
 			}
+
+            GSSCredential delegationCredential = null;
+            if (context.getCredDelegState()) {
+                delegationCredential = context.getDelegCred();
+            }
 
 			if (!holdOnToGSSContext) {
 				context.dispose();
 			}
-			return new KerberosTicketValidation(user, servicePrincipal, responseToken, context, delegationCredential);
+			return new KerberosTicketValidation(gssName.toString(), servicePrincipal, responseToken, context, delegationCredential);
         }
     }
 
@@ -205,6 +219,55 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
                     AppConfigurationEntry.LoginModuleControlFlag.REQUIRED, options), };
         }
 
+    }
+
+    private static byte[] tweakJdkRegression(byte[] token) throws GSSException {
+
+//    	Due to regression in 8u40/8u45 described in
+//    	https://bugs.openjdk.java.net/browse/JDK-8078439
+//    	try to tweak token package if it looks like it has
+//    	OID's in wrong order
+//
+//      0000: 60 82 06 5C 06 06 2B 06   01 05 05 02 A0 82 06 50
+//      0010: 30 82 06 4C A0 30 30 2E  |06 09 2A 86 48 82 F7 12
+//      0020: 01 02 02|06 09 2A 86 48   86 F7 12 01 02 02 06|0A
+//      0030: 2B 06 01 04 01 82 37 02   02 1E 06 0A 2B 06 01 04
+//      0040: 01 82 37 02 02 0A A2 82   06 16 04 82 06 12 60 82
+//
+//    	In above package first token is in position 24 and second
+//    	in 35 with both having size 11.
+//
+//    	We simple check if we have these two in this order and swap
+//
+//    	Below code would create two arrays, lets just create that
+//    	manually because it doesn't change
+//      Oid GSS_KRB5_MECH_OID = new Oid("1.2.840.113554.1.2.2");
+//      Oid MS_KRB5_MECH_OID = new Oid("1.2.840.48018.1.2.2");
+//		byte[] der1 = GSS_KRB5_MECH_OID.getDER();
+//		byte[] der2 = MS_KRB5_MECH_OID.getDER();
+
+//		0000: 06 09 2A 86 48 86 F7 12   01 02 02
+//		0000: 06 09 2A 86 48 82 F7 12   01 02 02
+
+		if (token == null || token.length < 48) {
+			return token;
+		}
+
+		int[] toCheck = new int[] { 0x06, 0x09, 0x2A, 0x86, 0x48, 0x82, 0xF7, 0x12, 0x01, 0x02, 0x02, 0x06, 0x09, 0x2A,
+				0x86, 0x48, 0x86, 0xF7, 0x12, 0x01, 0x02, 0x02 };
+
+		for (int i = 0; i < 22; i++) {
+			if ((byte) toCheck[i] != token[i + 24]) {
+				return token;
+			}
+		}
+
+		byte[] nt = new byte[token.length];
+		System.arraycopy(token, 0, nt, 0, 24);
+		System.arraycopy(token, 35, nt, 24, 11);
+		System.arraycopy(token, 24, nt, 35, 11);
+		System.arraycopy(token, 46, nt, 46, token.length - 24 - 11 - 11);
+		return nt;
     }
 
 }
