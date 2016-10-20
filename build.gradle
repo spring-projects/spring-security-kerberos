@@ -172,6 +172,7 @@ project('spring-security-kerberos-test') {
 project('spring-security-kerberos-samples-common') {
 	// don't publish boot packaged samples
 	configurations.archives.artifacts.removeAll { it.archiveTask.is jar }
+	tasks.findByPath("artifactoryPublish")?.enabled = false
 	dependencies {
 		compile project(":spring-security-kerberos-core")
 	}
@@ -181,6 +182,7 @@ configure(sampleServerProjects()) {
 	apply plugin: 'spring-boot'
 	// don't publish boot packaged samples
 	configurations.archives.artifacts.removeAll { it.archiveTask.is jar }
+	tasks.findByPath("artifactoryPublish")?.enabled = false
 	dependencies {
 		compile project(":spring-security-kerberos-samples-common")
 		compile project(":spring-security-kerberos-client")
@@ -205,6 +207,7 @@ configure(sampleClientProjects()) {
 	apply plugin: 'spring-boot'
 	// don't publish boot packaged samples
 	configurations.archives.artifacts.removeAll { it.archiveTask.is jar }
+	tasks.findByPath("artifactoryPublish")?.enabled = false
 	dependencies {
 		compile project(":spring-security-kerberos-samples-common")
 		compile project(":spring-security-kerberos-client")
