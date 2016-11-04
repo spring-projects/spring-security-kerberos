@@ -62,7 +62,7 @@ public class KerberosServiceAuthenticationProvider implements
 		byte[] token = auth.getToken();
 		LOG.debug("Try to validate Kerberos Token");
 		KerberosTicketValidation ticketValidation = this.ticketValidator.validateTicket(token);
-		LOG.debug("Succesfully validated " + ticketValidation.username());
+		LOG.debug("Successfully validated " + ticketValidation.username());
 		UserDetails userDetails = this.userDetailsService.loadUserByUsername(ticketValidation.username());
 		userDetailsChecker.check(userDetails);
 		additionalAuthenticationChecks(userDetails, auth);
