@@ -178,8 +178,14 @@ public class KerberosRestTemplate extends RestTemplate {
 
 		try {
 			ClientLoginConfig loginConfig = new ClientLoginConfig(keyTabLocation, userPrincipal, loginOptions);
-			Set<Principal> princ = new HashSet<Principal>(1);
-			princ.add(new KerberosPrincipal(userPrincipal));
+			Set<Principal> princ;
+			if (userPrincipal != null) {
+				princ = new HashSet<Principal>(1);
+                            	princ.add(new KerberosPrincipal(userPrincipal));
+            		}
+			else {
+				princ = Collections.<Principal>emptySet();
+			}
 			Subject sub = new Subject(false, princ, new HashSet<Object>(), new HashSet<Object>());
 			LoginContext lc = new LoginContext("", sub, null, loginConfig);
 			lc.login();
