@@ -15,19 +15,6 @@
  */
 package org.springframework.security.kerberos.authentication.sun;
 
-import java.security.Principal;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.security.auth.Subject;
-import javax.security.auth.kerberos.KerberosPrincipal;
-import javax.security.auth.login.AppConfigurationEntry;
-import javax.security.auth.login.Configuration;
-import javax.security.auth.login.LoginContext;
-
 import com.sun.security.jgss.GSSUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,10 +28,21 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.kerberos.authentication.JaasSubjectHolder;
-import org.springframework.security.kerberos.authentication.KerberosMultiTier;
 import org.springframework.security.kerberos.authentication.KerberosTicketValidation;
 import org.springframework.security.kerberos.authentication.KerberosTicketValidator;
 import org.springframework.util.Assert;
+
+import javax.security.auth.Subject;
+import javax.security.auth.kerberos.KerberosPrincipal;
+import javax.security.auth.login.AppConfigurationEntry;
+import javax.security.auth.login.Configuration;
+import javax.security.auth.login.LoginContext;
+import java.security.Principal;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Implementation of {@link KerberosTicketValidator} which uses the SUN JAAS
@@ -200,30 +198,13 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
 			byte[] responseToken = new byte[0];
             GSSManager manager = GSSManager.getInstance();
 
-            GSSName serverName =
-                    manager.createName(servicePrincipal,
-                            GSSName.NT_USER_NAME);
+            GSSContext context = manager.createContext((GSSCredential) null);
 
-            GSSCredential serverCreds =
-                    manager.createCredential(serverName,
-                            GSSCredential.INDEFINITE_LIFETIME,
-                            KerberosMultiTier.KERBEROS_OID,
-                            GSSCredential.INITIATE_AND_ACCEPT);
+            byte[] patchedToken = tweakJdkRegression(kerberosTicket);
 
-            GSSContext context = manager.createContext(serverCreds);
-
-			boolean first = true;
-			while (!context.isEstablished()) {
-				if (first) {
-					kerberosTicket = tweakJdkRegression(kerberosTicket);
-				}
-				responseToken = context.acceptSecContext(kerberosTicket, 0, kerberosTicket.length);
-                serverName = context.getSrcName();
-				if (serverName == null) {
-					throw new BadCredentialsException("GSSContext name of the context initiator is null");
-				}
-				first = false;
-			}
+            while (!context.isEstablished()) {
+                context.acceptSecContext(patchedToken, 0, patchedToken.length);
+            }
 
             Subject subject = GSSUtil.createSubject(
                     context.getSrcName(),
