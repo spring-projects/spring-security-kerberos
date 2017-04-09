@@ -17,10 +17,14 @@ package org.springframework.security.kerberos.web;
 
 import org.junit.jupiter.api.Test;
 
+import org.mockito.ArgumentCaptor;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.kerberos.web.authentication.SpnegoEntryPoint;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -28,6 +32,7 @@ import static org.mockito.Mockito.when;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
  * Test class for {@link SpnegoEntryPoint}
@@ -77,6 +82,35 @@ public class SpnegoEntryPointTest {
 		verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 		verify(request).getRequestDispatcher(forwardUrl);
 		verify(requestDispatcher).forward(request, response);
+	}
+
+	@Test
+	public void testForwardUsesDefaultHttpMethod() throws Exception {
+		ArgumentCaptor<HttpServletRequest> servletRequestCaptor = ArgumentCaptor.forClass(HttpServletRequest.class);
+		String forwardUrl = "/login";
+		SpnegoEntryPoint entryPoint = new SpnegoEntryPoint(forwardUrl);
+		HttpServletResponse response = mock(HttpServletResponse.class);
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		when(request.getMethod()).thenReturn(RequestMethod.POST.name());
+		RequestDispatcher requestDispatcher = mock(RequestDispatcher.class);
+		when(request.getRequestDispatcher(anyString())).thenReturn(requestDispatcher);
+		entryPoint.commence(request, response, null);
+		verify(requestDispatcher).forward(servletRequestCaptor.capture(), eq(response));
+		assertThat(servletRequestCaptor.getValue().getMethod()).isEqualTo(HttpMethod.POST.name());
+	}
+
+	@Test
+	public void testForwardUsesCustomHttpMethod() throws Exception {
+		ArgumentCaptor<HttpServletRequest> servletRequestCaptor = ArgumentCaptor.forClass(HttpServletRequest.class);
+		String forwardUrl = "/login";
+		SpnegoEntryPoint entryPoint = new SpnegoEntryPoint(forwardUrl, HttpMethod.DELETE);
+		HttpServletResponse response = mock(HttpServletResponse.class);
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		RequestDispatcher requestDispatcher = mock(RequestDispatcher.class);
+		when(request.getRequestDispatcher(anyString())).thenReturn(requestDispatcher);
+		entryPoint.commence(request, response, null);
+		verify(requestDispatcher).forward(servletRequestCaptor.capture(), eq(response));
+		assertThat(servletRequestCaptor.getValue().getMethod()).isEqualTo(HttpMethod.DELETE.name());
 	}
 
 	@Test
