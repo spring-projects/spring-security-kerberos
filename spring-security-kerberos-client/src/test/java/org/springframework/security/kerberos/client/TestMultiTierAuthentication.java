@@ -41,16 +41,29 @@ import static org.junit.Assert.*;
  * @author Bogdan Mustiata
  */
 public class TestMultiTierAuthentication extends KerberosSecurityTestcase {
+
+    public static final String REALM_NAME = "EXAMPLE.COM";
+
+    public static final String USER_LOGIN_NAME = "user1";
+    public static final String USER_FQDN_NAME = "user1@EXAMPLE.COM";
+    public static final String USER_PASSWORD = "secret";
+
+    public static final String WEB_TIER_SPN = "HTTP/webtier@EXAMPLE.COM";
+    public static final String WEB_TIER_USER_PASSWORD = "secret";
+
+    public static final String SERVICE_TIER_SPN = "HTTP/servicetier@EXAMPLE.COM";
+    public static final String SERVICE_TIER_USER_PASSWORD = "secret";
+
     @Test
     public void testServer() throws Exception {
         MiniKdc kdc = getKdc();
         File workDir = getWorkDir();
 
         File webTierKeytabFile = new File(workDir, "webtier.keytab");
-        kdc.createKeyabFile(webTierKeytabFile, "HTTP/webtier@EXAMPLE.COM", "secret");
+        kdc.createKeyabFile(webTierKeytabFile, WEB_TIER_SPN, WEB_TIER_USER_PASSWORD);
 
         File serviceTierKeytabFile = new File(workDir, "servicetier.keytab");
-        kdc.createKeyabFile(serviceTierKeytabFile, "HTTP/servicetier@EXAMPLE.COM", "secret");
+        kdc.createKeyabFile(serviceTierKeytabFile, SERVICE_TIER_SPN, SERVICE_TIER_USER_PASSWORD);
 
         //
         // User logs in as user1/secret
@@ -59,19 +72,19 @@ public class TestMultiTierAuthentication extends KerberosSecurityTestcase {
                 createUserPassAuthenticator(/* debug: */ true);
 
         Authentication authentication = kerberosAuthProvider
-                .authenticate(new UsernamePasswordAuthenticationToken("user1", "secret"));
+                .authenticate(new UsernamePasswordAuthenticationToken(USER_LOGIN_NAME, USER_PASSWORD));
 
-        assertEquals("user1@EXAMPLE.COM", authentication.getName());
+        assertEquals(USER_FQDN_NAME, authentication.getName());
 
         //
         // User creates a ticket for the HTTP/webtier@EXAMPLE.COM, using
         // and then calls the service, using the tokenData
         //
         authentication = KerberosMultiTier.authenticateService(
-                authentication,  "user1", 3600, "HTTP/webtier@EXAMPLE.COM");
+                authentication, USER_LOGIN_NAME, 3600, WEB_TIER_SPN);
 
         byte[] tokenData = KerberosMultiTier
-                .getTokenForService(authentication, "HTTP/webtier@EXAMPLE.COM");
+                .getTokenForService(authentication, WEB_TIER_SPN);
 
         assertNotNull(tokenData);
         assertTrue(tokenData.length != 0);
@@ -82,8 +95,8 @@ public class TestMultiTierAuthentication extends KerberosSecurityTestcase {
         KerberosServiceAuthenticationProvider webTierAuthenticatorProvider =
                 createServiceAuthenticator(
                     true,
-                    "HTTP/webtier@EXAMPLE.COM",
-                    "EXAMPLE.COM",
+                        WEB_TIER_SPN,
+                        REALM_NAME,
                     webTierKeytabFile.getCanonicalPath()
                 );
 
@@ -96,13 +109,13 @@ public class TestMultiTierAuthentication extends KerberosSecurityTestcase {
         Authentication webTierAuthentication = webTierAuthenticatorProvider
                 .authenticate(new KerberosServiceRequestToken(tokenData));
 
-        assertEquals("user1@EXAMPLE.COM", webTierAuthentication.getName());
+        assertEquals(USER_FQDN_NAME, webTierAuthentication.getName());
 
         webTierAuthentication = KerberosMultiTier.authenticateService(
-                webTierAuthentication, "user1@EXAMPLE.COM", 3600, "HTTP/servicetier@EXAMPLE.COM");
+                webTierAuthentication, USER_FQDN_NAME, 3600, SERVICE_TIER_SPN);
 
         byte[] workplaceTokenData = KerberosMultiTier.getTokenForService(
-                webTierAuthentication, "HTTP/servicetier@EXAMPLE.COM");
+                webTierAuthentication, SERVICE_TIER_SPN);
 
         //
         // The service HTTP/icr@EXAMPLE.COM authenticates via tokens.
@@ -110,8 +123,8 @@ public class TestMultiTierAuthentication extends KerberosSecurityTestcase {
         webTierAuthenticatorProvider =
                 createServiceAuthenticator(
                         true,
-                        "HTTP/servicetier@EXAMPLE.COM",
-                        "EXAMPLE.COM",
+                        SERVICE_TIER_SPN,
+                        REALM_NAME,
                         serviceTierKeytabFile.getCanonicalPath()
                 );
 
@@ -122,7 +135,7 @@ public class TestMultiTierAuthentication extends KerberosSecurityTestcase {
         Authentication serviceTierAuthentication = webTierAuthenticatorProvider
                 .authenticate(new KerberosServiceRequestToken(workplaceTokenData));
 
-        assertEquals("user1@EXAMPLE.COM", serviceTierAuthentication.getName());
+        assertEquals(USER_FQDN_NAME, serviceTierAuthentication.getName());
     }
 
     /**
