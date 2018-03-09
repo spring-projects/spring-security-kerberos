@@ -104,6 +104,7 @@ import java.util.UUID;
  *
  * @author Original Hadoop MiniKdc Authors
  * @author Janne Valkealahti
+ * @author Bogdan Mustiata
  *
  */
 public class MiniKdc {
@@ -536,6 +537,30 @@ public class MiniKdc {
 				entries.add(new KeytabEntry(principal, 1L, timestamp, keyVersion, ekey));
 			}
 		}
+		keytab.setEntries(entries);
+		keytab.write(keytabFile);
+	}
+
+	/**
+	 * Creates multiple principals in the KDC and adds them to a keytab file.
+	 *
+	 * @param keytabFile keytab file to add the created principal.
+	 * @param principal The principal to store in the keytab file.
+	 * @param password The password for the principal.
+	 * @throws Exception thrown if the principals or the keytab file could not be created.
+	 */
+	public void createKeyabFile(File keytabFile, String principal, String password) throws Exception {
+		Keytab keytab = new Keytab();
+		List<KeytabEntry> entries = new ArrayList<KeytabEntry>();
+
+		KerberosTime timestamp = new KerberosTime();
+		for (Map.Entry<EncryptionType, EncryptionKey> entry : KerberosKeyFactory.getKerberosKeys(principal,
+				password).entrySet()) {
+			EncryptionKey ekey = entry.getValue();
+			byte keyVersion = (byte) ekey.getKeyVersion();
+			entries.add(new KeytabEntry(principal, 1L, timestamp, keyVersion, ekey));
+		}
+
 		keytab.setEntries(entries);
 		keytab.write(keytabFile);
 	}

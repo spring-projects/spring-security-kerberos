@@ -13,13 +13,24 @@ import org.ietf.jgss.GSSContext;
 public class KerberosTicketValidation {
 
 	private final String username;
+	private final Subject subject;
 	private final byte[] responseToken;
 	private final GSSContext gssContext;
-	private final String servicePrincipal;
 
 	public KerberosTicketValidation(String username, String servicePrincipal, byte[] responseToken, GSSContext gssContext) {
+		final HashSet<KerberosPrincipal> princs = new HashSet<KerberosPrincipal>();
+		princs.add(new KerberosPrincipal(servicePrincipal));
+
 		this.username = username;
-		this.servicePrincipal = servicePrincipal;
+		this.subject = new Subject(false, princs, new HashSet<Object>(), new HashSet<Object>());
+		this.responseToken = responseToken;
+		this.gssContext = gssContext;
+	}
+
+
+	public KerberosTicketValidation(String username, Subject subject, byte[] responseToken, GSSContext gssContext) {
+		this.username = username;
+		this.subject = subject;
 		this.responseToken = responseToken;
 		this.gssContext = gssContext;
 	}
@@ -37,9 +48,7 @@ public class KerberosTicketValidation {
 	}
 
 	public Subject subject() {
-		final HashSet<KerberosPrincipal> princs = new HashSet<KerberosPrincipal>();
-		princs.add(new KerberosPrincipal(servicePrincipal));
-		return new Subject(false, princs, new HashSet<Object>(), new HashSet<Object>());
+		return this.subject;
 	}
 
 }

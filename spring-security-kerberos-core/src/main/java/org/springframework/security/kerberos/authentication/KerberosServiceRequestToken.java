@@ -41,10 +41,13 @@ import org.springframework.security.crypto.codec.Base64;
  *
  * @author Mike Wiesner
  * @author Jeremy Stone
+ * @author Bogdan Mustiata
  * @since 1.0
  * @see KerberosServiceAuthenticationProvider
  */
-public class KerberosServiceRequestToken extends AbstractAuthenticationToken {
+public class KerberosServiceRequestToken
+		extends AbstractAuthenticationToken
+		implements KerberosAuthentication {
 
 	private static final long serialVersionUID = 395488921064775014L;
 
@@ -53,6 +56,8 @@ public class KerberosServiceRequestToken extends AbstractAuthenticationToken {
 	private final Object principal;
 
 	private final transient KerberosTicketValidation ticketValidation;
+
+	private JaasSubjectHolder jaasSubjectHolder;
 
 	/**
 	 * Creates an authenticated token, normally used as an output of an
@@ -64,12 +69,17 @@ public class KerberosServiceRequestToken extends AbstractAuthenticationToken {
 	 * @param token the Kerberos/SPNEGO token
 	 * @see UserDetails
 	 */
-	public KerberosServiceRequestToken(Object principal, KerberosTicketValidation ticketValidation,
-			Collection<? extends GrantedAuthority> authorities, byte[] token) {
+	public KerberosServiceRequestToken(Object principal,
+									   KerberosTicketValidation ticketValidation,
+									   Collection<? extends GrantedAuthority> authorities,
+									   byte[] token) {
 		super(authorities);
 		this.token = token;
 		this.principal = principal;
 		this.ticketValidation = ticketValidation;
+		this.jaasSubjectHolder = new JaasSubjectHolder(
+				ticketValidation.subject(),
+				ticketValidation.username());
 		super.setAuthenticated(true);
 	}
 
@@ -225,4 +235,8 @@ public class KerberosServiceRequestToken extends AbstractAuthenticationToken {
 		return encrypt(data, 0, data.length);
 	}
 
+	@Override
+	public JaasSubjectHolder getJaasSubjectHolder() {
+		return jaasSubjectHolder;
+	}
 }

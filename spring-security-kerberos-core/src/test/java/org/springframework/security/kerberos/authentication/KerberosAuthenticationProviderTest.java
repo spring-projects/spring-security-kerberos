@@ -29,8 +29,6 @@ import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.kerberos.authentication.KerberosAuthenticationProvider;
-import org.springframework.security.kerberos.authentication.KerberosClient;
 
 /**
  * Test class for {@link KerberosAuthenticationProvider}
@@ -49,6 +47,7 @@ public class KerberosAuthenticationProviderTest {
     private static final UsernamePasswordAuthenticationToken INPUT_TOKEN = new UsernamePasswordAuthenticationToken(TEST_USER, TEST_PASSWORD);
     private static final List<GrantedAuthority> AUTHORITY_LIST = AuthorityUtils.createAuthorityList("ROLE_ADMIN");
     private static final UserDetails USER_DETAILS = new User(TEST_USER, "empty", true, true, true,true, AUTHORITY_LIST);
+    private static final JaasSubjectHolder JAAS_SUBJECT_HOLDER = new JaasSubjectHolder(null, TEST_USER);
 
     @Before
     public void before() {
@@ -63,7 +62,7 @@ public class KerberosAuthenticationProviderTest {
     @Test
     public void testLoginOk() throws Exception {
         when(userDetailsService.loadUserByUsername(TEST_USER)).thenReturn(USER_DETAILS);
-        when(kerberosClient.login(TEST_USER, TEST_PASSWORD)).thenReturn(TEST_USER);
+        when(kerberosClient.login(TEST_USER, TEST_PASSWORD)).thenReturn(JAAS_SUBJECT_HOLDER);
 
         Authentication authenticate = provider.authenticate(INPUT_TOKEN);
 

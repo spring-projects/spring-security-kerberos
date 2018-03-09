@@ -26,6 +26,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
  * {@link AuthenticationProvider} for kerberos.
  *
  * @author Mike Wiesner
+ * @author Bogdan Mustiata
  * @since 1.0
  */
 public class KerberosAuthenticationProvider implements AuthenticationProvider {
@@ -37,10 +38,10 @@ public class KerberosAuthenticationProvider implements AuthenticationProvider {
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
 		UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) authentication;
-		String validatedUsername = kerberosClient.login(auth.getName(), auth.getCredentials().toString());
-		UserDetails userDetails = this.userDetailsService.loadUserByUsername(validatedUsername);
-		UsernamePasswordAuthenticationToken output = new UsernamePasswordAuthenticationToken(userDetails,
-				auth.getCredentials(), userDetails.getAuthorities());
+		JaasSubjectHolder subjectHolder = kerberosClient.login(auth.getName(), auth.getCredentials().toString());
+		UserDetails userDetails = this.userDetailsService.loadUserByUsername(subjectHolder.getUsername());
+		KerberosUsernamePasswordAuthenticationToken output = new KerberosUsernamePasswordAuthenticationToken(
+                userDetails, auth.getCredentials(), userDetails.getAuthorities(), subjectHolder);
 		output.setDetails(authentication.getDetails());
         return output;
 
