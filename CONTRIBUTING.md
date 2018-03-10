@@ -68,7 +68,7 @@ Please carefully follow the whitespace and formatting conventions already presen
 Whitespace management tips
 
 1. You can use the [AnyEdit Eclipse plugin](http://marketplace.eclipse.org/content/anyedit-tools) to ensure spaces are used and to clean up trailing whitespaces.
-1. Use git's pre-commit.sample hook to prevent invalid whitespace from being pushed out. You can enable it by moving ~/spring-security/.git/hooks/pre-commit.sample to ~/spring-security/.git/hooks/pre-commit and ensuring it is executable. For more information on hooks refer to [Pro Git's Pre-Commit Hook's section](http://git-scm.com/book/cs/ch7-3.html)
+1. Use git's pre-commit.sample hook to prevent invalid whitespace from being pushed out. You can enable it by moving ~/spring-security/.git/hooks/pre-commit.sample to ~/spring-security/.git/hooks/pre-commit and ensuring it is executable. For more information on hooks refer to [Pro Git's section on Git Hooks](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks)
 
 # Add Apache license header to all new classes
 

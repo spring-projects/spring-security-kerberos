@@ -13,18 +13,20 @@ import java.util.HashSet;
 public class KerberosTicketValidation {
 
 	private final String username;
+	private final Subject subject;
 	private final byte[] responseToken;
 	private final GSSContext gssContext;
-	private final String servicePrincipal;
 	private final GSSCredential delegationCredential;
 
 	public KerberosTicketValidation(String username, String servicePrincipal, byte[] responseToken, GSSContext gssContext) {
 		this(username, servicePrincipal, responseToken, gssContext, null);
 	}
-	
+
 	public KerberosTicketValidation(String username, String servicePrincipal, byte[] responseToken, GSSContext gssContext, GSSCredential delegationCredential) {
+		final HashSet<KerberosPrincipal> princs = new HashSet<KerberosPrincipal>();
+		princs.add(new KerberosPrincipal(servicePrincipal));
 		this.username = username;
-		this.servicePrincipal = servicePrincipal;
+		this.subject = new Subject(false, princs, new HashSet<Object>(), new HashSet<Object>());
 		this.responseToken = responseToken;
 		this.gssContext = gssContext;
 		this.delegationCredential = delegationCredential;
@@ -47,9 +49,7 @@ public class KerberosTicketValidation {
 	}
 
 	public Subject subject() {
-		final HashSet<KerberosPrincipal> princs = new HashSet<KerberosPrincipal>();
-		princs.add(new KerberosPrincipal(servicePrincipal));
-		return new Subject(false, princs, new HashSet<Object>(), new HashSet<Object>());
+		return this.subject;
 	}
 
 }

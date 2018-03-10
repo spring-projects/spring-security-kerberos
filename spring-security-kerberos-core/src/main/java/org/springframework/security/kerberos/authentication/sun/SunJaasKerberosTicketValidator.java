@@ -15,19 +15,7 @@
  */
 package org.springframework.security.kerberos.authentication.sun;
 
-import java.security.Principal;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.security.auth.Subject;
-import javax.security.auth.kerberos.KerberosPrincipal;
-import javax.security.auth.login.AppConfigurationEntry;
-import javax.security.auth.login.Configuration;
-import javax.security.auth.login.LoginContext;
-
+import com.sun.security.jgss.GSSUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ietf.jgss.GSSContext;
@@ -39,9 +27,22 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.kerberos.authentication.JaasSubjectHolder;
 import org.springframework.security.kerberos.authentication.KerberosTicketValidation;
 import org.springframework.security.kerberos.authentication.KerberosTicketValidator;
 import org.springframework.util.Assert;
+
+import javax.security.auth.Subject;
+import javax.security.auth.kerberos.KerberosPrincipal;
+import javax.security.auth.login.AppConfigurationEntry;
+import javax.security.auth.login.Configuration;
+import javax.security.auth.login.LoginContext;
+import java.security.Principal;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Implementation of {@link KerberosTicketValidator} which uses the SUN JAAS
@@ -51,22 +52,34 @@ import org.springframework.util.Assert;
  *
  * @author Mike Wiesner
  * @author Jeremy Stone
+ * @author Bogdan Mustiata
  * @since 1.0
  */
 public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, InitializingBean {
 
     private String servicePrincipal;
+    private String realmName;
     private Resource keyTabLocation;
     private Subject serviceSubject;
     private boolean holdOnToGSSContext;
     private boolean debug = false;
+    private boolean multiTier = false;
     private boolean refreshKrb5Config = false;
     private static final Log LOG = LogFactory.getLog(SunJaasKerberosTicketValidator.class);
 
     @Override
     public KerberosTicketValidation validateTicket(byte[] token) {
         try {
-            return Subject.doAs(this.serviceSubject, new KerberosValidateAction(token));
+            if (!multiTier) {
+                return Subject.doAs(this.serviceSubject, new KerberosValidateAction(token));
+            }
+
+            Subject subjectCopy = JaasUtil.copySubject(serviceSubject);
+            JaasSubjectHolder subjectHolder = new JaasSubjectHolder(subjectCopy);
+
+            return Subject.doAs(subjectHolder.getJaasSubject(),
+                    new KerberosMultitierValidateAction(token));
+
         }
         catch (PrivilegedActionException e) {
             throw new BadCredentialsException("Kerberos validation not successful", e);
@@ -87,8 +100,13 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
         {
         	keyTabLocationAsString = keyTabLocationAsString.substring(5);
         }
-        LoginConfig loginConfig = new LoginConfig(keyTabLocationAsString, this.servicePrincipal,
-                this.debug, this.refreshKrb5Config);
+        LoginConfig loginConfig = new LoginConfig(
+                keyTabLocationAsString,
+                this.servicePrincipal,
+                this.realmName,
+                this.multiTier,
+                this.debug,
+                this.refreshKrb5Config);
         Set<Principal> princ = new HashSet<Principal>(1);
         princ.add(new KerberosPrincipal(this.servicePrincipal));
         Subject sub = new Subject(false, princ, new HashSet<Object>(), new HashSet<Object>());
@@ -107,6 +125,23 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
      */
     public void setServicePrincipal(String servicePrincipal) {
         this.servicePrincipal = servicePrincipal;
+    }
+
+    /**
+     * The realm name of the application.
+     * For web apps this is <code>DOMAIN</code>
+     * @param realmName
+     */
+    public void setRealmName(String realmName) {
+        this.realmName = realmName;
+    }
+
+    /**
+     *
+     * @param multiTier
+     */
+    public void setMultiTier(boolean multiTier) {
+        this.multiTier = multiTier;
     }
 
     /**
@@ -156,6 +191,52 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
         this.holdOnToGSSContext = holdOnToGSSContext;
     }
 
+
+
+    /**
+     * This class is needed, because the validation must run with previously generated JAAS subject
+     * which belongs to the service principal and was loaded out of the keytab during startup.
+     */
+    private class KerberosMultitierValidateAction implements PrivilegedExceptionAction<KerberosTicketValidation> {
+        byte[] kerberosTicket;
+
+        public KerberosMultitierValidateAction(byte[] kerberosTicket) {
+            this.kerberosTicket = kerberosTicket;
+        }
+
+        @Override
+        public KerberosTicketValidation run() throws Exception {
+			byte[] responseToken = new byte[0];
+            GSSManager manager = GSSManager.getInstance();
+
+            GSSContext context = manager.createContext((GSSCredential) null);
+
+            byte[] patchedToken = tweakJdkRegression(kerberosTicket);
+
+            while (!context.isEstablished()) {
+                context.acceptSecContext(patchedToken, 0, patchedToken.length);
+            }
+
+            Subject subject = GSSUtil.createSubject(
+                    context.getSrcName(),
+                    context.getDelegCred());
+
+            KerberosTicketValidation result = new KerberosTicketValidation(
+                    context.getSrcName().toString(),
+                    subject,
+                    responseToken,
+                    context);
+
+            if (!holdOnToGSSContext) {
+				context.dispose();
+			}
+
+            return result;
+        }
+    }
+
+
+
     /**
      * This class is needed, because the validation must run with previously generated JAAS subject
      * which belongs to the service principal and was loaded out of the keytab during startup.
@@ -169,33 +250,39 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
 
         @Override
         public KerberosTicketValidation run() throws Exception {
-			byte[] responseToken = new byte[0];
-			GSSName gssName = null;
-			GSSContext context = GSSManager.getInstance().createContext((GSSCredential) null);
-			boolean first = true;
-			while (!context.isEstablished()) {
-				if (first) {
-					kerberosTicket = tweakJdkRegression(kerberosTicket);
-				}
-				responseToken = context.acceptSecContext(kerberosTicket, 0, kerberosTicket.length);
-				gssName = context.getSrcName();
-				if (gssName == null) {
-					throw new BadCredentialsException("GSSContext name of the context initiator is null");
-				}
-				first = false;
-			}
+            byte[] responseToken = new byte[0];
+            GSSName gssName = null;
+            GSSContext context = GSSManager.getInstance().createContext((GSSCredential) null);
+            boolean first = true;
+            while (!context.isEstablished()) {
+                if (first) {
+                    kerberosTicket = tweakJdkRegression(kerberosTicket);
+                }
+                responseToken = context.acceptSecContext(kerberosTicket, 0, kerberosTicket.length);
+                gssName = context.getSrcName();
+                if (gssName == null) {
+                    throw new BadCredentialsException("GSSContext name of the context initiator is null");
+                }
+                first = false;
+            }
 
             GSSCredential delegationCredential = null;
             if (context.getCredDelegState()) {
                 delegationCredential = context.getDelegCred();
             }
 
-			if (!holdOnToGSSContext) {
-				context.dispose();
-			}
-			return new KerberosTicketValidation(gssName.toString(), servicePrincipal, responseToken, context, delegationCredential);
+            if (!holdOnToGSSContext) {
+                context.dispose();
+            }
+            return new KerberosTicketValidation(gssName.toString(),
+                    servicePrincipal,
+                    responseToken,
+                    context,
+                    delegationCredential);
         }
     }
+
+
 
     /**
      * Normally you need a JAAS config file in order to use the JAAS Kerberos Login Module,
@@ -204,12 +291,16 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
     private static class LoginConfig extends Configuration {
         private String keyTabLocation;
         private String servicePrincipalName;
+        private String realmName;
+        private boolean multiTier;
         private boolean debug;
         private boolean refreshKrb5Config;
 
-        public LoginConfig(String keyTabLocation, String servicePrincipalName, boolean debug, boolean refreshKrb5Config) {
+        public LoginConfig(String keyTabLocation, String servicePrincipalName, String realmName, boolean multiTier, boolean debug, boolean refreshKrb5Config) {
             this.keyTabLocation = keyTabLocation;
             this.servicePrincipalName = servicePrincipalName;
+            this.realmName = realmName;
+            this.multiTier = multiTier;
             this.debug = debug;
             this.refreshKrb5Config = refreshKrb5Config;
         }
@@ -225,6 +316,15 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
             if (this.debug) {
                 options.put("debug", "true");
             }
+
+            if (this.realmName != null) {
+                options.put("realm", realmName);
+            }
+
+            if (!multiTier) {
+                options.put("isInitiator", "false");
+            }
+
             if(this.refreshKrb5Config) {
                 options.put("refreshKrb5Config", "true");
             }
