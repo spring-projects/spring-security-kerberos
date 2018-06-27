@@ -74,7 +74,7 @@ public class SunJaasKrb5LoginConfig extends Configuration implements Initializin
 			LOG.warn("Your keytab is in the classpath. This file needs special protection and shouldn't be in the classpath. JAAS may also not be able to load this file from classpath.");
 		}
 
-		if (!useTicketCache) {
+		if (!useTicketCache || keyTabLocation != null) {
 			Assert.notNull(keyTabLocation, "keyTabLocation must be specified when useTicketCache is false");
 			keyTabLocationAsString = keyTabLocation.getURL().toExternalForm();
 			if (keyTabLocationAsString.startsWith("file:")) {
