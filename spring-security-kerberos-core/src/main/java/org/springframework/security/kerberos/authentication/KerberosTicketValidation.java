@@ -1,4 +1,4 @@
-package si.fraport.kerberostest.authentication;
+package org.springframework.security.kerberos.authentication;
 
 import java.util.HashSet;
 

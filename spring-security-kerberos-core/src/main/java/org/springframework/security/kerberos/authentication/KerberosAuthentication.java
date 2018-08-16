@@ -1,4 +1,5 @@
-package si.fraport.kerberostest.authentication;
+package org.springframework.security.kerberos.authentication;
+
 
 public interface KerberosAuthentication {
 

@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package si.fraport.kerberostest.authentication;
+package org.springframework.security.kerberos.authentication;
 
 
+
+import org.springframework.security.kerberos.authentication.sun.SunJaasKerberosClient;
 
 import javax.security.auth.Subject;
 import java.util.HashMap;

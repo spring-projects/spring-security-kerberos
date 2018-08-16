@@ -13,23 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package si.fraport.kerberostest.authentication.sun;
+package org.springframework.security.kerberos.authentication.sun;
 
 import com.sun.security.jgss.GSSUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.ietf.jgss.GSSContext;
-import org.ietf.jgss.GSSCredential;
-import org.ietf.jgss.GSSException;
-import org.ietf.jgss.GSSManager;
-import org.ietf.jgss.GSSName;
+import org.ietf.jgss.*;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.security.authentication.BadCredentialsException;
-import si.fraport.kerberostest.authentication.JaasSubjectHolder;
-import si.fraport.kerberostest.authentication.KerberosTicketValidation;
-import si.fraport.kerberostest.authentication.KerberosTicketValidator;
+import org.springframework.security.kerberos.authentication.JaasSubjectHolder;
+import org.springframework.security.kerberos.authentication.KerberosTicketValidation;
+import org.springframework.security.kerberos.authentication.KerberosTicketValidator;
 import org.springframework.util.Assert;
 
 import javax.security.auth.Subject;
@@ -43,7 +39,6 @@ import java.security.PrivilegedExceptionAction;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
-import org.springframework.context.annotation.DependsOn;
 
 /**
  * Implementation of {@link KerberosTicketValidator} which uses the SUN JAAS
