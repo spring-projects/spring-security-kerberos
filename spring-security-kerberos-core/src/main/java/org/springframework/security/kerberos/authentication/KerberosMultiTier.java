@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.security.kerberos.authentication;
+package si.fraport.kerberostest.authentication;
 
 import org.ietf.jgss.*;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -49,13 +49,10 @@ public class KerberosMultiTier {
         final JaasSubjectHolder jaasSubjectHolder = kerberosAuthentication.getJaasSubjectHolder();
         Subject subject = jaasSubjectHolder.getJaasSubject();
 
-        Subject.doAs(subject, new PrivilegedAction<Object>() {
-            @Override
-            public Object run() {
-                runAuthentication(jaasSubjectHolder, username, lifetimeInSeconds, targetService);
-
-                return null;
-            }
+        Subject.doAs(subject, (PrivilegedAction<Object>) () -> {
+            runAuthentication(jaasSubjectHolder, username, lifetimeInSeconds, targetService);
+            
+            return null;
         });
 
         return authentication;

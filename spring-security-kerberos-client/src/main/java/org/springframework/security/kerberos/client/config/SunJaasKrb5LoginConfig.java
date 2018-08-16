@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.security.kerberos.client.config;
+package si.fraport.kerberostest.client.config;
 
 import java.util.HashMap;
 
@@ -85,7 +85,7 @@ public class SunJaasKrb5LoginConfig extends Configuration implements Initializin
 
 	@Override
 	public AppConfigurationEntry[] getAppConfigurationEntry(String name) {
-		HashMap<String, String> options = new HashMap<String, String>();
+		HashMap<String, String> options = new HashMap<>();
 
 		options.put("principal", this.servicePrincipal);
 

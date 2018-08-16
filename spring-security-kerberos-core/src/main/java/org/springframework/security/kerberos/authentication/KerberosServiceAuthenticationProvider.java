@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.security.kerberos.authentication;
+package si.fraport.kerberostest.authentication;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -53,7 +53,7 @@ public class KerberosServiceAuthenticationProvider implements
 
 	private KerberosTicketValidator ticketValidator;
 	private UserDetailsService userDetailsService;
-	private UserDetailsChecker userDetailsChecker = new AccountStatusUserDetailsChecker();
+	private final UserDetailsChecker userDetailsChecker = new AccountStatusUserDetailsChecker();
 
 	@Override
 	public Authentication authenticate(Authentication authentication)

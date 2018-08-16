@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.security.kerberos.authentication;
+package si.fraport.kerberostest.authentication;
 
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -37,12 +37,12 @@ public class KerberosAuthenticationProvider implements AuthenticationProvider {
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-		UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) authentication;
-		JaasSubjectHolder subjectHolder = kerberosClient.login(auth.getName(), auth.getCredentials().toString());
-		UserDetails userDetails = this.userDetailsService.loadUserByUsername(subjectHolder.getUsername());
-		KerberosUsernamePasswordAuthenticationToken output = new KerberosUsernamePasswordAuthenticationToken(
+        UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) authentication;
+        JaasSubjectHolder subjectHolder = kerberosClient.login(auth.getName(), auth.getCredentials().toString());
+        UserDetails userDetails = this.userDetailsService.loadUserByUsername(subjectHolder.getUsername());
+        KerberosUsernamePasswordAuthenticationToken output = new KerberosUsernamePasswordAuthenticationToken(
                 userDetails, auth.getCredentials(), userDetails.getAuthorities(), subjectHolder);
-		output.setDetails(authentication.getDetails());
+        output.setDetails(authentication.getDetails());
         return output;
 
     }

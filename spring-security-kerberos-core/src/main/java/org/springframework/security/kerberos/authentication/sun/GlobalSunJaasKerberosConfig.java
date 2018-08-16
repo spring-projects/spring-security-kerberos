@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.security.kerberos.authentication.sun;
+package si.fraport.kerberostest.authentication.sun;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;

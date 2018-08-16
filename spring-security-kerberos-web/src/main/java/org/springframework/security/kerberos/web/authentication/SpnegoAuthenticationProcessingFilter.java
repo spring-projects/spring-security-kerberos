@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.security.kerberos.web.authentication;
+package si.fraport.kerberostest.web.authentication;
 
 import java.io.IOException;
+import java.util.Base64;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -30,9 +31,9 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.codec.Base64;
-import org.springframework.security.kerberos.authentication.KerberosServiceAuthenticationProvider;
-import org.springframework.security.kerberos.authentication.KerberosServiceRequestToken;
+
+import si.fraport.kerberostest.authentication.KerberosServiceAuthenticationProvider;
+import si.fraport.kerberostest.authentication.KerberosServiceRequestToken;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -145,7 +146,7 @@ public class SpnegoAuthenticationProcessingFilter extends GenericFilterBean {
                 logger.debug("Received Negotiate Header for request " + request.getRequestURL() + ": " + header);
             }
             byte[] base64Token = header.substring(header.indexOf(" ") + 1).getBytes("UTF-8");
-            byte[] kerberosTicket = Base64.decode(base64Token);
+            byte[] kerberosTicket = Base64.getDecoder().decode(base64Token);
             KerberosServiceRequestToken authenticationRequest = new KerberosServiceRequestToken(kerberosTicket);
             authenticationRequest.setDetails(authenticationDetailsSource.buildDetails(request));
             Authentication authentication;

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.security.kerberos.authentication.sun;
+package si.fraport.kerberostest.authentication.sun;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -32,8 +32,8 @@ import javax.security.auth.login.LoginException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.kerberos.authentication.KerberosClient;
-import org.springframework.security.kerberos.authentication.JaasSubjectHolder;
+import si.fraport.kerberostest.authentication.KerberosClient;
+import si.fraport.kerberostest.authentication.JaasSubjectHolder;
 
 /**
  * Implementation of {@link KerberosClient} which uses the SUN JAAS

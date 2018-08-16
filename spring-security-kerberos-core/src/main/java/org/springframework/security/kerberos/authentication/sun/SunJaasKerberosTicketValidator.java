@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.security.kerberos.authentication.sun;
+package si.fraport.kerberostest.authentication.sun;
 
 import com.sun.security.jgss.GSSUtil;
 import org.apache.commons.logging.Log;
@@ -27,9 +27,9 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.kerberos.authentication.JaasSubjectHolder;
-import org.springframework.security.kerberos.authentication.KerberosTicketValidation;
-import org.springframework.security.kerberos.authentication.KerberosTicketValidator;
+import si.fraport.kerberostest.authentication.JaasSubjectHolder;
+import si.fraport.kerberostest.authentication.KerberosTicketValidation;
+import si.fraport.kerberostest.authentication.KerberosTicketValidator;
 import org.springframework.util.Assert;
 
 import javax.security.auth.Subject;
@@ -43,6 +43,7 @@ import java.security.PrivilegedExceptionAction;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import org.springframework.context.annotation.DependsOn;
 
 /**
  * Implementation of {@link KerberosTicketValidator} which uses the SUN JAAS
@@ -200,7 +201,7 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
 
             GSSContext context = manager.createContext((GSSCredential) null);
 
-            byte[] patchedToken = tweakJdkRegression(kerberosTicket);
+            byte[] patchedToken = kerberosTicket;
 
             while (!context.isEstablished()) {
                 context.acceptSecContext(patchedToken, 0, patchedToken.length);
@@ -245,7 +246,7 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
             boolean first = true;
             while (!context.isEstablished()) {
                 if (first) {
-                    kerberosTicket = tweakJdkRegression(kerberosTicket);
+//                    kerberosTicket = tweakJdkRegression(kerberosTicket);
                 }
                 responseToken = context.acceptSecContext(kerberosTicket, 0, kerberosTicket.length);
                 gssName = context.getSrcName();
@@ -271,11 +272,11 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
      * with this class it is not needed and you can have different configurations in one JVM.
      */
     private static class LoginConfig extends Configuration {
-        private String keyTabLocation;
-        private String servicePrincipalName;
-        private String realmName;
-        private boolean multiTier;
-        private boolean debug;
+        private final String keyTabLocation;
+        private final String servicePrincipalName;
+        private final String realmName;
+        private final boolean multiTier;
+        private final boolean debug;
 
         public LoginConfig(String keyTabLocation, String servicePrincipalName, String realmName, boolean multiTier, boolean debug) {
             this.keyTabLocation = keyTabLocation;
@@ -287,7 +288,8 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
 
         @Override
         public AppConfigurationEntry[] getAppConfigurationEntry(String name) {
-            HashMap<String, String> options = new HashMap<String, String>();
+            HashMap<String, String> options;
+            options = new HashMap<>();
             options.put("useKeyTab", "true");
             options.put("keyTab", this.keyTabLocation);
             options.put("principal", this.servicePrincipalName);
@@ -311,6 +313,7 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
 
     }
 
+    @Deprecated
     private static byte[] tweakJdkRegression(byte[] token) throws GSSException {
 
 //    	Due to regression in 8u40/8u45 described in

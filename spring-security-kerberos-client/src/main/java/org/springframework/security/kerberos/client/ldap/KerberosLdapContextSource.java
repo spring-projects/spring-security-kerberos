@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.security.kerberos.client.ldap;
+package si.fraport.kerberostest.client.ldap;
 
 import java.security.PrivilegedAction;
 import java.util.Hashtable;
@@ -30,7 +30,7 @@ import javax.security.auth.login.LoginException;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.ldap.core.support.LdapContextSource;
-import org.springframework.security.kerberos.client.config.SunJaasKrb5LoginConfig;
+
 import org.springframework.security.ldap.DefaultSpringSecurityContextSource;
 import org.springframework.util.Assert;
 

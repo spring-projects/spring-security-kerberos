@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.security.kerberos.authentication;
+package si.fraport.kerberostest.authentication;
 
 /**
  * 

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.security.kerberos.web.authentication;
+package si.fraport.kerberostest.web.authentication;
 
 import java.io.IOException;
 
@@ -22,8 +22,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.core.Authentication;
-import org.springframework.security.kerberos.authentication.KerberosServiceRequestToken;
+
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import si.fraport.kerberostest.authentication.KerberosServiceRequestToken;
 
 /**
  * Adds a WWW-Authenticate (or other) header to the response following

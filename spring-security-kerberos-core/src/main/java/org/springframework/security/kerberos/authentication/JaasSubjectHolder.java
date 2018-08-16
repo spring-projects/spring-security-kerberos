@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.security.kerberos.authentication;
+package si.fraport.kerberostest.authentication;
 
-import org.springframework.security.kerberos.authentication.sun.SunJaasKerberosClient;
+
 
 import javax.security.auth.Subject;
 import java.util.HashMap;
@@ -33,13 +33,15 @@ public class JaasSubjectHolder {
     private Subject jaasSubject;
     private String username;
 
-    private Map<String, byte[]> savedTokens = new HashMap<String, byte[]>();
+    private Map<String, byte[]> savedTokens;
 
     public JaasSubjectHolder(Subject jaasSubject) {
+        this.savedTokens = new HashMap<>();
         this.jaasSubject = jaasSubject;
     }
 
     public JaasSubjectHolder(Subject jaasSubject, String username) {
+        this.savedTokens = new HashMap<>();
         this.jaasSubject = jaasSubject;
         this.username = username;
     }
