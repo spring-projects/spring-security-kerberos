@@ -53,7 +53,7 @@ public class KerberosServiceAuthenticationProvider implements
 
 	private KerberosTicketValidator ticketValidator;
 	private UserDetailsService userDetailsService;
-	private UserDetailsChecker userDetailsChecker = new AccountStatusUserDetailsChecker();
+	private final UserDetailsChecker userDetailsChecker = new AccountStatusUserDetailsChecker();
 
 	@Override
 	public Authentication authenticate(Authentication authentication)

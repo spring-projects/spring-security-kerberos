@@ -85,7 +85,7 @@ public class SunJaasKrb5LoginConfig extends Configuration implements Initializin
 
 	@Override
 	public AppConfigurationEntry[] getAppConfigurationEntry(String name) {
-		HashMap<String, String> options = new HashMap<String, String>();
+		HashMap<String, String> options = new HashMap<>();
 
 		options.put("principal", this.servicePrincipal);
 

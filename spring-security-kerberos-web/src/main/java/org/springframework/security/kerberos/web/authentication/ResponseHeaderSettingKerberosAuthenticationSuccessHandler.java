@@ -15,15 +15,15 @@
  */
 package org.springframework.security.kerberos.web.authentication;
 
-import java.io.IOException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.kerberos.authentication.KerberosServiceRequestToken;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.springframework.security.core.Authentication;
-import org.springframework.security.kerberos.authentication.KerberosServiceRequestToken;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import java.io.IOException;
 
 /**
  * Adds a WWW-Authenticate (or other) header to the response following

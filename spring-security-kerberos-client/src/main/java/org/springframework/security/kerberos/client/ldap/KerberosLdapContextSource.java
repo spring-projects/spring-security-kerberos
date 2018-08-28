@@ -30,7 +30,7 @@ import javax.security.auth.login.LoginException;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.ldap.core.support.LdapContextSource;
-import org.springframework.security.kerberos.client.config.SunJaasKrb5LoginConfig;
+
 import org.springframework.security.ldap.DefaultSpringSecurityContextSource;
 import org.springframework.util.Assert;
 

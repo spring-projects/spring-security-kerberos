@@ -15,6 +15,8 @@
  */
 package org.springframework.security.kerberos.authentication;
 
+
+
 import org.springframework.security.kerberos.authentication.sun.SunJaasKerberosClient;
 
 import javax.security.auth.Subject;
@@ -33,13 +35,15 @@ public class JaasSubjectHolder {
     private Subject jaasSubject;
     private String username;
 
-    private Map<String, byte[]> savedTokens = new HashMap<String, byte[]>();
+    private Map<String, byte[]> savedTokens;
 
     public JaasSubjectHolder(Subject jaasSubject) {
+        this.savedTokens = new HashMap<>();
         this.jaasSubject = jaasSubject;
     }
 
     public JaasSubjectHolder(Subject jaasSubject, String username) {
+        this.savedTokens = new HashMap<>();
         this.jaasSubject = jaasSubject;
         this.username = username;
     }

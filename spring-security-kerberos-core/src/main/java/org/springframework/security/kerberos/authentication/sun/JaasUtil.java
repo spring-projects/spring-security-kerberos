@@ -16,7 +16,6 @@
 package org.springframework.security.kerberos.authentication.sun;
 
 import javax.security.auth.Subject;
-import java.security.Principal;
 import java.util.HashSet;
 
 /**
@@ -30,10 +29,11 @@ public class JaasUtil {
      * @return
      */
     public static Subject copySubject(Subject subject) {
-        Subject subjectCopy = new Subject(false,
-                new HashSet<Principal>(subject.getPrincipals()),
-                new HashSet<Object>(subject.getPublicCredentials()),
-                new HashSet<Object>(subject.getPrivateCredentials()));
+        Subject subjectCopy;
+        subjectCopy = new Subject(false,
+                new HashSet<>(subject.getPrincipals()),
+                new HashSet<>(subject.getPublicCredentials()),
+                new HashSet<>(subject.getPrivateCredentials()));
 
         return subjectCopy;
     }

@@ -15,25 +15,20 @@
  */
 package org.springframework.security.kerberos.authentication.sun;
 
-import java.io.IOException;
-import java.util.HashMap;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.kerberos.authentication.JaasSubjectHolder;
+import org.springframework.security.kerberos.authentication.KerberosClient;
 
 import javax.security.auth.Subject;
-import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.callback.NameCallback;
-import javax.security.auth.callback.PasswordCallback;
-import javax.security.auth.callback.UnsupportedCallbackException;
+import javax.security.auth.callback.*;
 import javax.security.auth.login.AppConfigurationEntry;
 import javax.security.auth.login.Configuration;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.kerberos.authentication.KerberosClient;
-import org.springframework.security.kerberos.authentication.JaasSubjectHolder;
+import java.io.IOException;
+import java.util.HashMap;
 
 /**
  * Implementation of {@link KerberosClient} which uses the SUN JAAS

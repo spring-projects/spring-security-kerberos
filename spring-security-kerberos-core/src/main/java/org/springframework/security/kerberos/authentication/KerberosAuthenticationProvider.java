@@ -37,12 +37,12 @@ public class KerberosAuthenticationProvider implements AuthenticationProvider {
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-		UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) authentication;
-		JaasSubjectHolder subjectHolder = kerberosClient.login(auth.getName(), auth.getCredentials().toString());
-		UserDetails userDetails = this.userDetailsService.loadUserByUsername(subjectHolder.getUsername());
-		KerberosUsernamePasswordAuthenticationToken output = new KerberosUsernamePasswordAuthenticationToken(
+        UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) authentication;
+        JaasSubjectHolder subjectHolder = kerberosClient.login(auth.getName(), auth.getCredentials().toString());
+        UserDetails userDetails = this.userDetailsService.loadUserByUsername(subjectHolder.getUsername());
+        KerberosUsernamePasswordAuthenticationToken output = new KerberosUsernamePasswordAuthenticationToken(
                 userDetails, auth.getCredentials(), userDetails.getAuthorities(), subjectHolder);
-		output.setDetails(authentication.getDetails());
+        output.setDetails(authentication.getDetails());
         return output;
 
     }

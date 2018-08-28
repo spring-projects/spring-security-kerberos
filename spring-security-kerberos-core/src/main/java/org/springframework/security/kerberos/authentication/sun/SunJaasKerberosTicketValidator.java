@@ -18,11 +18,7 @@ package org.springframework.security.kerberos.authentication.sun;
 import com.sun.security.jgss.GSSUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.ietf.jgss.GSSContext;
-import org.ietf.jgss.GSSCredential;
-import org.ietf.jgss.GSSException;
-import org.ietf.jgss.GSSManager;
-import org.ietf.jgss.GSSName;
+import org.ietf.jgss.*;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -200,7 +196,7 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
 
             GSSContext context = manager.createContext((GSSCredential) null);
 
-            byte[] patchedToken = tweakJdkRegression(kerberosTicket);
+            byte[] patchedToken = kerberosTicket;
 
             while (!context.isEstablished()) {
                 context.acceptSecContext(patchedToken, 0, patchedToken.length);
@@ -245,7 +241,7 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
             boolean first = true;
             while (!context.isEstablished()) {
                 if (first) {
-                    kerberosTicket = tweakJdkRegression(kerberosTicket);
+//                    kerberosTicket = tweakJdkRegression(kerberosTicket);
                 }
                 responseToken = context.acceptSecContext(kerberosTicket, 0, kerberosTicket.length);
                 gssName = context.getSrcName();
@@ -271,11 +267,11 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
      * with this class it is not needed and you can have different configurations in one JVM.
      */
     private static class LoginConfig extends Configuration {
-        private String keyTabLocation;
-        private String servicePrincipalName;
-        private String realmName;
-        private boolean multiTier;
-        private boolean debug;
+        private final String keyTabLocation;
+        private final String servicePrincipalName;
+        private final String realmName;
+        private final boolean multiTier;
+        private final boolean debug;
 
         public LoginConfig(String keyTabLocation, String servicePrincipalName, String realmName, boolean multiTier, boolean debug) {
             this.keyTabLocation = keyTabLocation;
@@ -287,7 +283,8 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
 
         @Override
         public AppConfigurationEntry[] getAppConfigurationEntry(String name) {
-            HashMap<String, String> options = new HashMap<String, String>();
+            HashMap<String, String> options;
+            options = new HashMap<>();
             options.put("useKeyTab", "true");
             options.put("keyTab", this.keyTabLocation);
             options.put("principal", this.servicePrincipalName);
@@ -311,6 +308,7 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
 
     }
 
+    @Deprecated
     private static byte[] tweakJdkRegression(byte[] token) throws GSSException {
 
 //    	Due to regression in 8u40/8u45 described in

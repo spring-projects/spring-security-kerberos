@@ -18,11 +18,11 @@ public class KerberosTicketValidation {
 	private final GSSContext gssContext;
 
 	public KerberosTicketValidation(String username, String servicePrincipal, byte[] responseToken, GSSContext gssContext) {
-		final HashSet<KerberosPrincipal> princs = new HashSet<KerberosPrincipal>();
+		final HashSet<KerberosPrincipal> princs = new HashSet<>();
 		princs.add(new KerberosPrincipal(servicePrincipal));
 
 		this.username = username;
-		this.subject = new Subject(false, princs, new HashSet<Object>(), new HashSet<Object>());
+		this.subject = new Subject(false, princs, new HashSet<>(), new HashSet<>());
 		this.responseToken = responseToken;
 		this.gssContext = gssContext;
 	}

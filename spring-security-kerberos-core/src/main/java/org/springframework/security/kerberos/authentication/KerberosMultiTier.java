@@ -49,13 +49,10 @@ public class KerberosMultiTier {
         final JaasSubjectHolder jaasSubjectHolder = kerberosAuthentication.getJaasSubjectHolder();
         Subject subject = jaasSubjectHolder.getJaasSubject();
 
-        Subject.doAs(subject, new PrivilegedAction<Object>() {
-            @Override
-            public Object run() {
-                runAuthentication(jaasSubjectHolder, username, lifetimeInSeconds, targetService);
-
-                return null;
-            }
+        Subject.doAs(subject, (PrivilegedAction<Object>) () -> {
+            runAuthentication(jaasSubjectHolder, username, lifetimeInSeconds, targetService);
+            
+            return null;
         });
 
         return authentication;
