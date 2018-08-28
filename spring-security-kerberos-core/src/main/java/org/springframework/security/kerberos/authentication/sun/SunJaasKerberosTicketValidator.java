@@ -339,6 +339,13 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
 //		0000: 06 09 2A 86 48 86 F7 12   01 02 02
 //		0000: 06 09 2A 86 48 82 F7 12   01 02 02
 
+        //Checks for the Java version 8u40 or 8u45 if true no regression required
+        String version = Runtime.class.getPackage().getImplementationVersion();
+        if(!version.startsWith("1.8.0_4")) {
+            return token;
+        }
+
+
 		if (token == null || token.length < 48) {
 			return token;
 		}
