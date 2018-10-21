@@ -9,3 +9,11 @@ application developers to Kerberos concepts with Spring.
 Spring Security Kerberos {revnumber} is built and tested with JDK 7,
 Spring Security {spring-security-version} and Spring Framework {spring-version}.
 
+[IMPORTANT]
+====
+Java 8 Update 40/45 had a regression which broke handling of Kerberos tokens.
+These Java versions are no longer supported.
+See https://bugs.openjdk.java.net/browse/JDK-8078439[JDK-8078439] for further
+information.
+====
+
