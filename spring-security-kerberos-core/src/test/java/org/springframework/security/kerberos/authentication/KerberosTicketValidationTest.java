@@ -47,6 +47,6 @@ public class KerberosTicketValidationTest {
         assertEquals(responseToken, ticketValidation.responseToken());
         assertEquals(gssContext, ticketValidation.getGssContext());
 
-        assertEquals("With no credential delegation", delegationCredential, ticketValidation.getDelegationCredential());
+        assertEquals("With credential delegation", delegationCredential, ticketValidation.getDelegationCredential());
     }
 }
