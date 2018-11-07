@@ -35,7 +35,7 @@ public class KerberosTicketValidation {
 	}
 
 	public KerberosTicketValidation(String username, Subject subject, byte[] responseToken, GSSContext gssContext) {
-		this(username, subject, responseToken, gssContext, null)
+		this(username, subject, responseToken, gssContext, null);
 	}
 
 	public KerberosTicketValidation(String username, Subject subject, byte[] responseToken, GSSContext gssContext, GSSCredential delegationCredential) {

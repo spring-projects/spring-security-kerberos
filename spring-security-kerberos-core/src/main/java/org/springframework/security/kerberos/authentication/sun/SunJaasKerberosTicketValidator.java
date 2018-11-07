@@ -295,7 +295,7 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
             this.realmName = realmName;
             this.multiTier = multiTier;
             this.debug = debug;
-            this.refreshKrb5Config = refreshKrb5Configx
+            this.refreshKrb5Config = refreshKrb5Config;
         }
 
         @Override
