@@ -64,6 +64,7 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
     private boolean holdOnToGSSContext;
     private boolean debug = false;
     private boolean multiTier = false;
+    private boolean refreshKrb5Config = false;
     private static final Log LOG = LogFactory.getLog(SunJaasKerberosTicketValidator.class);
 
     @Override
@@ -104,7 +105,8 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
                 this.servicePrincipal,
                 this.realmName,
                 this.multiTier,
-                this.debug);
+                this.debug,
+                this.refreshKrb5Config);
         Set<Principal> princ = new HashSet<Principal>(1);
         princ.add(new KerberosPrincipal(this.servicePrincipal));
         Subject sub = new Subject(false, princ, new HashSet<Object>(), new HashSet<Object>());
@@ -180,7 +182,14 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
         this.holdOnToGSSContext = holdOnToGSSContext;
     }
 
-
+    /**
+     * Enables configuration to be refreshed before the login method is called.
+     *
+     * @param refreshKrb5Config Set this to true, if you want the configuration to be refreshed before the login method is called.
+     */
+    public void setRefreshKrb5Config(boolean refreshKrb5Config) {
+        this.refreshKrb5Config = refreshKrb5Config;
+    }
 
     /**
      * This class is needed, because the validation must run with previously generated JAAS subject
@@ -249,13 +258,20 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
                 }
                 first = false;
             }
+
+            GSSCredential delegationCredential = null;
+            if (context.getCredDelegState()) {
+                delegationCredential = context.getDelegCred();
+            }
+
             if (!holdOnToGSSContext) {
                 context.dispose();
             }
             return new KerberosTicketValidation(gssName.toString(),
                     servicePrincipal,
                     responseToken,
-                    context);
+                    context,
+                    delegationCredential);
         }
     }
 
@@ -271,13 +287,15 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
         private String realmName;
         private boolean multiTier;
         private boolean debug;
+        private boolean refreshKrb5Config;
 
-        public LoginConfig(String keyTabLocation, String servicePrincipalName, String realmName, boolean multiTier, boolean debug) {
+        public LoginConfig(String keyTabLocation, String servicePrincipalName, String realmName, boolean multiTier, boolean debug, boolean refreshKrb5Config) {
             this.keyTabLocation = keyTabLocation;
             this.servicePrincipalName = servicePrincipalName;
             this.realmName = realmName;
             this.multiTier = multiTier;
             this.debug = debug;
+            this.refreshKrb5Config = refreshKrb5Config;
         }
 
         @Override
@@ -294,6 +312,10 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
 
             if (this.realmName != null) {
                 options.put("realm", realmName);
+            }
+
+            if(this.refreshKrb5Config) {
+                options.put("refreshKrb5Config", "true");
             }
 
             if (!multiTier) {
