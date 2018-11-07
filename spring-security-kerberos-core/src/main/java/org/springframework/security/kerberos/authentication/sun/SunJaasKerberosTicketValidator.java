@@ -270,7 +270,8 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
             return new KerberosTicketValidation(gssName.toString(),
                     servicePrincipal,
                     responseToken,
-                    context);
+                    context,
+                    delegationCredential);
         }
     }
 
