@@ -1,6 +1,6 @@
 SPRING SECURITY KERBEROS
 ------------------------
-http://projects.spring.io/spring-security-kerberos/
+https://projects.spring.io/spring-security-kerberos/
 
 1. INTRODUCTION
 
@@ -19,6 +19,6 @@ The Spring Statemachine jars files can be found in the 'dist' directory.
 4. GETTING STARTED
 
 Please see the reference documentation.
-Additionally the blog at http://blog.spring.io as well
+Additionally the blog at https://blog.spring.io as well
 as sections of interest in the reference documentation.
 
