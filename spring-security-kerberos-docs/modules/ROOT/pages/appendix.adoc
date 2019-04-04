@@ -64,7 +64,7 @@ originally signed and gave to a `client`.
 image:drawio-kerb-cc3.png[]
 
 When client wants to get a ticket which it can use to authenticate
-with a service, `TGT` is send to `KDC` which then signs a service ticket
+with a service, `TGT` is sent to `KDC` which then signs a service ticket
 with service's own key. This a moment when a trust between
 `client` and `service` is created. This service ticket contains data
 which only `service` itself is able to decrypt.
@@ -73,7 +73,7 @@ image:drawio-kerb-cc4.png[]
 
 When `client` is authenticating with a service it sends previously
 received service ticket to a service which then thinks that I don't
-know anything about this guy but he have me an authentication ticket.
+know anything about this guy but he gave me an authentication ticket.
 What `service` can do next is try to decrypt that ticket and if that
 operation is succesfull it knows that only other party who knows my
 credentials is the `KDC` and because I trust him I can also trust that
