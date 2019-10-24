@@ -203,8 +203,8 @@ public class KerberosRestTemplate extends RestTemplate {
 		BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
 		credentialsProvider.setCredentials(new AuthScope(null, -1, null), credentials);
 		builder.setDefaultCredentialsProvider(credentialsProvider);
-		CloseableHttpClient httpClient = builder.build();
-		return httpClient;
+
+		return builder.build();
 	}
 
 	/**
@@ -218,8 +218,8 @@ public class KerberosRestTemplate extends RestTemplate {
 		princ.add(new KerberosPrincipal(userPrincipal));
 		Subject sub = new Subject(false, princ, new HashSet<Object>(), new HashSet<Object>());
 		CallbackHandler callbackHandler = new CallbackHandlerImpl(userPrincipal, password);
-		LoginContext lc = new LoginContext("", sub, callbackHandler, loginConfig);
-		return lc;
+
+		return new LoginContext("", sub, callbackHandler, loginConfig);
 	}
 
 	@Override
