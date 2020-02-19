@@ -119,7 +119,7 @@ public class MiniKdc {
 			System.out.println("---------------------------------------------------");
 			System.out.println("  Realm           : " + miniKdc.getRealm());
 			System.out.println("  Running at      : " + miniKdc.getHost() + ":" +
-					miniKdc.getHost());
+					miniKdc.getPort());
 			System.out.println("  krb5conf        : " + krb5conf);
 			System.out.println();
 			System.out.println("  created keytab  : " + keytabFile);
