@@ -20,7 +20,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ietf.jgss.GSSContext;
 import org.ietf.jgss.GSSCredential;
-import org.ietf.jgss.GSSException;
 import org.ietf.jgss.GSSManager;
 import org.ietf.jgss.GSSName;
 import org.springframework.beans.factory.InitializingBean;
@@ -249,14 +248,12 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
             byte[] responseToken = new byte[0];
             GSSName gssName = null;
             GSSContext context = GSSManager.getInstance().createContext((GSSCredential) null);
-            boolean first = true;
             while (!context.isEstablished()) {
                 responseToken = context.acceptSecContext(kerberosTicket, 0, kerberosTicket.length);
                 gssName = context.getSrcName();
                 if (gssName == null) {
                     throw new BadCredentialsException("GSSContext name of the context initiator is null");
                 }
-                first = false;
             }
 
             GSSCredential delegationCredential = null;
