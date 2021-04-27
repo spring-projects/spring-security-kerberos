@@ -23,7 +23,7 @@ public class KerberosRestTemplateConfig {
     public void doWithTicketCache() {
         KerberosRestTemplate restTemplate =
                 new KerberosRestTemplate();
-        restTemplate.getForObject("http://neo.example.org:8080/hello", String.class);
+        restTemplate.getForObject("https://neo.example.org:8080/hello", String.class);
     }
 //end::snippetA[]
 
@@ -31,7 +31,7 @@ public class KerberosRestTemplateConfig {
     public void doWithKeytabFile() {
         KerberosRestTemplate restTemplate =
                 new KerberosRestTemplate("/tmp/user2.keytab", "user2@EXAMPLE.ORG");
-        restTemplate.getForObject("http://neo.example.org:8080/hello", String.class);
+        restTemplate.getForObject("https://neo.example.org:8080/hello", String.class);
     }
 //end::snippetB[]
 

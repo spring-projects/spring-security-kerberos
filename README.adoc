@@ -11,20 +11,20 @@ By participating, you  are expected to uphold this code. Please report unaccepta
 See https://github.com/spring-projects/spring-framework/wiki/Downloading-Spring-artifacts[downloading Spring artifacts] for Maven repository information.
 
 == Documentation
-Be sure to read the http://docs.spring.io/spring-security-kerberos/docs/1.0.x/reference/htmlsingle/[Spring Security Kerberos Reference].
-Extensive JavaDoc for the Spring Security Kerberos code is also available in the http://docs.spring.io/spring-security-kerberos/docs/1.0.x/api/[Spring Security Kerberos API Documentation].
+Be sure to read the https://docs.spring.io/spring-security-kerberos/docs/1.0.x/reference/htmlsingle/[Spring Security Kerberos Reference].
+Extensive JavaDoc for the Spring Security Kerberos code is also available in the https://docs.spring.io/spring-security-kerberos/docs/1.0.x/api/[Spring Security Kerberos API Documentation].
 
 == Samples
 Samples can be found under `spring-security-kerberos-samples`. Check
 the reference documentation more about what those do.
 
 == Building from Source
-Spring Security Kerberos uses a http://gradle.org[Gradle]-based build system.
-In the instructions below, http://vimeo.com/34436402[`./gradlew`] is invoked from the root of the source tree and serves as
+Spring Security Kerberos uses a https://gradle.org[Gradle]-based build system.
+In the instructions below, https://vimeo.com/34436402[`./gradlew`] is invoked from the root of the source tree and serves as
 a cross-platform, self-contained bootstrap mechanism for the build.
 
 === Prerequisites
-http://help.github.com/set-up-git-redirect[Git] and the http://www.oracle.com/technetwork/java/javase/downloads[JDK7 build].
+https://help.github.com/set-up-git-redirect[Git] and the https://www.oracle.com/technetwork/java/javase/downloads[JDK7 build].
 
 Be sure that your `JAVA_HOME` environment variable points to the `jdk1.7.0` folder extracted from the JDK download.
 
@@ -50,11 +50,11 @@ Discover more commands with `./gradlew tasks`.
 See also the https://github.com/spring-projects/spring-framework/wiki/Gradle-build-and-release-FAQ[Gradle build and release FAQ].
 
 == Getting Support
-Check out the http://stackoverflow.com/questions/tagged/spring-security[Spring Security tags on Stack Overflow].
-http://spring.io/services[Commercial support] is available too.
+Check out the https://stackoverflow.com/questions/tagged/spring-security[Spring Security tags on Stack Overflow].
+https://spring.io/services[Commercial support] is available too.
 
 == Contributing
-http://help.github.com/send-pull-requests[Pull requests] are welcome; see the https://github.com/spring-projects/spring-security-kerberos/blob/master/CONTRIBUTING.md[contributor guidelines] for details.
+https://help.github.com/send-pull-requests[Pull requests] are welcome; see the https://github.com/spring-projects/spring-security-kerberos/blob/master/CONTRIBUTING.md[contributor guidelines] for details.
 
 == License
 Spring Security Kerberos is Open Source software released under the

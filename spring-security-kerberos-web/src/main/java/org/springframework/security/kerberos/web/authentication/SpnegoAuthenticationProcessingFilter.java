@@ -51,7 +51,7 @@ import org.springframework.web.filter.GenericFilterBean;
  * <pre>
  * &lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
  * xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xmlns:sec=&quot;http://www.springframework.org/schema/security&quot;
- * xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+ * xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans-2.0.xsd
  * 	http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.0.xsd&quot;&gt;
  *
  * &lt;sec:http entry-point-ref=&quot;spnegoEntryPoint&quot;&gt;
@@ -94,7 +94,7 @@ import org.springframework.web.filter.GenericFilterBean;
  *
  * <p>If you get a "GSSException: Channel binding mismatch (Mechanism
  * level:ChannelBinding not provided!) have a look at this <a
- * href="http://bugs.sun.com/view_bug.do?bug_id=6851973">bug</a>.</p>
+ * href="https://bugs.java.com/view_bug.do?bug_id=6851973">bug</a>.</p>
  * <p>A workaround unti this is fixed in the JVM is to change</p>
  * HKEY_LOCAL_MACHINE\System
  * \CurrentControlSet\Control\LSA\SuppressExtendedProtection to 0x02
