@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2015 the original author or authors.
+ * Copyright 2009-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,10 @@
  */
 package org.springframework.security.kerberos.web.authentication;
 
+import javax.servlet.http.HttpServletRequestWrapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.util.UrlUtils;
@@ -57,6 +59,8 @@ public class SpnegoEntryPoint implements AuthenticationEntryPoint {
 
 	private final String forwardUrl;
 
+	private final HttpMethod forwardMethod;
+
 	private final boolean forward;
 
 	/**
@@ -71,8 +75,9 @@ public class SpnegoEntryPoint implements AuthenticationEntryPoint {
 
 	/**
 	 * Instantiates a new spnego entry point. This constructor enables security
-	 * configuration to use SPNEGO in combination with login form as fallback
-	 * for clients that do not support this kind of authentication.
+	 * configuration to use SPNEGO in combination with a fallback page (login form,
+	 * custom 401 page ...). The forward method will be accessed via GET HTTP
+	 * method regardless of the HTTP method of the original request.
 	 *
 	 * @param forwardUrl
 	 *            URL where the login page can be found. Should be
@@ -80,13 +85,35 @@ public class SpnegoEntryPoint implements AuthenticationEntryPoint {
 	 *            {@code /}) and can't be absolute URL.
 	 */
 	public SpnegoEntryPoint(String forwardUrl) {
+		this(forwardUrl, HttpMethod.GET);
+	}
+
+	/**
+	 * Instantiates a new spnego entry point. This constructor enables security
+	 * configuration to use SPNEGO in combination a fallback page (login form,
+	 * custom 401 page ...). The forward URL will be accessed via provided HTTP
+	 * method.
+	 *
+	 * @param forwardUrl
+	 *            URL where the login page can be found. Should be
+	 *            relative to the web-app context path (include a leading
+	 *            {@code /}) and can't be absolute URL.
+	 *
+	 * @param forwardMethod
+	 *            HTTP method to use when accessing the forward URL
+	 */
+	public SpnegoEntryPoint(String forwardUrl, HttpMethod forwardMethod) {
 		if (StringUtils.hasText(forwardUrl)) {
 			Assert.isTrue(UrlUtils.isValidRedirectUrl(forwardUrl), "Forward url specified must be a valid forward URL");
 			Assert.isTrue(!UrlUtils.isAbsoluteUrl(forwardUrl), "Forward url specified must not be absolute");
+			Assert.notNull(forwardMethod, "Http method must be specified");
+
 			this.forwardUrl = forwardUrl;
+			this.forwardMethod = forwardMethod;
 			this.forward = true;
 		} else {
 			this.forwardUrl = null;
+			this.forwardMethod = null;
 			this.forward = false;
 		}
 	}
@@ -102,7 +129,13 @@ public class SpnegoEntryPoint implements AuthenticationEntryPoint {
 
 		if (forward) {
 			RequestDispatcher dispatcher = request.getRequestDispatcher(forwardUrl);
-			dispatcher.forward(request, response);
+
+			dispatcher.forward(new HttpServletRequestWrapper(request) {
+				@Override
+				public String getMethod() {
+					return forwardMethod.name();
+				}
+			}, response);
 		} else {
 			response.flushBuffer();
 		}
