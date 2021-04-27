@@ -46,7 +46,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 				.permitAll()
 				.and()
 			.addFilterBefore(
-					spnegoAuthenticationProcessingFilter(authenticationManagerBean()),
+					spnegoAuthenticationProcessingFilter(),
 					BasicAuthenticationFilter.class);
 	}
 
@@ -73,10 +73,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
-	public SpnegoAuthenticationProcessingFilter spnegoAuthenticationProcessingFilter(
-			AuthenticationManager authenticationManager) {
+	public SpnegoAuthenticationProcessingFilter spnegoAuthenticationProcessingFilter() throws Exception {
 		SpnegoAuthenticationProcessingFilter filter = new SpnegoAuthenticationProcessingFilter();
-		filter.setAuthenticationManager(authenticationManager);
+		filter.setAuthenticationManager(authenticationManagerBean());
 		return filter;
 	}
 
