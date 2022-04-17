@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -101,6 +101,37 @@ public class KerberosRestTemplateTests extends KerberosSecurityTestcase {
 		String response = restTemplate.getForObject("http://" + host + ":" + port + "/hello", String.class);
 		assertThat(response, is("home"));
     }
+
+	@Test
+	public void testSpnegoWithPassword() throws Exception {
+
+		MiniKdc kdc = getKdc();
+		File workDir = getWorkDir();
+		String host = InetAddress.getLocalHost().getCanonicalHostName();
+
+		String serverPrincipal = "HTTP/" + host;
+		File serverKeytab = new File(workDir, "server.keytab");
+		kdc.createPrincipal(serverKeytab, serverPrincipal);
+
+		String userPrincipal = "testuser";
+		String password = "testpassword";
+		kdc.createPrincipal(userPrincipal, password);
+
+
+		context = SpringApplication.run(new Object[] { WebSecurityConfig.class, VanillaWebConfiguration.class,
+				WebConfiguration.class }, new String[] { "--security.basic.enabled=true",
+				"--security.user.name=username", "--security.user.password=password",
+				"--serverPrincipal=" + serverPrincipal, "--serverKeytab=" + serverKeytab.getAbsolutePath() });
+
+		PortInitListener portInitListener = context.getBean(PortInitListener.class);
+		assertThat(portInitListener.latch.await(10, TimeUnit.SECONDS), is(true));
+		int port = portInitListener.port;
+
+		KerberosRestTemplate restTemplate = new KerberosRestTemplate(null, userPrincipal, password, null);
+
+		String response = restTemplate.getForObject("http://" + host + ":" + port + "/hello", String.class);
+		assertThat(response, is("home"));
+	}
 
     @Test
     public void testSpnegoWithForward() throws Exception {

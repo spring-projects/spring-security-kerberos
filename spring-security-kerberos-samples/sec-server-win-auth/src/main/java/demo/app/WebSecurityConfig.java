@@ -90,7 +90,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
-	public KerberosServiceAuthenticationProvider kerberosServiceAuthenticationProvider() {
+	public KerberosServiceAuthenticationProvider kerberosServiceAuthenticationProvider() throws Exception {
 		KerberosServiceAuthenticationProvider provider = new KerberosServiceAuthenticationProvider();
 		provider.setTicketValidator(sunJaasKerberosTicketValidator());
 		provider.setUserDetailsService(ldapUserDetailsService());
@@ -107,29 +107,35 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	@Bean
-	public KerberosLdapContextSource kerberosLdapContextSource() {
+	public KerberosLdapContextSource kerberosLdapContextSource() throws Exception {
 		KerberosLdapContextSource contextSource = new KerberosLdapContextSource(adServer);
 		contextSource.setLoginConfig(loginConfig());
 		return contextSource;
 	}
 
-	@Bean
-	public SunJaasKrb5LoginConfig loginConfig() {
+	public SunJaasKrb5LoginConfig loginConfig() throws Exception {
 		SunJaasKrb5LoginConfig loginConfig = new SunJaasKrb5LoginConfig();
 		loginConfig.setKeyTabLocation(new FileSystemResource(keytabLocation));
 		loginConfig.setServicePrincipal(servicePrincipal);
 		loginConfig.setDebug(true);
 		loginConfig.setIsInitiator(true);
+		loginConfig.afterPropertiesSet();
 		return loginConfig;
 	}
 
 	@Bean
-	public LdapUserDetailsService ldapUserDetailsService() {
+	public LdapUserDetailsService ldapUserDetailsService() throws Exception {
 		FilterBasedLdapUserSearch userSearch =
 				new FilterBasedLdapUserSearch(ldapSearchBase, ldapSearchFilter, kerberosLdapContextSource());
-		LdapUserDetailsService service = new LdapUserDetailsService(userSearch);
+		LdapUserDetailsService service =
+				new LdapUserDetailsService(userSearch, new ActiveDirectoryLdapAuthoritiesPopulator());
 		service.setUserDetailsMapper(new LdapUserDetailsMapper());
 		return service;
 	}
 
+	@Bean
+	@Override
+	public AuthenticationManager authenticationManagerBean() throws Exception {
+		return super.authenticationManagerBean();
+	}
 }
