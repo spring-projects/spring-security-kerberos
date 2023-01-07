@@ -1,11 +1,11 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2009-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * https://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,16 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.security.kerberos.authentication.sun;
+
+import java.util.Base64;
+
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+import org.springframework.security.authentication.BadCredentialsException;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
-
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.crypto.codec.Base64;
 
 public class SunJaasKerberosTicketValidatorTests {
 
@@ -63,20 +66,17 @@ public class SunJaasKerberosTicketValidatorTests {
 			+ "UgYMsiMC59oi82OR3re8gpypecrtD0g88CwCrReDpoLb7VGVCc4z00ld7ugz"
 			+ "EbGsZvh0SLMKnxAAm1nYlqQTu/VKC8zi9N0c7ikJegGwBKOgbebPm+ckKDra"
 			+ "fbVsm0pcmnXv5WvwjJPFjJWsL+7NzUfsedJxgHTCzdztZyNxu6iQf8cpAabp"
-			+ "PB1vJdIMjc8benP9/+EUhX1LkwvV/rOO3ocwjtdLY1rcmNXSbhnf8jDcVjOe"
-			+ "eL2PHBfvkne/FgxC";
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
+			+ "PB1vJdIMjc8benP9/+EUhX1LkwvV/rOO3ocwjtdLY1rcmNXSbhnf8jDcVjOe" + "eL2PHBfvkne/FgxC";
 
 	@Test
-	public void testJdkMsKrb5OIDRegressionTweak() throws Exception {
-		thrown.expect(BadCredentialsException.class);
-		thrown.expectMessage(not(containsString("GSSContext name of the context initiator is null")));
-		thrown.expectMessage(containsString("Kerberos validation not successful"));
+	public void testJdkMsKrb5OIDRegressionTweak() {
 		SunJaasKerberosTicketValidator validator = new SunJaasKerberosTicketValidator();
-		byte[] kerberosTicket = Base64.decode(header.getBytes());
-		validator.validateTicket(kerberosTicket);
+		byte[] kerberosTicket = Base64.getDecoder().decode(header.getBytes());
+		BadCredentialsException exception = Assertions.assertThrows(BadCredentialsException.class,
+				() -> validator.validateTicket(kerberosTicket));
+		String message = exception.getMessage();
+		MatcherAssert.assertThat(message, not(containsString("GSSContext name of the context initiator is null")));
+		MatcherAssert.assertThat(message, containsString("Kerberos validation not successful"));
 	}
 
 }

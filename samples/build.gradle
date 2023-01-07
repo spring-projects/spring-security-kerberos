@@ -1,21 +1,87 @@
+import org.springframework.boot.gradle.plugin.SpringBootPlugin
+
+plugins {
+	id "checkstyle"
+	id "io.spring.javaformat" version "0.0.25"
+	id 'io.spring.nohttp' version '0.0.5.RELEASE'
+	id 'org.springframework.boot' version '2.7.7'
+}
+
+repositories {
+	mavenCentral()
+	maven {
+		url  "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+	}
+}
+
+group = 'io.github.openprojectx.security.kerberos'
+
 description = 'Spring Security Kerberos Samples Common'
 
-project('sec-server-win-auth') {
-  description = 'Security Server Windows Auth Sample'
+allprojects {
+	apply plugin: 'checkstyle'
+	apply plugin: 'io.spring.javaformat'
+
+	repositories {
+		mavenCentral()
+		maven {
+			url  "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+		}
+	}
+
+	dependencies {
+		checkstyle "io.spring.javaformat:spring-javaformat-checkstyle:0.0.25"
+	}
 }
 
-project('sec-server-client-auth') {
-  description = 'Security Server Side Auth Sample'
+def sampleServerProjects() {
+	subprojects.findAll { project ->
+		project.name.contains('sec-server') && project.name != 'spring-security-kerberos-samples-common'
+	}
 }
 
-project('sec-server-spnego-form-auth') {
-  description = 'Security Server Spnego and Form Auth Sample'
+def sampleClientProjects() {
+	subprojects.findAll { project ->
+		project.name.contains('sec-client')
+	}
 }
 
-project('sec-server-spnego-form-auth-xml') {
-  description = 'Security Server Spnego and Form Auth Xml Sample'
+configure(sampleServerProjects()) {
+	apply plugin: 'java'
+	apply plugin: 'org.springframework.boot'
+	apply plugin: 'io.spring.dependency-management'
+
+	// don't publish boot packaged samples
+	tasks.findByPath("artifactoryPublish")?.enabled = false
+	dependencies {
+		implementation(platform("io.github.openprojectx.security.kerberos:spring-security-kerberos-bom:5.8.0-SNAPSHOT"))
+		implementation platform(SpringBootPlugin.BOM_COORDINATES)
+
+		implementation project(':spring-security-kerberos-samples-common')
+		implementation 'io.github.openprojectx.security.kerberos:spring-security-kerberos-client'
+		implementation 'io.github.openprojectx.security.kerberos:spring-security-kerberos-web'
+		implementation 'org.springframework.boot:spring-boot-starter-security'
+		implementation 'org.springframework.boot:spring-boot-starter-web'
+		implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	}
 }
 
-project('sec-client-rest-template') {
-  description = 'Security Client RestTemplate Sample'
+configure(sampleClientProjects()) {
+	apply plugin: "org.springframework.boot"
+	apply plugin: 'java'
+	// don't publish boot packaged samples
+	tasks.findByPath("artifactoryPublish")?.enabled = false
+	dependencies {
+		implementation(platform("io.github.openprojectx.security.kerberos:spring-security-kerberos-bom:5.8.0-SNAPSHOT"))
+		implementation platform(SpringBootPlugin.BOM_COORDINATES)
+		implementation "io.github.openprojectx.security.kerberos:spring-security-kerberos-client"
+		implementation "org.springframework.boot:spring-boot-starter"
+		testImplementation "org.springframework:spring-test"
+//		testImplementation "org.hamcrest:hamcrest-core:$hamcrestVersion"
+//		testImplementation "org.hamcrest:hamcrest-library:$hamcrestVersion"
+	}
+}
+
+subprojects {
+	task allDeps(type: DependencyReportTask) {}
 }

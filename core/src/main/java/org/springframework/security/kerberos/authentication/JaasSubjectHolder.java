@@ -13,50 +13,57 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.security.kerberos.authentication;
 
-import org.springframework.security.kerberos.authentication.sun.SunJaasKerberosClient;
-
-import javax.security.auth.Subject;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.security.auth.Subject;
+
+import org.springframework.security.kerberos.authentication.sun.SunJaasKerberosClient;
+
 /**
- * <p>Holds the Subject of the currently authenticated user, since this
- * Jaas object also has the credentials, and permits creating new
- * credentials against other Kerberos services.</p>
+ * <p>
+ * Holds the Subject of the currently authenticated user, since this Jaas object also has
+ * the credentials, and permits creating new credentials against other Kerberos services.
+ * </p>
+ *
  * @author Bogdan Mustiata
  * @see SunJaasKerberosClient
  * @see org.springframework.security.kerberos.authentication.KerberosAuthenticationProvider
  */
 public class JaasSubjectHolder {
-    private Subject jaasSubject;
-    private String username;
 
-    private Map<String, byte[]> savedTokens = new HashMap<String, byte[]>();
+	private Subject jaasSubject;
 
-    public JaasSubjectHolder(Subject jaasSubject) {
-        this.jaasSubject = jaasSubject;
-    }
+	private String username;
 
-    public JaasSubjectHolder(Subject jaasSubject, String username) {
-        this.jaasSubject = jaasSubject;
-        this.username = username;
-    }
+	private Map<String, byte[]> savedTokens = new HashMap<String, byte[]>();
 
-    public String getUsername() {
-        return username;
-    }
+	public JaasSubjectHolder(Subject jaasSubject) {
+		this.jaasSubject = jaasSubject;
+	}
 
-    public Subject getJaasSubject() {
-        return jaasSubject;
-    }
+	public JaasSubjectHolder(Subject jaasSubject, String username) {
+		this.jaasSubject = jaasSubject;
+		this.username = username;
+	}
 
-    public void addToken(String targetService, byte[] outToken) {
-        this.savedTokens.put(targetService, outToken);
-    }
+	public String getUsername() {
+		return this.username;
+	}
 
-    public byte[] getToken(String principalName) {
-        return savedTokens.get(principalName);
-    }
+	public Subject getJaasSubject() {
+		return this.jaasSubject;
+	}
+
+	public void addToken(String targetService, byte[] outToken) {
+		this.savedTokens.put(targetService, outToken);
+	}
+
+	public byte[] getToken(String principalName) {
+		return this.savedTokens.get(principalName);
+	}
+
 }

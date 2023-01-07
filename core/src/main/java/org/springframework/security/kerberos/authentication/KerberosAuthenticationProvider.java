@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.security.kerberos.authentication;
 
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -31,43 +32,41 @@ import org.springframework.security.core.userdetails.UserDetailsService;
  */
 public class KerberosAuthenticationProvider implements AuthenticationProvider {
 
-    private KerberosClient kerberosClient;
+	private KerberosClient kerberosClient;
 
-    private UserDetailsService userDetailsService;
+	private UserDetailsService userDetailsService;
 
-    @Override
-    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+	@Override
+	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
 		UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken) authentication;
-		JaasSubjectHolder subjectHolder = kerberosClient.login(auth.getName(), auth.getCredentials().toString());
+		JaasSubjectHolder subjectHolder = this.kerberosClient.login(auth.getName(), auth.getCredentials().toString());
 		UserDetails userDetails = this.userDetailsService.loadUserByUsername(subjectHolder.getUsername());
 		KerberosUsernamePasswordAuthenticationToken output = new KerberosUsernamePasswordAuthenticationToken(
-                userDetails, auth.getCredentials(), userDetails.getAuthorities(), subjectHolder);
+				userDetails, auth.getCredentials(), userDetails.getAuthorities(), subjectHolder);
 		output.setDetails(authentication.getDetails());
-        return output;
+		return output;
 
-    }
+	}
 
-    @Override
-    public boolean supports(Class<? extends Object> authentication) {
-        return (UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication));
-    }
+	@Override
+	public boolean supports(Class<? extends Object> authentication) {
+		return (UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication));
+	}
 
-    /**
-     * Sets the kerberos client.
-     *
-     * @param kerberosClient the new kerberos client
-     */
-    public void setKerberosClient(KerberosClient kerberosClient) {
-        this.kerberosClient = kerberosClient;
-    }
+	/**
+	 * Sets the kerberos client.
+	 * @param kerberosClient the new kerberos client
+	 */
+	public void setKerberosClient(KerberosClient kerberosClient) {
+		this.kerberosClient = kerberosClient;
+	}
 
-    /**
-     * Sets the user details service.
-     *
-     * @param detailsService the new user details service
-     */
-    public void setUserDetailsService(UserDetailsService detailsService) {
-        this.userDetailsService = detailsService;
-    }
+	/**
+	 * Sets the user details service.
+	 * @param detailsService the new user details service
+	 */
+	public void setUserDetailsService(UserDetailsService detailsService) {
+		this.userDetailsService = detailsService;
+	}
 
 }

@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.security.kerberos.authentication;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.security.authentication.AccountStatusUserDetailsChecker;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -28,17 +30,20 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.util.Assert;
 
 /**
- * <p>Authentication Provider which validates Kerberos Service Tickets
- * or SPNEGO Tokens (which includes Kerberos Service Tickets).</p>
+ * <p>
+ * Authentication Provider which validates Kerberos Service Tickets or SPNEGO Tokens
+ * (which includes Kerberos Service Tickets).
+ * </p>
  *
- * <p>It needs a <code>KerberosTicketValidator</code>, which contains the
- * code to validate the ticket, as this code is different between
- * SUN and IBM JRE.<br>
- * It also needs an <code>UserDetailsService</code> to load the user properties
- * and the <code>GrantedAuthorities</code>, as we only get back the username
- * from Kerbeos</p>
- *
- * You can see an example configuration in <code>SpnegoAuthenticationProcessingFilter</code>.
+ * <p>
+ * It needs a <code>KerberosTicketValidator</code>, which contains the code to validate
+ * the ticket, as this code is different between SUN and IBM JRE.<br>
+ * It also needs an <code>UserDetailsService</code> to load the user properties and the
+ * <code>GrantedAuthorities</code>, as we only get back the username from Kerbeos
+ * </p>
+ * <p>
+ * You can see an example configuration in
+ * <code>SpnegoAuthenticationProcessingFilter</code>.
  *
  * @author Mike Wiesner
  * @author Jeremy Stone
@@ -46,31 +51,30 @@ import org.springframework.util.Assert;
  * @see KerberosTicketValidator
  * @see UserDetailsService
  */
-public class KerberosServiceAuthenticationProvider implements
-		AuthenticationProvider, InitializingBean {
+public class KerberosServiceAuthenticationProvider implements AuthenticationProvider, InitializingBean {
 
 	private static final Log LOG = LogFactory.getLog(KerberosServiceAuthenticationProvider.class);
 
 	private KerberosTicketValidator ticketValidator;
+
 	private UserDetailsService userDetailsService;
+
 	private UserDetailsChecker userDetailsChecker = new AccountStatusUserDetailsChecker();
 
 	@Override
-	public Authentication authenticate(Authentication authentication)
-			throws AuthenticationException {
+	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
 		KerberosServiceRequestToken auth = (KerberosServiceRequestToken) authentication;
 		byte[] token = auth.getToken();
 		LOG.debug("Try to validate Kerberos Token");
 		KerberosTicketValidation ticketValidation = this.ticketValidator.validateTicket(token);
 		LOG.debug("Successfully validated " + ticketValidation.username());
 		UserDetails userDetails = this.userDetailsService.loadUserByUsername(ticketValidation.username());
-		userDetailsChecker.check(userDetails);
+		this.userDetailsChecker.check(userDetails);
 		additionalAuthenticationChecks(userDetails, auth);
-		KerberosServiceRequestToken responseAuth = new KerberosServiceRequestToken(
-				userDetails, ticketValidation,
+		KerberosServiceRequestToken responseAuth = new KerberosServiceRequestToken(userDetails, ticketValidation,
 				userDetails.getAuthorities(), token);
 		responseAuth.setDetails(authentication.getDetails());
-		return  responseAuth;
+		return responseAuth;
 	}
 
 	@Override
@@ -85,9 +89,8 @@ public class KerberosServiceAuthenticationProvider implements
 	}
 
 	/**
-	 * The <code>UserDetailsService</code> to use, for loading the user properties
-	 * and the <code>GrantedAuthorities</code>.
-	 *
+	 * The <code>UserDetailsService</code> to use, for loading the user properties and the
+	 * <code>GrantedAuthorities</code>.
 	 * @param userDetailsService the new user details service
 	 */
 	public void setUserDetailsService(UserDetailsService userDetailsService) {
@@ -95,9 +98,8 @@ public class KerberosServiceAuthenticationProvider implements
 	}
 
 	/**
-	 * The <code>KerberosTicketValidator</code> to use, for validating
-	 * the Kerberos/SPNEGO tickets.
-	 *
+	 * The <code>KerberosTicketValidator</code> to use, for validating the Kerberos/SPNEGO
+	 * tickets.
 	 * @param ticketValidator the new ticket validator
 	 */
 	public void setTicketValidator(KerberosTicketValidator ticketValidator) {
@@ -105,13 +107,13 @@ public class KerberosServiceAuthenticationProvider implements
 	}
 
 	/**
-	 * Allows subclasses to perform any additional checks of a returned <code>UserDetails</code>
-	 * for a given authentication request.
-	 *
+	 * Allows subclasses to perform any additional checks of a returned
+	 * <code>UserDetails</code> for a given authentication request.
 	 * @param userDetails as retrieved from the {@link UserDetailsService}
 	 * @param authentication validated {@link KerberosServiceRequestToken}
-	 * @throws AuthenticationException AuthenticationException if the credentials could not be validated (generally a
-	 *         <code>BadCredentialsException</code>, an <code>AuthenticationServiceException</code>)
+	 * @throws AuthenticationException AuthenticationException if the credentials could
+	 * not be validated (generally a <code>BadCredentialsException</code>, an
+	 * <code>AuthenticationServiceException</code>)
 	 */
 	protected void additionalAuthenticationChecks(UserDetails userDetails, KerberosServiceRequestToken authentication)
 			throws AuthenticationException {

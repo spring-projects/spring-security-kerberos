@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC
+		"-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+		"https://checkstyle.org/dtds/configuration_1_3.dtd">
+<module name="com.puppycrawl.tools.checkstyle.Checker">
+	<module name="SuppressionFilter">
+		<property name="file" value="${config_loc}/suppressions.xml"/>
+	</module>
+	<module name="io.spring.javaformat.checkstyle.SpringChecks">
+		<property name="avoidStaticImportExcludes" value="org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.*,
+			org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction.*,
+			org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction.*,
+			org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.*" />
+		<property name="excludes" value="com.puppycrawl.tools.checkstyle.checks.regexp.RegexpSinglelineJavaCheck" />
+	</module>
+	<module name="com.puppycrawl.tools.checkstyle.TreeWalker">
+		<module name="io.spring.javaformat.checkstyle.check.SpringJUnit5Check" />
+		<module
+				name="com.puppycrawl.tools.checkstyle.checks.imports.IllegalImportCheck">
+			<property name="regexp" value="true" />
+			<property name="illegalPkgs"
+					  value="^sun.*, ^org\.apache\.commons\.(?!compress|dbcp2|lang|lang3|logging|pool2).*, ^com\.datastax\.oss\.driver\.shaded.*, ^com\.google\.common.*, ^io\.micrometer\.shaded.*, ^org\.flywaydb\.core\.internal.*, ^org\.testcontainers\.shaded.*" />
+			<property name="illegalClasses"
+					  value="^com\.hazelcast\.util\.Base64, ^org\.junit\.rules\.ExpectedException, ^org\.mockito\.InjectMocks, ^org\.slf4j\.LoggerFactory, ^org.springframework.context.annotation.ScannedGenericBeanDefinition, ^reactor\.core\.support\.Assert" />
+		</module>
+		<module name="com.puppycrawl.tools.checkstyle.checks.regexp.RegexpSinglelineJavaCheck">
+			<property name="format" value="^\t* +\t*\S" />
+			<property name="message"
+					  value="Line has leading space characters; indentation should be performed with tabs only." />
+			<property name="ignoreComments" value="true" />
+		</module>
+		<module name="com.puppycrawl.tools.checkstyle.checks.regexp.RegexpSinglelineJavaCheck">
+			<property name="maximum" value="0"/>
+			<property name="format" value="org\.junit\.(Assert|jupiter\.api\.Assertions)\.assert" />
+			<property name="message"
+					  value="Please use AssertJ imports." />
+			<property name="ignoreComments" value="true" />
+		</module>
+		<module name="com.puppycrawl.tools.checkstyle.checks.regexp.RegexpCheck">
+			<property name="format" value="[ \t]+$" />
+			<property name="illegalPattern" value="true" />
+			<property name="message" value="Trailing whitespace" />
+		</module>
+		<module name="io.spring.javaformat.checkstyle.check.SpringJavadocCheck">
+			<property name="publicOnlySinceTags" value="true" />
+			<property name="requireSinceTag" value="false" />
+		</module>
+	</module>
+</module>

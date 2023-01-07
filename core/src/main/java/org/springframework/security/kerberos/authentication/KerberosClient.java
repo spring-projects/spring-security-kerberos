@@ -17,7 +17,6 @@
 package org.springframework.security.kerberos.authentication;
 
 /**
- * 
  * @author Mike Wiesner
  * @author Bogdan Mustiata
  * @since 1.0
@@ -25,6 +24,6 @@ package org.springframework.security.kerberos.authentication;
  */
 public interface KerberosClient {
 
-    public JaasSubjectHolder login(String username, String password);
+	JaasSubjectHolder login(String username, String password);
 
 }

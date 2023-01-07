@@ -1,11 +1,11 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2009-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * https://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,14 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.security.kerberos.test;
 
-import org.apache.directory.server.kerberos.shared.keytab.Keytab;
-import org.apache.directory.server.kerberos.shared.keytab.KeytabEntry;
-import org.junit.Assert;
-import org.junit.Test;
-import org.springframework.security.kerberos.test.KerberosSecurityTestcase;
-import org.springframework.security.kerberos.test.MiniKdc;
+import java.io.File;
+import java.security.Principal;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import javax.security.auth.Subject;
 import javax.security.auth.kerberos.KerberosPrincipal;
@@ -28,20 +30,17 @@ import javax.security.auth.login.AppConfigurationEntry;
 import javax.security.auth.login.Configuration;
 import javax.security.auth.login.LoginContext;
 
-import java.io.File;
-import java.security.Principal;
-import java.util.Set;
-import java.util.Map;
-import java.util.HashSet;
-import java.util.HashMap;
-import java.util.Arrays;
+import org.apache.directory.server.kerberos.shared.keytab.Keytab;
+import org.apache.directory.server.kerberos.shared.keytab.KeytabEntry;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class TestMiniKdc extends KerberosSecurityTestcase {
 
 	@Test
 	public void testMiniKdcStart() {
 		MiniKdc kdc = getKdc();
-		Assert.assertNotSame(0, kdc.getPort());
+		Assertions.assertNotSame(0, kdc.getPort());
 	}
 
 	@Test
@@ -59,14 +58,52 @@ public class TestMiniKdc extends KerberosSecurityTestcase {
 		// because
 		// org.apache.directory.server.kerberos.shared.keytab.KeytabDecoder
 		// .getPrincipalName(IoBuffer buffer) use \\ when generates principal
-		Assert.assertEquals(
+		Assertions.assertEquals(
 				new HashSet<String>(Arrays.asList("foo\\bar@" + kdc.getRealm(), "bar\\foo@" + kdc.getRealm())),
 				principals);
 	}
 
-	private static class KerberosConfiguration extends Configuration {
+	@Test
+	public void testKerberosLogin() throws Exception {
+		MiniKdc kdc = getKdc();
+		File workDir = getWorkDir();
+		LoginContext loginContext = null;
+
+		String principal = "foo";
+		File keytab = new File(workDir, "foo.keytab");
+		kdc.createPrincipal(keytab, principal);
+
+		Set<Principal> principals = new HashSet<Principal>();
+		principals.add(new KerberosPrincipal(principal));
+
+		// client login
+		Subject subject = new Subject(false, principals, new HashSet<Object>(), new HashSet<Object>());
+		loginContext = new LoginContext("", subject, null, KerberosConfiguration.createClientConfig(principal, keytab));
+		loginContext.login();
+		subject = loginContext.getSubject();
+		Assertions.assertEquals(1, subject.getPrincipals().size());
+		Assertions.assertEquals(KerberosPrincipal.class, subject.getPrincipals().iterator().next().getClass());
+		Assertions.assertEquals(principal + "@" + kdc.getRealm(), subject.getPrincipals().iterator().next().getName());
+		loginContext.logout();
+
+		// server login
+		subject = new Subject(false, principals, new HashSet<Object>(), new HashSet<Object>());
+		loginContext = new LoginContext("", subject, null, KerberosConfiguration.createServerConfig(principal, keytab));
+		loginContext.login();
+		subject = loginContext.getSubject();
+		Assertions.assertEquals(1, subject.getPrincipals().size());
+		Assertions.assertEquals(KerberosPrincipal.class, subject.getPrincipals().iterator().next().getClass());
+		Assertions.assertEquals(principal + "@" + kdc.getRealm(), subject.getPrincipals().iterator().next().getName());
+		loginContext.logout();
+
+	}
+
+	public static final class KerberosConfiguration extends Configuration {
+
 		private String principal;
+
 		private String keytab;
+
 		private boolean isInitiator;
 
 		private KerberosConfiguration(String principal, File keytab, boolean client) {
@@ -91,15 +128,15 @@ public class TestMiniKdc extends KerberosSecurityTestcase {
 		@Override
 		public AppConfigurationEntry[] getAppConfigurationEntry(String name) {
 			Map<String, String> options = new HashMap<String, String>();
-			options.put("keyTab", keytab);
-			options.put("principal", principal);
+			options.put("keyTab", this.keytab);
+			options.put("principal", this.principal);
 			options.put("useKeyTab", "true");
 			options.put("storeKey", "true");
 			options.put("doNotPrompt", "true");
 			options.put("useTicketCache", "true");
 			options.put("renewTGT", "true");
 			options.put("refreshKrb5Config", "true");
-			options.put("isInitiator", Boolean.toString(isInitiator));
+			options.put("isInitiator", Boolean.toString(this.isInitiator));
 			String ticketCache = System.getenv("KRB5CCNAME");
 			if (ticketCache != null) {
 				options.put("ticketCache", ticketCache);
@@ -109,48 +146,7 @@ public class TestMiniKdc extends KerberosSecurityTestcase {
 			return new AppConfigurationEntry[] { new AppConfigurationEntry(getKrb5LoginModuleName(),
 					AppConfigurationEntry.LoginModuleControlFlag.REQUIRED, options) };
 		}
-	}
 
-	@Test
-	public void testKerberosLogin() throws Exception {
-		MiniKdc kdc = getKdc();
-		File workDir = getWorkDir();
-		LoginContext loginContext = null;
-		try {
-			String principal = "foo";
-			File keytab = new File(workDir, "foo.keytab");
-			kdc.createPrincipal(keytab, principal);
-
-			Set<Principal> principals = new HashSet<Principal>();
-			principals.add(new KerberosPrincipal(principal));
-
-			// client login
-			Subject subject = new Subject(false, principals, new HashSet<Object>(), new HashSet<Object>());
-			loginContext = new LoginContext("", subject, null, KerberosConfiguration.createClientConfig(principal,
-					keytab));
-			loginContext.login();
-			subject = loginContext.getSubject();
-			Assert.assertEquals(1, subject.getPrincipals().size());
-			Assert.assertEquals(KerberosPrincipal.class, subject.getPrincipals().iterator().next().getClass());
-			Assert.assertEquals(principal + "@" + kdc.getRealm(), subject.getPrincipals().iterator().next().getName());
-			loginContext.logout();
-
-			// server login
-			subject = new Subject(false, principals, new HashSet<Object>(), new HashSet<Object>());
-			loginContext = new LoginContext("", subject, null, KerberosConfiguration.createServerConfig(principal,
-					keytab));
-			loginContext.login();
-			subject = loginContext.getSubject();
-			Assert.assertEquals(1, subject.getPrincipals().size());
-			Assert.assertEquals(KerberosPrincipal.class, subject.getPrincipals().iterator().next().getClass());
-			Assert.assertEquals(principal + "@" + kdc.getRealm(), subject.getPrincipals().iterator().next().getName());
-			loginContext.logout();
-
-		} finally {
-			if (loginContext != null) {
-				loginContext.logout();
-			}
-		}
 	}
 
 }

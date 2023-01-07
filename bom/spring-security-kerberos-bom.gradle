@@ -1,0 +1,13 @@
+import io.spring.gradle.convention.SpringModulePlugin
+
+apply plugin: 'io.spring.convention.bom'
+
+dependencies {
+	constraints {
+		project.rootProject.allprojects { p ->
+			p.plugins.withType(SpringModulePlugin) {
+				api p
+			}
+		}
+	}
+}

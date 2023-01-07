@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.security.kerberos.authentication;
 
 import java.io.UnsupportedEncodingException;
@@ -25,19 +26,23 @@ import javax.security.auth.Subject;
 
 import org.ietf.jgss.GSSContext;
 import org.ietf.jgss.MessageProp;
+
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.codec.Base64;
 
 /**
- * <p>Holds the Kerberos/SPNEGO token for requesting a kerberized service and is
- * also the output of <code>KerberosServiceAuthenticationProvider</code>.</p>
- * <p>Will mostly be created in <code>SpnegoAuthenticationProcessingFilter</code>
- * and authenticated in <code>KerberosServiceAuthenticationProvider</code>.</p>
- *
- * This token cannot be re-authenticated, as you will get a Kerberos Reply
- * error.
+ * <p>
+ * Holds the Kerberos/SPNEGO token for requesting a kerberized service and is also the
+ * output of <code>KerberosServiceAuthenticationProvider</code>.
+ * </p>
+ * <p>
+ * Will mostly be created in <code>SpnegoAuthenticationProcessingFilter</code> and
+ * authenticated in <code>KerberosServiceAuthenticationProvider</code>.
+ * </p>
+ * <p>
+ * This token cannot be re-authenticated, as you will get a Kerberos Reply error.
  *
  * @author Mike Wiesner
  * @author Jeremy Stone
@@ -45,9 +50,7 @@ import org.springframework.security.crypto.codec.Base64;
  * @since 1.0
  * @see KerberosServiceAuthenticationProvider
  */
-public class KerberosServiceRequestToken
-		extends AbstractAuthenticationToken
-		implements KerberosAuthentication {
+public class KerberosServiceRequestToken extends AbstractAuthenticationToken implements KerberosAuthentication {
 
 	private static final long serialVersionUID = 395488921064775014L;
 
@@ -60,33 +63,27 @@ public class KerberosServiceRequestToken
 	private JaasSubjectHolder jaasSubjectHolder;
 
 	/**
-	 * Creates an authenticated token, normally used as an output of an
-	 * authentication provider.
-	 *
+	 * Creates an authenticated token, normally used as an output of an authentication
+	 * provider.
 	 * @param principal the user principal (mostly of instance <code>UserDetails</code>)
 	 * @param ticketValidation result of ticket validation
 	 * @param authorities the authorities which are granted to the user
 	 * @param token the Kerberos/SPNEGO token
 	 * @see UserDetails
 	 */
-	public KerberosServiceRequestToken(Object principal,
-									   KerberosTicketValidation ticketValidation,
-									   Collection<? extends GrantedAuthority> authorities,
-									   byte[] token) {
+	public KerberosServiceRequestToken(Object principal, KerberosTicketValidation ticketValidation,
+			Collection<? extends GrantedAuthority> authorities, byte[] token) {
 		super(authorities);
 		this.token = token;
 		this.principal = principal;
 		this.ticketValidation = ticketValidation;
-		this.jaasSubjectHolder = new JaasSubjectHolder(
-				ticketValidation.subject(),
-				ticketValidation.username());
+		this.jaasSubjectHolder = new JaasSubjectHolder(ticketValidation.subject(), ticketValidation.username());
 		super.setAuthenticated(true);
 	}
 
 	/**
 	 * Creates an unauthenticated instance which should then be authenticated by
 	 * <code>KerberosServiceAuthenticationProvider</code>.
-	 *
 	 * @param token Kerberos/SPNEGO token
 	 * @see KerberosServiceAuthenticationProvider
 	 */
@@ -98,31 +95,35 @@ public class KerberosServiceRequestToken
 	}
 
 	/**
+	 * equals() is based only on the Kerberos token
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!super.equals(obj)) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		KerberosServiceRequestToken other = (KerberosServiceRequestToken) obj;
+		if (!Arrays.equals(this.token, other.token)) {
+			return false;
+		}
+		return true;
+	}
+
+	/**
 	 * Calculates hashcode based on the Kerberos token
 	 */
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + Arrays.hashCode(token);
+		result = prime * result + Arrays.hashCode(this.token);
 		return result;
-	}
-
-	/**
-	 * equals() is based only on the Kerberos token
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		KerberosServiceRequestToken other = (KerberosServiceRequestToken) obj;
-		if (!Arrays.equals(token, other.token))
-			return false;
-		return true;
 	}
 
 	@Override
@@ -145,41 +146,38 @@ public class KerberosServiceRequestToken
 
 	/**
 	 * Gets the ticket validation
-	 *
 	 * @return the ticket validation (which will be null if the token is unauthenticated)
 	 */
 	public KerberosTicketValidation getTicketValidation() {
-		return ticketValidation;
+		return this.ticketValidation;
 	}
 
 	/**
 	 * Determines whether an authenticated token has a response token
-	 *
 	 * @return whether a response token is available
 	 */
 	public boolean hasResponseToken() {
-		return ticketValidation != null && ticketValidation.responseToken() != null;
+		return this.ticketValidation != null && this.ticketValidation.responseToken() != null;
 	}
 
 	/**
 	 * Gets the (Base64) encoded response token assuming one is available.
-	 *
 	 * @return encoded response token
 	 */
 	public String getEncodedResponseToken() {
-		if (!hasResponseToken())
+		if (!hasResponseToken()) {
 			throw new IllegalStateException("Unauthenticated or no response token");
-
+		}
 		try {
-			return new String(Base64.encode(ticketValidation.responseToken()), "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			throw new IllegalStateException("Unable to encode response token", e);
+			return new String(Base64.encode(this.ticketValidation.responseToken()), "UTF-8");
+		}
+		catch (UnsupportedEncodingException ex) {
+			throw new IllegalStateException("Unable to encode response token", ex);
 		}
 	}
 
 	/**
 	 * Unwraps an encrypted message using the gss context
-	 *
 	 * @param data the data
 	 * @param offset data offset
 	 * @param length data length
@@ -197,7 +195,6 @@ public class KerberosServiceRequestToken
 
 	/**
 	 * Unwraps an encrypted message using the gss context
-	 *
 	 * @param data the data
 	 * @return the decrypted message
 	 * @throws PrivilegedActionException if jaas throws and error
@@ -208,7 +205,6 @@ public class KerberosServiceRequestToken
 
 	/**
 	 * Wraps an message using the gss context
-	 *
 	 * @param data the data
 	 * @param offset data offset
 	 * @param length data length
@@ -226,7 +222,6 @@ public class KerberosServiceRequestToken
 
 	/**
 	 * Wraps an message using the gss context
-	 *
 	 * @param data the data
 	 * @return the encrypted message
 	 * @throws PrivilegedActionException if jaas throws and error
@@ -237,6 +232,7 @@ public class KerberosServiceRequestToken
 
 	@Override
 	public JaasSubjectHolder getJaasSubjectHolder() {
-		return jaasSubjectHolder;
+		return this.jaasSubjectHolder;
 	}
+
 }

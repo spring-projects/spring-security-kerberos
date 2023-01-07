@@ -1,0 +1,5 @@
+description = 'Security Server Spnego and Form Auth Xml Sample'
+
+dependencies {
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}

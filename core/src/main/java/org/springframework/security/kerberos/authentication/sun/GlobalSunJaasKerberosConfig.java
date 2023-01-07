@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.security.kerberos.authentication.sun;
 
 import org.springframework.beans.BeansException;
@@ -27,51 +28,51 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
  */
 public class GlobalSunJaasKerberosConfig implements BeanPostProcessor, InitializingBean {
 
-    private boolean debug = false;
+	private boolean debug = false;
 
-    private String krbConfLocation;
+	private String krbConfLocation;
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        if (debug) {
-            System.setProperty("sun.security.krb5.debug", "true");
-        }
-        if (krbConfLocation != null) {
-            System.setProperty("java.security.krb5.conf", krbConfLocation);
-        }
+	@Override
+	public void afterPropertiesSet() {
+		if (this.debug) {
+			System.setProperty("sun.security.krb5.debug", "true");
+		}
+		if (this.krbConfLocation != null) {
+			System.setProperty("java.security.krb5.conf", this.krbConfLocation);
+		}
 
-    }
+	}
 
-    /**
-     * Enable debug logs from the Sun Kerberos Implementation. Default is false.
-     *
-     * @param debug true if debug should be enabled
-     */
-    public void setDebug(boolean debug) {
-        this.debug = debug;
-    }
+	/**
+	 * Enable debug logs from the Sun Kerberos Implementation. Default is false.
+	 * @param debug true if debug should be enabled
+	 */
+	public void setDebug(boolean debug) {
+		this.debug = debug;
+	}
 
-    /**
-     * Kerberos config file location can be specified here.
-     *
-     * @param krbConfLocation the path to krb config file
-     */
-    public void setKrbConfLocation(String krbConfLocation) {
-        this.krbConfLocation = krbConfLocation;
-    }
+	/**
+	 * Kerberos config file location can be specified here.
+	 * @param krbConfLocation the path to krb config file
+	 */
+	public void setKrbConfLocation(String krbConfLocation) {
+		this.krbConfLocation = krbConfLocation;
+	}
 
-    //  The following methods are not used here. This Bean implements only BeanPostProcessor to ensure that it
-    //  is created before any other bean is created, because the system properties needed to be set very early
-    //  in the startup-phase, but after the BeanFactoryPostProcessing.
+	// The following methods are not used here. This Bean implements only
+	// BeanPostProcessor to ensure that it
+	// is created before any other bean is created, because the system properties needed
+	// to be set very early
+	// in the startup-phase, but after the BeanFactoryPostProcessing.
 
-    @Override
-    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        return bean;
-    }
+	@Override
+	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+		return bean;
+	}
 
-    @Override
-    public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-        return bean;
-    }
+	@Override
+	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+		return bean;
+	}
 
 }

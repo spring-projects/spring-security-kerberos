@@ -13,113 +13,117 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.security.kerberos.authentication;
 
-import org.ietf.jgss.*;
+import java.security.PrivilegedAction;
+
+import javax.security.auth.Subject;
+
+import org.ietf.jgss.GSSContext;
+import org.ietf.jgss.GSSCredential;
+import org.ietf.jgss.GSSException;
+import org.ietf.jgss.GSSManager;
+import org.ietf.jgss.GSSName;
+import org.ietf.jgss.Oid;
+
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 
-import javax.security.auth.Subject;
-import java.security.PrivilegedAction;
-
 /**
- * <p>Allows creating tickets against other service principals storing the
- * tickets in the KerberosAuthentication's JaasSubjectHolder.</p>
+ * <p>
+ * Allows creating tickets against other service principals storing the tickets in the
+ * KerberosAuthentication's JaasSubjectHolder.
+ * </p>
+ *
  * @author Bogdan Mustiata
  */
 public class KerberosMultiTier {
-    public static final String KERBEROS_OID_STRING = "1.2.840.113554.1.2.2";
 
-    public static final Oid KERBEROS_OID = createOid(KERBEROS_OID_STRING);
+	public static final String KERBEROS_OID_STRING = "1.2.840.113554.1.2.2";
 
-    /**
-     * Create a new ticket for the
-     * @param authentication
-     * @param username
-     * @param lifetimeInSeconds
-     * @param targetService
-     * @return
-     */
-    public static Authentication authenticateService(Authentication authentication,
-                                                     final String username,
-                                                     final int lifetimeInSeconds,
-                                                     final String targetService) {
+	public static final Oid KERBEROS_OID = createOid(KERBEROS_OID_STRING);
 
-        KerberosAuthentication kerberosAuthentication = (KerberosAuthentication)authentication;
-        final JaasSubjectHolder jaasSubjectHolder = kerberosAuthentication.getJaasSubjectHolder();
-        Subject subject = jaasSubjectHolder.getJaasSubject();
+	/**
+	 * Create a new ticket for the
+	 * @param authentication
+	 * @param username
+	 * @param lifetimeInSeconds
+	 * @param targetService
+	 * @return
+	 */
+	public static Authentication authenticateService(Authentication authentication, final String username,
+			final int lifetimeInSeconds, final String targetService) {
 
-        Subject.doAs(subject, new PrivilegedAction<Object>() {
-            @Override
-            public Object run() {
-                runAuthentication(jaasSubjectHolder, username, lifetimeInSeconds, targetService);
+		KerberosAuthentication kerberosAuthentication = (KerberosAuthentication) authentication;
+		final JaasSubjectHolder jaasSubjectHolder = kerberosAuthentication.getJaasSubjectHolder();
+		Subject subject = jaasSubjectHolder.getJaasSubject();
 
-                return null;
-            }
-        });
+		Subject.doAs(subject, new PrivilegedAction<Object>() {
+			@Override
+			public Object run() {
+				runAuthentication(jaasSubjectHolder, username, lifetimeInSeconds, targetService);
 
-        return authentication;
-    }
+				return null;
+			}
+		});
 
-    public static byte[] getTokenForService(Authentication authentication, String principalName) {
-        KerberosAuthentication kerberosAuthentication = (KerberosAuthentication)authentication;
-        final JaasSubjectHolder jaasSubjectHolder = kerberosAuthentication.getJaasSubjectHolder();
+		return authentication;
+	}
 
-        return jaasSubjectHolder.getToken(principalName);
-    }
+	public static byte[] getTokenForService(Authentication authentication, String principalName) {
+		KerberosAuthentication kerberosAuthentication = (KerberosAuthentication) authentication;
+		final JaasSubjectHolder jaasSubjectHolder = kerberosAuthentication.getJaasSubjectHolder();
 
-    private static void runAuthentication(JaasSubjectHolder jaasContext,
-                                          String username,
-                                          int lifetimeInSeconds,
-                                          String targetService) {
-        try {
-            GSSManager manager = GSSManager.getInstance();
-            GSSName clientName = manager.createName(username, GSSName.NT_USER_NAME);
+		return jaasSubjectHolder.getToken(principalName);
+	}
 
-            GSSCredential clientCredential = manager.createCredential(
-                    clientName,
-                    lifetimeInSeconds,
-                    KERBEROS_OID,
-                    GSSCredential.INITIATE_ONLY
-            );
+	private static void runAuthentication(JaasSubjectHolder jaasContext, String username, int lifetimeInSeconds,
+			String targetService) {
+		try {
+			GSSManager manager = GSSManager.getInstance();
+			GSSName clientName = manager.createName(username, GSSName.NT_USER_NAME);
 
-            GSSName serverName = manager.createName(targetService, GSSName.NT_USER_NAME);
+			GSSCredential clientCredential = manager.createCredential(clientName, lifetimeInSeconds, KERBEROS_OID,
+					GSSCredential.INITIATE_ONLY);
 
-            GSSContext securityContext = manager.createContext(serverName,
-                    KERBEROS_OID,
-                    clientCredential,
-                    GSSContext.DEFAULT_LIFETIME);
+			GSSName serverName = manager.createName(targetService, GSSName.NT_USER_NAME);
 
-            securityContext.requestCredDeleg(true);
-            securityContext.requestInteg(false);
-            securityContext.requestAnonymity(false);
-            securityContext.requestMutualAuth(false);
-            securityContext.requestReplayDet(false);
-            securityContext.requestSequenceDet(false);
+			GSSContext securityContext = manager.createContext(serverName, KERBEROS_OID, clientCredential,
+					GSSContext.DEFAULT_LIFETIME);
 
-            boolean established = false;
+			securityContext.requestCredDeleg(true);
+			securityContext.requestInteg(false);
+			securityContext.requestAnonymity(false);
+			securityContext.requestMutualAuth(false);
+			securityContext.requestReplayDet(false);
+			securityContext.requestSequenceDet(false);
 
-            byte[] outToken = new byte[0];
+			boolean established = false;
 
-            while (!established) {
-                byte[] inToken = new byte[0];
-                outToken = securityContext.initSecContext(inToken, 0, inToken.length);
+			byte[] outToken = new byte[0];
 
-                established = securityContext.isEstablished();
-            }
+			while (!established) {
+				byte[] inToken = new byte[0];
+				outToken = securityContext.initSecContext(inToken, 0, inToken.length);
 
-            jaasContext.addToken(targetService, outToken);
-        } catch (Exception e) {
-            throw new BadCredentialsException("Kerberos authentication failed", e);
-        }
-    }
+				established = securityContext.isEstablished();
+			}
 
-    private static Oid createOid(String oid)
-    {
-        try {
-            return new Oid(oid);
-        } catch (GSSException e) {
-            throw new IllegalStateException("Unable to instantiate Oid: ", e);
-        }
-    }
+			jaasContext.addToken(targetService, outToken);
+		}
+		catch (Exception ex) {
+			throw new BadCredentialsException("Kerberos authentication failed", ex);
+		}
+	}
+
+	private static Oid createOid(String oid) {
+		try {
+			return new Oid(oid);
+		}
+		catch (GSSException ex) {
+			throw new IllegalStateException("Unable to instantiate Oid: ", ex);
+		}
+	}
+
 }

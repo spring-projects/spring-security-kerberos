@@ -1,11 +1,11 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2009-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * https://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.security.kerberos.client.docs;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -26,7 +27,7 @@ import org.springframework.security.ldap.userdetails.LdapUserDetailsService;
 
 public class KerberosLdapContextSourceConfig {
 
-//tag::snippetA[]
+	// tag::snippetA[]
 	@Value("${app.ad-server}")
 	private String adServer;
 
@@ -44,10 +45,10 @@ public class KerberosLdapContextSourceConfig {
 
 	@Bean
 	public KerberosLdapContextSource kerberosLdapContextSource() {
-		KerberosLdapContextSource contextSource = new KerberosLdapContextSource(adServer);
+		KerberosLdapContextSource contextSource = new KerberosLdapContextSource(this.adServer);
 		SunJaasKrb5LoginConfig loginConfig = new SunJaasKrb5LoginConfig();
-		loginConfig.setKeyTabLocation(new FileSystemResource(keytabLocation));
-		loginConfig.setServicePrincipal(servicePrincipal);
+		loginConfig.setKeyTabLocation(new FileSystemResource(this.keytabLocation));
+		loginConfig.setServicePrincipal(this.servicePrincipal);
 		loginConfig.setDebug(true);
 		loginConfig.setIsInitiator(true);
 		contextSource.setLoginConfig(loginConfig);
@@ -55,13 +56,13 @@ public class KerberosLdapContextSourceConfig {
 	}
 
 	@Bean
-	public LdapUserDetailsService ldapUserDetailsService() {
-		FilterBasedLdapUserSearch userSearch =
-				new FilterBasedLdapUserSearch(ldapSearchBase, ldapSearchFilter, kerberosLdapContextSource());
+	public LdapUserDetailsService ldapUserDetailsService(KerberosLdapContextSource kerberosLdapContextSource) {
+		FilterBasedLdapUserSearch userSearch = new FilterBasedLdapUserSearch(this.ldapSearchBase, this.ldapSearchFilter,
+				kerberosLdapContextSource);
 		LdapUserDetailsService service = new LdapUserDetailsService(userSearch);
 		service.setUserDetailsMapper(new LdapUserDetailsMapper());
 		return service;
 	}
-//end::snippetA[]
+	// end::snippetA[]
 
 }

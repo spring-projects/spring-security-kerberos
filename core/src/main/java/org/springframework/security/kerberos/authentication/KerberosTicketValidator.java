@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.security.kerberos.authentication;
 
 import org.springframework.security.authentication.BadCredentialsException;
 
 /**
  * Implementations of this interface are used in
- * {@link KerberosServiceAuthenticationProvider} to validate a Kerberos/SPNEGO
- * Ticket.
+ * {@link KerberosServiceAuthenticationProvider} to validate a Kerberos/SPNEGO Ticket.
  *
  * @author Mike Wiesner
  * @author Jeremy Stone
@@ -29,13 +29,13 @@ import org.springframework.security.authentication.BadCredentialsException;
  */
 public interface KerberosTicketValidator {
 
-    /**
-     * Validates a Kerberos/SPNEGO ticket.
-     *
-     * @param token Kerbeos/SPNEGO ticket
-     * @return authenticated kerberos principal
-     * @throws BadCredentialsException if the ticket is not valid
-     */
-    public KerberosTicketValidation validateTicket(byte[] token)
-            throws BadCredentialsException;
+	/**
+	 * Validates a Kerberos/SPNEGO ticket.
+	 * @param token Kerbeos/SPNEGO ticket
+	 * @return authenticated kerberos principal
+	 * @throws BadCredentialsException if the ticket is not valid
+	 */
+	@SuppressWarnings("checkstyle:RedundantModifier")
+	KerberosTicketValidation validateTicket(byte[] token) throws BadCredentialsException;
+
 }

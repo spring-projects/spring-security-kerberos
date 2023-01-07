@@ -13,9 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.security.kerberos.client;
 
-import org.junit.Test;
+import java.io.File;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -33,161 +38,144 @@ import org.springframework.security.kerberos.authentication.sun.SunJaasKerberosT
 import org.springframework.security.kerberos.test.KerberosSecurityTestcase;
 import org.springframework.security.kerberos.test.MiniKdc;
 
-import java.io.File;
-
-import static org.junit.Assert.*;
-
 /**
  * @author Bogdan Mustiata
  */
 public class TestMultiTierAuthentication extends KerberosSecurityTestcase {
 
-    public static final String REALM_NAME = "EXAMPLE.COM";
+	public static final String REALM_NAME = "EXAMPLE.COM";
 
-    public static final String USER_LOGIN_NAME = "user1";
-    public static final String USER_FQDN_NAME = "user1@EXAMPLE.COM";
-    public static final String USER_PASSWORD = "secret";
+	public static final String USER_LOGIN_NAME = "user1";
 
-    public static final String WEB_TIER_SPN = "HTTP/webtier@EXAMPLE.COM";
-    public static final String WEB_TIER_USER_PASSWORD = "secret";
+	public static final String USER_FQDN_NAME = "user1@EXAMPLE.COM";
 
-    public static final String SERVICE_TIER_SPN = "HTTP/servicetier@EXAMPLE.COM";
-    public static final String SERVICE_TIER_USER_PASSWORD = "secret";
+	public static final String USER_PASSWORD = "secret";
 
-    @Test
-    public void testServer() throws Exception {
-        MiniKdc kdc = getKdc();
-        File workDir = getWorkDir();
+	public static final String WEB_TIER_SPN = "HTTP/webtier@EXAMPLE.COM";
 
-        File webTierKeytabFile = new File(workDir, "webtier.keytab");
-        kdc.createKeyabFile(webTierKeytabFile, WEB_TIER_SPN, WEB_TIER_USER_PASSWORD);
+	public static final String WEB_TIER_USER_PASSWORD = "secret";
 
-        File serviceTierKeytabFile = new File(workDir, "servicetier.keytab");
-        kdc.createKeyabFile(serviceTierKeytabFile, SERVICE_TIER_SPN, SERVICE_TIER_USER_PASSWORD);
+	public static final String SERVICE_TIER_SPN = "HTTP/servicetier@EXAMPLE.COM";
 
-        //
-        // User logs in as user1/secret
-        //
-        KerberosAuthenticationProvider kerberosAuthProvider =
-                createUserPassAuthenticator(/* debug: */ true);
+	public static final String SERVICE_TIER_USER_PASSWORD = "secret";
 
-        Authentication authentication = kerberosAuthProvider
-                .authenticate(new UsernamePasswordAuthenticationToken(USER_LOGIN_NAME, USER_PASSWORD));
+	@Test
+	public void testServer() throws Exception {
+		MiniKdc kdc = getKdc();
+		File workDir = getWorkDir();
 
-        assertEquals(USER_FQDN_NAME, authentication.getName());
+		File webTierKeytabFile = new File(workDir, "webtier.keytab");
+		kdc.createKeyabFile(webTierKeytabFile, WEB_TIER_SPN, WEB_TIER_USER_PASSWORD);
 
-        //
-        // User creates a ticket for the HTTP/webtier@EXAMPLE.COM, using
-        // and then calls the service, using the tokenData
-        //
-        authentication = KerberosMultiTier.authenticateService(
-                authentication, USER_LOGIN_NAME, 3600, WEB_TIER_SPN);
+		File serviceTierKeytabFile = new File(workDir, "servicetier.keytab");
+		kdc.createKeyabFile(serviceTierKeytabFile, SERVICE_TIER_SPN, SERVICE_TIER_USER_PASSWORD);
 
-        byte[] tokenData = KerberosMultiTier
-                .getTokenForService(authentication, WEB_TIER_SPN);
+		//
+		// User logs in as user1/secret
+		//
+		KerberosAuthenticationProvider kerberosAuthProvider = createUserPassAuthenticator(
+				/* debug: */ true);
 
-        assertNotNull(tokenData);
-        assertTrue(tokenData.length != 0);
+		Authentication authentication = kerberosAuthProvider
+				.authenticate(new UsernamePasswordAuthenticationToken(USER_LOGIN_NAME, USER_PASSWORD));
 
-        //
-        // The service HTTP/webtier@EXAMPLE.COM authenticates via tokens.
-        //
-        KerberosServiceAuthenticationProvider webTierAuthenticatorProvider =
-                createServiceAuthenticator(
-                    true,
-                        WEB_TIER_SPN,
-                        REALM_NAME,
-                    webTierKeytabFile.getCanonicalPath()
-                );
+		Assertions.assertEquals(USER_FQDN_NAME, authentication.getName());
 
+		//
+		// User creates a ticket for the HTTP/webtier@EXAMPLE.COM, using
+		// and then calls the service, using the tokenData
+		//
+		authentication = KerberosMultiTier.authenticateService(authentication, USER_LOGIN_NAME, 3600, WEB_TIER_SPN);
 
-        //
-        // The service HTTP/webtier@EXAMPLE.COM authenticates the user1@EXAMPLE.COM
-        // using the previously stored token, then authenticates itself further as
-        // user1@EXAMPLE.COM to the HTTP/servicetier@EXAMPLE.COM.
-        //
-        Authentication webTierAuthentication = webTierAuthenticatorProvider
-                .authenticate(new KerberosServiceRequestToken(tokenData));
+		byte[] tokenData = KerberosMultiTier.getTokenForService(authentication, WEB_TIER_SPN);
 
-        assertEquals(USER_FQDN_NAME, webTierAuthentication.getName());
+		Assertions.assertNotNull(tokenData);
+		Assertions.assertTrue(tokenData.length != 0);
 
-        webTierAuthentication = KerberosMultiTier.authenticateService(
-                webTierAuthentication, USER_FQDN_NAME, 3600, SERVICE_TIER_SPN);
+		//
+		// The service HTTP/webtier@EXAMPLE.COM authenticates via tokens.
+		//
+		KerberosServiceAuthenticationProvider webTierAuthenticatorProvider = createServiceAuthenticator(true,
+				WEB_TIER_SPN, REALM_NAME, webTierKeytabFile.getCanonicalPath());
 
-        byte[] workplaceTokenData = KerberosMultiTier.getTokenForService(
-                webTierAuthentication, SERVICE_TIER_SPN);
+		//
+		// The service HTTP/webtier@EXAMPLE.COM authenticates the user1@EXAMPLE.COM
+		// using the previously stored token, then authenticates itself further as
+		// user1@EXAMPLE.COM to the HTTP/servicetier@EXAMPLE.COM.
+		//
+		Authentication webTierAuthentication = webTierAuthenticatorProvider
+				.authenticate(new KerberosServiceRequestToken(tokenData));
 
-        //
-        // The service HTTP/icr@EXAMPLE.COM authenticates via tokens.
-        //
-        webTierAuthenticatorProvider =
-                createServiceAuthenticator(
-                        true,
-                        SERVICE_TIER_SPN,
-                        REALM_NAME,
-                        serviceTierKeytabFile.getCanonicalPath()
-                );
+		Assertions.assertEquals(USER_FQDN_NAME, webTierAuthentication.getName());
 
-        //
-        // The service HTTP/servicetier@EXAMPLE.COM authenticates via the previously saved
-        // token, received from the HTTP/webtier@EXAMPLE.COM on behalf of user1@EXAMPLE.COM
-        //
-        Authentication serviceTierAuthentication = webTierAuthenticatorProvider
-                .authenticate(new KerberosServiceRequestToken(workplaceTokenData));
+		webTierAuthentication = KerberosMultiTier.authenticateService(webTierAuthentication, USER_FQDN_NAME, 3600,
+				SERVICE_TIER_SPN);
 
-        assertEquals(USER_FQDN_NAME, serviceTierAuthentication.getName());
-    }
+		byte[] workplaceTokenData = KerberosMultiTier.getTokenForService(webTierAuthentication, SERVICE_TIER_SPN);
 
-    /**
-     * Create a username/password authenticator.
-     * @return
-     */
-    private KerberosAuthenticationProvider createUserPassAuthenticator(boolean debug) {
-        KerberosAuthenticationProvider kerberosAuthenticationProvider =
-                new KerberosAuthenticationProvider();
+		//
+		// The service HTTP/icr@EXAMPLE.COM authenticates via tokens.
+		//
+		webTierAuthenticatorProvider = createServiceAuthenticator(true, SERVICE_TIER_SPN, REALM_NAME,
+				serviceTierKeytabFile.getCanonicalPath());
 
-        SunJaasKerberosClient sunJaasKerberosClient = new SunJaasKerberosClient();
+		//
+		// The service HTTP/servicetier@EXAMPLE.COM authenticates via the previously saved
+		// token, received from the HTTP/webtier@EXAMPLE.COM on behalf of
+		// user1@EXAMPLE.COM
+		//
+		Authentication serviceTierAuthentication = webTierAuthenticatorProvider
+				.authenticate(new KerberosServiceRequestToken(workplaceTokenData));
 
-        sunJaasKerberosClient.setDebug(debug);
-        sunJaasKerberosClient.setMultiTier(true);
+		Assertions.assertEquals(USER_FQDN_NAME, serviceTierAuthentication.getName());
+	}
 
-        kerberosAuthenticationProvider.setKerberosClient(sunJaasKerberosClient);
-        kerberosAuthenticationProvider.setUserDetailsService(userDetailsService());
+	/**
+	 * Create a username/password authenticator.
+	 * @return
+	 */
+	private KerberosAuthenticationProvider createUserPassAuthenticator(boolean debug) {
+		KerberosAuthenticationProvider kerberosAuthenticationProvider = new KerberosAuthenticationProvider();
 
-        return kerberosAuthenticationProvider;
-    }
+		SunJaasKerberosClient sunJaasKerberosClient = new SunJaasKerberosClient();
 
-    private KerberosServiceAuthenticationProvider createServiceAuthenticator(boolean debug,
-                                                                             String serviceName,
-                                                                             String realmName,
-                                                                             String keytabFileLocation) throws Exception {
-        KerberosServiceAuthenticationProvider kerberosServiceAuthenticationProvider =
-                new KerberosServiceAuthenticationProvider();
+		sunJaasKerberosClient.setDebug(debug);
+		sunJaasKerberosClient.setMultiTier(true);
 
-        SunJaasKerberosTicketValidator ticketValidator = new SunJaasKerberosTicketValidator();
-        ticketValidator.setDebug(debug);
-        ticketValidator.setServicePrincipal(serviceName);
-        ticketValidator.setRealmName(realmName);
-        ticketValidator.setKeyTabLocation(new FileSystemResource(keytabFileLocation));
-        ticketValidator.setMultiTier(true);
+		kerberosAuthenticationProvider.setKerberosClient(sunJaasKerberosClient);
+		kerberosAuthenticationProvider.setUserDetailsService(userDetailsService());
 
-        ticketValidator.afterPropertiesSet();
+		return kerberosAuthenticationProvider;
+	}
 
-        kerberosServiceAuthenticationProvider.setTicketValidator(ticketValidator);
-        kerberosServiceAuthenticationProvider.setUserDetailsService(userDetailsService());
+	private KerberosServiceAuthenticationProvider createServiceAuthenticator(boolean debug, String serviceName,
+			String realmName, String keytabFileLocation) throws Exception {
+		KerberosServiceAuthenticationProvider kerberosServiceAuthenticationProvider = new KerberosServiceAuthenticationProvider();
 
-        return kerberosServiceAuthenticationProvider;
-    }
+		SunJaasKerberosTicketValidator ticketValidator = new SunJaasKerberosTicketValidator();
+		ticketValidator.setDebug(debug);
+		ticketValidator.setServicePrincipal(serviceName);
+		ticketValidator.setRealmName(realmName);
+		ticketValidator.setKeyTabLocation(new FileSystemResource(keytabFileLocation));
+		ticketValidator.setMultiTier(true);
 
-    private UserDetailsService userDetailsService() {
-        return new UserDetailsService() {
-            @Override
-            public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-                return new User(username, "notUsed", true, true, true, true,
-                        AuthorityUtils.createAuthorityList("ROLE_USER"));
+		ticketValidator.afterPropertiesSet();
 
-            }
-        };
-    }
+		kerberosServiceAuthenticationProvider.setTicketValidator(ticketValidator);
+		kerberosServiceAuthenticationProvider.setUserDetailsService(userDetailsService());
+
+		return kerberosServiceAuthenticationProvider;
+	}
+
+	private UserDetailsService userDetailsService() {
+		return new UserDetailsService() {
+			@Override
+			public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+				return new User(username, "notUsed", true, true, true, true,
+						AuthorityUtils.createAuthorityList("ROLE_USER"));
+
+			}
+		};
+	}
 
 }

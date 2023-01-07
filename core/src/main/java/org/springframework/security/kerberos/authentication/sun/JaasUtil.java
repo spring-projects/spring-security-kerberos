@@ -13,28 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.security.kerberos.authentication.sun;
 
-import javax.security.auth.Subject;
 import java.security.Principal;
 import java.util.HashSet;
 
+import javax.security.auth.Subject;
+
 /**
  * JAAS utility functions.
+ *
  * @author Bogdan Mustiata
  */
-public class JaasUtil {
-    /**
-     * Copy the principal and the credentials into a new Subject.
-     * @param subject
-     * @return
-     */
-    public static Subject copySubject(Subject subject) {
-        Subject subjectCopy = new Subject(false,
-                new HashSet<Principal>(subject.getPrincipals()),
-                new HashSet<Object>(subject.getPublicCredentials()),
-                new HashSet<Object>(subject.getPrivateCredentials()));
+public final class JaasUtil {
 
-        return subjectCopy;
-    }
+	private JaasUtil() {
+	}
+
+	/**
+	 * Copy the principal and the credentials into a new Subject.
+	 * @param subject
+	 * @return
+	 */
+	public static Subject copySubject(Subject subject) {
+		Subject subjectCopy = new Subject(false, new HashSet<Principal>(subject.getPrincipals()),
+				new HashSet<Object>(subject.getPublicCredentials()),
+				new HashSet<Object>(subject.getPrivateCredentials()));
+
+		return subjectCopy;
+	}
+
 }

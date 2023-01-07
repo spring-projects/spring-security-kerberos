@@ -1,0 +1,24 @@
+pluginManagement {
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+        maven { url 'https://repo.spring.io/milestone' }
+        maven { url "https://repo.spring.io/libs-snapshot" }
+    }
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.id == "io.spring.javaformat") {
+                useModule "io.spring.javaformat:spring-javaformat-gradle-plugin:${requested.version}"
+            }
+        }
+    }
+}
+
+rootProject.name = 'spring-security-kerberos-samples'
+
+include ':sec-client-rest-template'
+include ':sec-server-client-auth'
+include ':sec-server-spnego-form-auth'
+include ':sec-server-spnego-form-auth-xml'
+include ':sec-server-win-auth'
+include ':spring-security-kerberos-samples-common'

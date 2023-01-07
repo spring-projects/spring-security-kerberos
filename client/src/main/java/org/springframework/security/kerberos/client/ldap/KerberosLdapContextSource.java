@@ -1,11 +1,11 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2009-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * https://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.security.kerberos.client.ldap;
 
 import java.security.PrivilegedAction;
@@ -35,8 +36,8 @@ import org.springframework.security.ldap.DefaultSpringSecurityContextSource;
 import org.springframework.util.Assert;
 
 /**
- * Implementation of an {@link LdapContextSource} that authenticates with the
- * ldap server using Kerberos.
+ * Implementation of an {@link LdapContextSource} that authenticates with the ldap server
+ * using Kerberos.
  *
  * Example usage:
  *
@@ -59,8 +60,8 @@ import org.springframework.util.Assert;
  *       group-search-filter=&quot;(member={0})&quot; group-role-attribute=&quot;cn&quot; role-prefix=&quot;none&quot; /&gt;
  * </pre>
  *
- * @see SunJaasKrb5LoginConfig
  * @author Nelson Rodrigues
+ * @see SunJaasKrb5LoginConfig
  *
  */
 public class KerberosLdapContextSource extends DefaultSpringSecurityContextSource implements InitializingBean {
@@ -69,7 +70,6 @@ public class KerberosLdapContextSource extends DefaultSpringSecurityContextSourc
 
 	/**
 	 * Instantiates a new kerberos ldap context source.
-	 *
 	 * @param url the url
 	 */
 	public KerberosLdapContextSource(String url) {
@@ -78,7 +78,6 @@ public class KerberosLdapContextSource extends DefaultSpringSecurityContextSourc
 
 	/**
 	 * Instantiates a new kerberos ldap context source.
-	 *
 	 * @param urls the urls
 	 * @param baseDn the base dn
 	 */
@@ -87,19 +86,19 @@ public class KerberosLdapContextSource extends DefaultSpringSecurityContextSourc
 	}
 
 	@Override
-	public void afterPropertiesSet() /*throws Exception*/ {
+	public void afterPropertiesSet() /* throws Exception */ {
 		// org.springframework.ldap.core.support.AbstractContextSource in 4.x
 		// doesn't throw Exception for its InitializingBean method, so
 		// we had to remove it from here also. Addition to that
 		// we need to catch super call and re-throw.
 		try {
 			super.afterPropertiesSet();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
+		}
+		catch (Exception ex) {
+			throw new RuntimeException(ex);
 		}
 		Assert.notNull(this.loginConfig, "loginConfig must be specified");
 	}
-
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -116,8 +115,9 @@ public class KerberosLdapContextSource extends DefaultSpringSecurityContextSourc
 			public DirContext run() {
 				try {
 					return KerberosLdapContextSource.super.getDirContextInstance(environment);
-				} catch (NamingException e) {
-					suppressedException[0] = e;
+				}
+				catch (NamingException ex) {
+					suppressedException[0] = ex;
 					return null;
 				}
 			}
@@ -132,7 +132,6 @@ public class KerberosLdapContextSource extends DefaultSpringSecurityContextSourc
 
 	/**
 	 * The login configuration to get the serviceSubject from LoginContext
-	 *
 	 * @param loginConfig the login config
 	 */
 	public void setLoginConfig(Configuration loginConfig) {
@@ -147,9 +146,10 @@ public class KerberosLdapContextSource extends DefaultSpringSecurityContextSourc
 			lc.login();
 
 			return lc.getSubject();
-		} catch (LoginException e) {
-			AuthenticationException ae = new AuthenticationException(e.getMessage());
-			ae.initCause(e);
+		}
+		catch (LoginException ex) {
+			AuthenticationException ae = new AuthenticationException(ex.getMessage());
+			ae.initCause(ex);
 			throw ae;
 		}
 	}

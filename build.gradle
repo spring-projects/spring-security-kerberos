@@ -1,399 +1,88 @@
 buildscript {
+	dependencies {
+		classpath "io.spring.javaformat:spring-javaformat-gradle-plugin:$springJavaformatVersion"
+		classpath 'io.spring.nohttp:nohttp-gradle:0.0.10'
+		classpath "io.freefair.gradle:aspectj-plugin:6.6-rc1"
+		classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+		classpath "com.netflix.nebula:nebula-project-plugin:8.2.0"
+	}
 	repositories {
-		maven { url 'https://repo.spring.io/plugins-release' }
-		maven { url 'https://plugins.gradle.org/m2/' }
-	}
-	dependencies {
-		classpath("org.springframework.build.gradle:propdeps-plugin:0.0.7")
-		classpath("org.springframework.build.gradle:spring-io-plugin:0.0.3.RELEASE")
-		classpath('org.asciidoctor:asciidoctor-gradle-plugin:1.5.2')
-		classpath("io.spring.gradle:docbook-reference-plugin:0.3.0")
-		classpath("org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion")
+		gradlePluginPortal()
 	}
 }
 
-def sampleServerProjects() {
-	subprojects.findAll { project ->
-		project.name.contains('sec-server') && project.name != 'spring-security-kerberos-samples-common'
-	}
+apply plugin: 'io.spring.nohttp'
+apply plugin: 'locks'
+apply plugin: 's101'
+apply plugin: 'io.spring.convention.root'
+apply plugin: 'org.jetbrains.kotlin.jvm'
+apply plugin: 'org.springframework.security.update-dependencies'
+apply plugin: 'org.springframework.security.update-version'
+apply plugin: 'org.springframework.security.sagan'
+apply plugin: 'org.springframework.github.milestone'
+apply plugin: 'org.springframework.github.changelog'
+apply plugin: 'org.springframework.github.release'
+
+group = 'io.github.openprojectx.security.kerberos'
+
+ext.snapshotBuild = version.contains("SNAPSHOT")
+ext.releaseBuild = version.contains("SNAPSHOT")
+ext.milestoneBuild = !(snapshotBuild || releaseBuild)
+
+repositories {
+	mavenCentral()
 }
 
-def sampleClientProjects() {
-	subprojects.findAll { project ->
-		project.name.contains('sec-client')
+subprojects {
+	plugins.withType(JavaPlugin) {
+		project.sourceCompatibility='1.8'
 	}
-}
-
-configure(allprojects) {
-	apply plugin: 'java'
-	apply plugin: 'eclipse'
-	apply plugin: 'idea'
-	apply plugin: 'propdeps'
-
-	group = 'org.springframework.security.kerberos'
-
-	sourceCompatibility=1.6
-	targetCompatibility=1.6
-
-	[compileJava, compileTestJava]*.options*.compilerArgs = ['-Xlint:none']
-
-	test.systemProperty("java.awt.headless", "true")
-
-	repositories {
-		mavenCentral()
-		maven { url 'https://repo.spring.io/libs-release' }
-	}
-
-	// servlet-api (2.5) and tomcat-servlet-api (3.0) classpath entries should not be
-	// exported to dependent projects in Eclipse to avoid false compilation errors due
-	// to changing APIs across these versions
-	eclipse.classpath.file.whenMerged { classpath ->
-		classpath.entries.findAll { entry -> entry.path.contains('servlet-api') }*.exported = false
-	}
-}
-
-configure(subprojects) { subproject ->
-	apply from: "${rootProject.projectDir}/publish-maven.gradle"
-
-	jar {
-		manifest.attributes['Created-By'] = "${System.getProperty('java.version')} (${System.getProperty('java.specification.vendor')})"
-		manifest.attributes['Implementation-Title'] = subproject.name
-		manifest.attributes['Implementation-Version'] = subproject.version
-
-		from("${rootProject.projectDir}/src/dist") {
-			include "license.txt"
-			include "notice.txt"
-			into "META-INF"
-			expand(copyright: new Date().format('yyyy'), version: project.version)
-		}
-	}
-
-	javadoc {
-		options.memberLevel = org.gradle.external.javadoc.JavadocMemberLevel.PROTECTED
-		options.author = true
-		options.header = project.name
-	}
-
-	task sourcesJar(type: Jar, dependsOn:classes) {
-		classifier = 'sources'
-		from sourceSets.main.allJava.srcDirs
-		include '**/*.java', '**/*.aj'
-	}
-
-	task javadocJar(type: Jar) {
-		classifier = 'javadoc'
-		from javadoc
-	}
-
-	artifacts {
-		archives sourcesJar
-		archives javadocJar
-	}
-
-	dependencies {
-		testCompile "org.mockito:mockito-core:$mockitoVersion"
-		testCompile "junit:junit:$junitVersion"
-		testRuntime("log4j:log4j:$log4jVersion")
+	tasks.withType(JavaCompile) {
+		options.encoding = "UTF-8"
+		options.compilerArgs.add("-parameters")
 	}
 
 }
 
-project('spring-security-kerberos-core') {
-	description = 'Spring Security Kerberos Core'
-	dependencies {
-		compile "org.springframework:spring-core:$springVersion"
-		compile "org.springframework.security:spring-security-core:$springSecurityVersion"
-	}
-}
+allprojects {
+	if (!['spring-security-kerberos-bom', 'spring-security-docs'].contains(project.name)) {
+		apply plugin: 'io.spring.javaformat'
+		apply plugin: 'checkstyle'
 
-project('spring-security-kerberos-web') {
-	description = 'Spring Security Kerberos Web'
-	dependencies {
-		compile project(":spring-security-kerberos-core")
-		compile "org.springframework:spring-core:$springVersion"
-		compile "org.springframework:spring-web:$springVersion"
-		compile "org.springframework.security:spring-security-web:$springSecurityVersion"
-
-		compile("javax.servlet:javax.servlet-api:$servletApi3Version", optional)
-
-		testCompile "org.springframework.security:spring-security-config:$springSecurityVersion"
-		testCompile "org.springframework:spring-test:$springVersion"
-	}
-}
-
-project('spring-security-kerberos-client') {
-	description = 'Spring Security Kerberos Client'
-
-	configurations {
-		all*.exclude group: "org.apache.directory.api", module: "api-ldap-schema-data"
-	}
-
-	dependencies {
-		compile project(":spring-security-kerberos-core")
-		compile "org.springframework:spring-web:$springVersion"
-		compile "org.apache.httpcomponents:httpclient:$httpclientVersion"
-
-		optional("org.springframework.security:spring-security-ldap:$springSecurityVersion")
-
-		testCompile project(":spring-security-kerberos-test")
-		testCompile project(":spring-security-kerberos-web")
-		testCompile "org.springframework.security:spring-security-config:$springSecurityVersion"
-		testCompile "org.springframework.boot:spring-boot-autoconfigure:$springBootVersion"
-		testRuntime "org.apache.tomcat.embed:tomcat-embed-core:$tomcatEmbedVersion"
-		testRuntime "org.apache.tomcat.embed:tomcat-embed-logging-juli:$tomcatEmbedVersion"
-		testRuntime "org.springframework:spring-webmvc:$springVersion"
-	}
-}
-
-project('spring-security-kerberos-test') {
-	description = 'Spring Security Kerberos Test'
-
-	configurations {
-		all*.exclude group: "org.apache.directory.api", module: "api-ldap-schema-data"
-	}
-
-	dependencies {
-		compile "junit:junit:$junitVersion"
-		compile "org.apache.directory.server:apacheds-core-api:$apacheDirServerVersion"
-		compile "org.apache.directory.server:apacheds-interceptor-kerberos:$apacheDirServerVersion"
-		compile "org.apache.directory.server:apacheds-protocol-shared:$apacheDirServerVersion"
-		compile "org.apache.directory.server:apacheds-protocol-kerberos:$apacheDirServerVersion"
-		compile "org.apache.directory.server:apacheds-ldif-partition:$apacheDirServerVersion"
-		compile "org.apache.directory.server:apacheds-mavibot-partition:$apacheDirServerVersion"
-		compile "org.apache.directory.server:apacheds-jdbm-partition:$apacheDirServerVersion"
-		compile "org.apache.directory.server:apacheds-protocol-ldap:$apacheDirServerVersion"
-		compile("org.apache.directory.api:api-all:$apacheDirApiVersion") {
-			exclude group: "xml-apis", module: "xml-apis"
-			exclude group: "xpp3", module: "xpp3"
-			exclude group: "dom4j", module: "dom4j"
-		}
-	}
-}
-
-project('spring-security-kerberos-samples-common') {
-	// don't publish boot packaged samples
-	configurations.archives.artifacts.removeAll { it.archiveTask.is jar }
-	tasks.findByPath("artifactoryPublish")?.enabled = false
-	dependencies {
-		compile project(":spring-security-kerberos-core")
-	}
-}
-
-configure(sampleServerProjects()) {
-	apply plugin: 'spring-boot'
-	// don't publish boot packaged samples
-	configurations.archives.artifacts.removeAll { it.archiveTask.is jar }
-	tasks.findByPath("artifactoryPublish")?.enabled = false
-	dependencies {
-		compile project(":spring-security-kerberos-samples-common")
-		compile project(":spring-security-kerberos-client")
-		compile project(":spring-security-kerberos-web")
-		compile "org.springframework.boot:spring-boot-starter-thymeleaf:$springBootVersion"
-		compile "org.springframework.security:spring-security-config:$springSecurityVersion"
-		compile "org.springframework.security:spring-security-ldap:$springSecurityVersion"
-		compile "org.springframework:spring-beans:$springVersion"
-		compile "org.springframework:spring-aop:$springVersion"
-		compile "org.springframework:spring-expression:$springVersion"
-		compile "org.springframework:spring-context:$springVersion"
-		compile "org.springframework:spring-tx:$springVersion"
-		compile "org.springframework:spring-jdbc:$springVersion"
-		testCompile "org.springframework:spring-test:$springVersion"
-		testCompile "org.hamcrest:hamcrest-core:$hamcrestVersion"
-		testCompile "org.hamcrest:hamcrest-library:$hamcrestVersion"
-		testCompile "junit:junit:$junitVersion"
-	}
-}
-
-configure(sampleClientProjects()) {
-	apply plugin: 'spring-boot'
-	// don't publish boot packaged samples
-	configurations.archives.artifacts.removeAll { it.archiveTask.is jar }
-	tasks.findByPath("artifactoryPublish")?.enabled = false
-	dependencies {
-		compile project(":spring-security-kerberos-samples-common")
-		compile project(":spring-security-kerberos-client")
-		compile "org.springframework:spring-tx:$springVersion"
-		compile "org.springframework:spring-jdbc:$springVersion"
-		compile "org.springframework.boot:spring-boot-starter:$springBootVersion"
-		compile "org.springframework:spring-beans:$springVersion"
-		compile "org.springframework:spring-aop:$springVersion"
-		compile "org.springframework:spring-expression:$springVersion"
-		compile "org.springframework:spring-context:$springVersion"
-		compile "org.springframework:spring-tx:$springVersion"
-		compile "org.springframework:spring-jdbc:$springVersion"
-		testCompile "org.springframework:spring-test:$springVersion"
-		testCompile "org.hamcrest:hamcrest-core:$hamcrestVersion"
-		testCompile "org.hamcrest:hamcrest-library:$hamcrestVersion"
-		testCompile "junit:junit:$junitVersion"
-	}
-}
-
-configure(rootProject) {
-	description = 'Spring Security Kerberos Extension'
-
-	apply plugin: 'org.asciidoctor.gradle.asciidoctor'
-	apply plugin: 'docbook-reference'
-
-	reference {
-		sourceDir = new File(asciidoctor.outputDir , 'docbook5')
-		pdfFilename = "spring-security-kerberos-reference.pdf"
-		epubFilename = "spring-security-kerberos-reference.epub"
-		expandPlaceholders = ""
-	}
-
-	afterEvaluate {
-		tasks.findAll { it.name.startsWith("reference") }.each{ it.dependsOn.add("asciidoctor") }
-	}
-
-	asciidoctorj {
-		version = '1.5.2'
-	}
-
-	asciidoctor {
-		sourceDir = file("docs/src/reference/asciidoc")
-		backends = ['docbook5']
-		options eruby: 'erubis'
-		attributes docinfo: '',
-			copycss : '',
-			icons : 'font',
-			'source-highlighter': 'prettify',
-			sectanchors : '',
-			toc2: '',
-			idprefix: '',
-			idseparator: '-',
-			doctype: 'book',
-			numbered: '',
-			'spring-version' : springVersion,
-			'spring-security-version' : springSecurityVersion,
-			revnumber : project.version
-	}
-
-	task copyDocsSamples(type: Copy) {
-		from 'spring-security-kerberos-web/src/test/java/org/springframework/security/kerberos/docs/'
-		from 'spring-security-kerberos-web/src/test/resources/org/springframework/security/kerberos/docs/'
-		from 'spring-security-kerberos-client/src/test/java/org/springframework/security/kerberos/client/docs/'
-		include '**/*.java'
-		include '**/*.xml'
-		into 'docs/src/reference/asciidoc/samples'
-	}
-	asciidoctor.dependsOn copyDocsSamples
-
-
-	// don't publish the default jar for the root project
-	configurations.archives.artifacts.clear()
-
-	task api(type: Javadoc) {
-		group = 'Documentation'
-		description = 'Generates aggregated Javadoc API documentation.'
-		title = "${rootProject.description} ${version} API"
-		options.memberLevel = org.gradle.external.javadoc.JavadocMemberLevel.PROTECTED
-		options.author = true
-		options.header = rootProject.description
-		options.splitIndex = true
-		options.links(
-			'https://docs.jboss.org/jbossas/javadoc/4.0.5/connector'
-		)
-		source subprojects.collect { project ->
-			project.sourceSets.main.allJava
-		}
-		destinationDir = new File(buildDir, "api")
-		classpath = files(subprojects.collect { project ->
-			project.sourceSets.main.compileClasspath
+		pluginManager.withPlugin("io.spring.convention.checkstyle", { plugin ->
+//			configure(plugin) {
+				dependencies {
+					checkstyle "io.spring.javaformat:spring-javaformat-checkstyle:$springJavaformatVersion"
+				}
+				checkstyle {
+					toolVersion = '8.34'
+				}
+//			}
 		})
-		maxMemory = '1024m'
-	}
 
-	task docsZip(type: Zip) {
-		group = 'Distribution'
-		classifier = 'docs'
-		description = "Builds -${classifier} archive containing api and reference " +
-			"for deployment at static.springframework.org/spring-security-kerberos/docs."
-
-		from('src/dist') {
-			include 'changelog.txt'
-		}
-
-		from (api) {
-			into 'api'
-		}
-
-		from (reference) {
-			into 'reference'
-		}
-	}
-
-	task distZip(type: Zip, dependsOn: [docsZip]) {
-		group = 'Distribution'
-		classifier = 'dist'
-		description = "Builds -${classifier} archive, containing all jars and docs, " +
-			"suitable for community download page."
-
-		ext.baseDir = "${project.name}-${project.version}";
-
-		from('src/dist') {
-			include 'readme.txt'
-			include 'license.txt'
-			include 'notice.txt'
-			into "${baseDir}"
-			expand(copyright: new Date().format('yyyy'), version: project.version)
-		}
-
-		from(zipTree(docsZip.archivePath)) {
-			into "${baseDir}/docs"
-		}
-
-		subprojects.each { subproject ->
-			into ("${baseDir}/libs") {
-				from subproject.jar
-				if (subproject.tasks.findByPath('sourcesJar')) {
-					from subproject.sourcesJar
-				}
-				if (subproject.tasks.findByPath('javadocJar')) {
-					from subproject.javadocJar
+		if (project.name.contains('sample')) {
+			tasks.whenTaskAdded { task ->
+				if (task.name.contains('format') || task.name.contains('checkFormat') || task.name.contains("checkstyle")) {
+					task.enabled = false
 				}
 			}
 		}
 	}
 
-	// Create an distribution that contains all dependencies (required and optional).
-	// Not published by default; only for use when building from source.
-	task depsZip(type: Zip, dependsOn: distZip) { zipTask ->
-		group = 'Distribution'
-		classifier = 'dist-with-deps'
-		description = "Builds -${classifier} archive, containing everything " +
-			"in the -${distZip.classifier} archive plus all runtime dependencies."
-
-		from zipTree(distZip.archivePath)
-
-		gradle.taskGraph.whenReady { taskGraph ->
-			if (taskGraph.hasTask(":${zipTask.name}")) {
-				def projectNames = rootProject.subprojects*.name
-				def artifacts = new HashSet()
-				subprojects.each { subproject ->
-					subproject.configurations.runtime.resolvedConfiguration.resolvedArtifacts.each { artifact ->
-						def dependency = artifact.moduleVersion.id
-						if (!projectNames.contains(dependency.name)) {
-							artifacts << artifact.file
-						}
-					}
-				}
-
-				zipTask.from(artifacts) {
-					into "${distZip.baseDir}/deps"
-				}
-			}
+	tasks.withType(JavaCompile).configureEach {
+		javaCompiler = javaToolchains.compilerFor {
+			languageVersion = JavaLanguageVersion.of(8)
 		}
 	}
 
-	artifacts {
-		archives docsZip
-		archives distZip
+	dependencies {
+//		runtimeOnly "org.apache.directory.server:apacheds-core"
+		gradleApi()
 	}
-
-	task wrapper(type: Wrapper) {
-		description = 'Generates gradlew[.bat] scripts'
-		gradleVersion = '2.2.1'
-	}
-
 }
 
+nohttp {
+	source.exclude "buildSrc/build/**"
+	source.exclude "samples/**"
+
+}

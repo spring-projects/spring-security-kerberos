@@ -1,0 +1,11 @@
+import org.springframework.boot.gradle.plugin.SpringBootPlugin
+
+plugins{
+	id 'java'
+}
+description = 'Spring Security Kerberos Samples Common'
+
+dependencies {
+	implementation platform(SpringBootPlugin.BOM_COORDINATES)
+	implementation "org.springframework.security:spring-security-core"
+}

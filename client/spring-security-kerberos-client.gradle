@@ -1,0 +1,32 @@
+apply plugin: 'io.spring.convention.spring-module'
+
+description = 'Spring Security Kerberos Client'
+
+configurations {
+    all*.exclude group: "org.apache.directory.api", module: "api-ldap-schema-data"
+}
+
+dependencies {
+    management platform(project(":spring-security-kerberos-dependencies"))
+    api project(":spring-security-kerberos-core")
+    api "org.springframework:spring-web"
+	api("org.apache.httpcomponents:httpclient") {
+        exclude group: 'commons-logging', module: 'commons-logging'
+    }
+
+    implementation("org.springframework.security:spring-security-ldap")
+
+    testImplementation project(":spring-security-kerberos-test")
+    testImplementation project(":spring-security-kerberos-web")
+    testImplementation "org.junit.jupiter:junit-jupiter-api"
+    testImplementation "org.junit.jupiter:junit-jupiter-engine"
+
+    provided "jakarta.servlet:jakarta.servlet-api"
+    testImplementation "org.springframework.security:spring-security-config"
+    testImplementation "org.springframework.security:spring-security-web"
+    testRuntimeOnly "org.springframework:spring-webmvc"
+}
+
+test {
+    jvmArgs("--add-exports", "java.security.jgss/sun.security.krb5=ALL-UNNAMED")
+}

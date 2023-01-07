@@ -13,17 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.security.kerberos.web;
 
-import org.junit.Test;
-import org.springframework.security.kerberos.web.authentication.SpnegoEntryPoint;
+package org.springframework.security.kerberos.web;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+import org.springframework.security.kerberos.web.authentication.SpnegoEntryPoint;
+
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * Test class for {@link SpnegoEntryPoint}
@@ -42,7 +47,7 @@ public class SpnegoEntryPointTest {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		HttpServletResponse response = mock(HttpServletResponse.class);
 
-		entryPoint.commence(request, response, null);
+		this.entryPoint.commence(request, response, null);
 
 		verify(response).addHeader("WWW-Authenticate", "Negotiate");
 		verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -54,7 +59,7 @@ public class SpnegoEntryPointTest {
 		HttpServletResponse response = mock(HttpServletResponse.class);
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		RequestDispatcher requestDispatcher = mock(RequestDispatcher.class);
-		when(request.getRequestDispatcher(anyString())).thenReturn(requestDispatcher);
+		lenient().when(request.getRequestDispatcher(anyString())).thenReturn(requestDispatcher);
 		entryPoint.commence(request, response, null);
 		verify(response).addHeader("WWW-Authenticate", "Negotiate");
 		verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -67,7 +72,7 @@ public class SpnegoEntryPointTest {
 		HttpServletResponse response = mock(HttpServletResponse.class);
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		RequestDispatcher requestDispatcher = mock(RequestDispatcher.class);
-		when(request.getRequestDispatcher(anyString())).thenReturn(requestDispatcher);
+		lenient().when(request.getRequestDispatcher(anyString())).thenReturn(requestDispatcher);
 		entryPoint.commence(request, response, null);
 		verify(response).addHeader("WWW-Authenticate", "Negotiate");
 		verify(response).setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -75,9 +80,9 @@ public class SpnegoEntryPointTest {
 		verify(requestDispatcher).forward(request, response);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testEntryPointForwardAbsolute() throws Exception {
-		new SpnegoEntryPoint("http://test/login");
+	@Test
+	public void testEntryPointForwardAbsolute() {
+		Assertions.assertThrows(IllegalArgumentException.class, () -> new SpnegoEntryPoint("http://test/login"));
 	}
 
 }

@@ -1,0 +1,27 @@
+apply plugin: 'io.spring.convention.spring-module'
+
+description = 'Spring Security Kerberos Test'
+
+configurations {
+    all*.exclude group: "org.apache.directory.api", module: "api-ldap-schema-data"
+}
+
+dependencies {
+    management platform(project(":spring-security-kerberos-dependencies"))
+    implementation "org.junit.jupiter:junit-jupiter-api"
+    implementation "org.apache.directory.server:apacheds-core-api:$apacheDirServerVersion"
+    implementation "org.apache.directory.server:apacheds-interceptor-kerberos:$apacheDirServerVersion"
+    implementation "org.apache.directory.server:apacheds-protocol-shared:$apacheDirServerVersion"
+    implementation "org.apache.directory.server:apacheds-protocol-kerberos:$apacheDirServerVersion"
+    implementation "org.apache.directory.server:apacheds-ldif-partition:$apacheDirServerVersion"
+    implementation "org.apache.directory.server:apacheds-mavibot-partition:$apacheDirServerVersion"
+    implementation "org.apache.directory.server:apacheds-jdbm-partition:$apacheDirServerVersion"
+    implementation "org.apache.directory.server:apacheds-protocol-ldap:$apacheDirServerVersion"
+    implementation("org.apache.directory.api:api-all:$apacheDirApiVersion") {
+        exclude group: "xml-apis", module: "xml-apis"
+        exclude group: "xpp3", module: "xpp3"
+        exclude group: "dom4j", module: "dom4j"
+    }
+
+    testImplementation "org.junit.jupiter:junit-jupiter-engine"
+}

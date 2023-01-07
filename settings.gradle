@@ -1,18 +1,49 @@
+pluginManagement {
+	repositories {
+		gradlePluginPortal()
+		maven { url 'https://repo.spring.io/plugins-release' }
+	}
+}
+
+dependencyResolutionManagement {
+	repositories {
+		mavenCentral()
+	}
+}
+
 rootProject.name = 'spring-security-kerberos'
 
-include 'spring-security-kerberos-core'
-include 'spring-security-kerberos-client'
-include 'spring-security-kerberos-test'
-include 'spring-security-kerberos-web'
-include 'spring-security-kerberos-samples'
-include 'spring-security-kerberos-samples:sec-server-client-auth'
-include 'spring-security-kerberos-samples:sec-server-spnego-form-auth'
-include 'spring-security-kerberos-samples:sec-server-spnego-form-auth-xml'
-include 'spring-security-kerberos-samples:sec-server-win-auth'
-include 'spring-security-kerberos-samples:sec-client-rest-template'
+FileTree buildFiles = fileTree(rootDir) {
+	List excludes = excludeProjects?.split(",")
+	include '**/*.gradle', '**/*.gradle.kts'
+	exclude 'build', '**/gradle', 'settings.gradle', 'buildSrc', '/build.gradle', '.*', 'out'
+	exclude '**/grails3'
+	if(excludes) {
+		exclude excludes
+	}
+}
 
-rootProject.children.find {
-	if (it.name == 'spring-security-kerberos-samples') {
-		it.name = 'spring-security-kerberos-samples-common'
+String rootDirPath = rootDir.absolutePath + File.separator
+buildFiles.each { File buildFile ->
+
+	boolean isDefaultName = 'build.gradle' == buildFile.name
+	boolean isKotlin = buildFile.name.endsWith(".kts")
+	if(isDefaultName) {
+		String buildFilePath = buildFile.parentFile.absolutePath
+		String projectPath = buildFilePath.replace(rootDirPath, '').replace(File.separator, ':')
+		include projectPath
+	} else {
+		String projectName
+		if (isKotlin) {
+			projectName = buildFile.name.replace('.gradle.kts', '')
+		} else {
+			projectName = buildFile.name.replace('.gradle', '')
+		}
+		String projectPath = ':' + projectName;
+		include projectPath
+		def project = findProject("${projectPath}")
+		project.name = projectName
+		project.projectDir = buildFile.parentFile
+		project.buildFileName = buildFile.name
 	}
 }
