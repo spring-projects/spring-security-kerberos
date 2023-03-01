@@ -6,8 +6,8 @@ buildscript {
 	dependencies {
 		classpath("org.springframework.build.gradle:propdeps-plugin:0.0.7")
 		classpath("org.springframework.build.gradle:spring-io-plugin:0.0.3.RELEASE")
-		classpath('org.asciidoctor:asciidoctor-gradle-plugin:1.5.2')
-		classpath("io.spring.gradle:docbook-reference-plugin:0.3.0")
+		// classpath('org.asciidoctor:asciidoctor-gradle-plugin:1.5.2')
+		// classpath("io.spring.gradle:docbook-reference-plugin:0.3.0")
 		classpath("org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion")
 	}
 }
@@ -231,52 +231,52 @@ configure(sampleClientProjects()) {
 configure(rootProject) {
 	description = 'Spring Security Kerberos Extension'
 
-	apply plugin: 'org.asciidoctor.gradle.asciidoctor'
-	apply plugin: 'docbook-reference'
+	// apply plugin: 'org.asciidoctor.gradle.asciidoctor'
+	// apply plugin: 'docbook-reference'
 
-	reference {
-		sourceDir = new File(asciidoctor.outputDir , 'docbook5')
-		pdfFilename = "spring-security-kerberos-reference.pdf"
-		epubFilename = "spring-security-kerberos-reference.epub"
-		expandPlaceholders = ""
-	}
+	// reference {
+	// 	sourceDir = new File(asciidoctor.outputDir , 'docbook5')
+	// 	pdfFilename = "spring-security-kerberos-reference.pdf"
+	// 	epubFilename = "spring-security-kerberos-reference.epub"
+	// 	expandPlaceholders = ""
+	// }
 
-	afterEvaluate {
-		tasks.findAll { it.name.startsWith("reference") }.each{ it.dependsOn.add("asciidoctor") }
-	}
+	// afterEvaluate {
+	// 	tasks.findAll { it.name.startsWith("reference") }.each{ it.dependsOn.add("asciidoctor") }
+	// }
 
-	asciidoctorj {
-		version = '1.5.2'
-	}
+	// asciidoctorj {
+	// 	version = '1.5.2'
+	// }
 
-	asciidoctor {
-		sourceDir = file("docs/src/reference/asciidoc")
-		backends = ['docbook5']
-		options eruby: 'erubis'
-		attributes docinfo: '',
-			copycss : '',
-			icons : 'font',
-			'source-highlighter': 'prettify',
-			sectanchors : '',
-			toc2: '',
-			idprefix: '',
-			idseparator: '-',
-			doctype: 'book',
-			numbered: '',
-			'spring-version' : springVersion,
-			'spring-security-version' : springSecurityVersion,
-			revnumber : project.version
-	}
+	// asciidoctor {
+	// 	sourceDir = file("docs/src/reference/asciidoc")
+	// 	backends = ['docbook5']
+	// 	options eruby: 'erubis'
+	// 	attributes docinfo: '',
+	// 		copycss : '',
+	// 		icons : 'font',
+	// 		'source-highlighter': 'prettify',
+	// 		sectanchors : '',
+	// 		toc2: '',
+	// 		idprefix: '',
+	// 		idseparator: '-',
+	// 		doctype: 'book',
+	// 		numbered: '',
+	// 		'spring-version' : springVersion,
+	// 		'spring-security-version' : springSecurityVersion,
+	// 		revnumber : project.version
+	// }
 
-	task copyDocsSamples(type: Copy) {
-		from 'spring-security-kerberos-web/src/test/java/org/springframework/security/kerberos/docs/'
-		from 'spring-security-kerberos-web/src/test/resources/org/springframework/security/kerberos/docs/'
-		from 'spring-security-kerberos-client/src/test/java/org/springframework/security/kerberos/client/docs/'
-		include '**/*.java'
-		include '**/*.xml'
-		into 'docs/src/reference/asciidoc/samples'
-	}
-	asciidoctor.dependsOn copyDocsSamples
+	// task copyDocsSamples(type: Copy) {
+	// 	from 'spring-security-kerberos-web/src/test/java/org/springframework/security/kerberos/docs/'
+	// 	from 'spring-security-kerberos-web/src/test/resources/org/springframework/security/kerberos/docs/'
+	// 	from 'spring-security-kerberos-client/src/test/java/org/springframework/security/kerberos/client/docs/'
+	// 	include '**/*.java'
+	// 	include '**/*.xml'
+	// 	into 'docs/src/reference/asciidoc/samples'
+	// }
+	// asciidoctor.dependsOn copyDocsSamples
 
 
 	// don't publish the default jar for the root project
@@ -317,9 +317,9 @@ configure(rootProject) {
 			into 'api'
 		}
 
-		from (reference) {
-			into 'reference'
-		}
+		// from (reference) {
+		// 	into 'reference'
+		// }
 	}
 
 	task distZip(type: Zip, dependsOn: [docsZip]) {
