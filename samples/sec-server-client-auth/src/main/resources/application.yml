@@ -1,2 +1,7 @@
+debug: true
 server:
     port: 8080
+
+logging:
+  level:
+    logging.level.org.springframework.security: TRACE

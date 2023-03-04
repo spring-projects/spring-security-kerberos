@@ -1,3 +1,5 @@
+import org.springframework.boot.gradle.plugin.SpringBootPlugin
+
 plugins {
 	id 'java-platform'
 }
@@ -7,8 +9,7 @@ javaPlatform {
 }
 
 dependencies {
-	api platform("org.springframework.security:spring-security-bom:$springSecurityVersion")
-	api platform("org.springframework:spring-framework-bom:$springFrameworkVersion")
+	api platform(SpringBootPlugin.BOM_COORDINATES)
 	api platform("io.projectreactor:reactor-bom:2020.0.20")
 	api platform("io.rsocket:rsocket-bom:1.1.2")
 	api platform("org.junit:junit-bom:5.8.2")

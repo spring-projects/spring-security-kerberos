@@ -1,0 +1,15 @@
+apply plugin: 'io.spring.convention.spring-module'
+
+description = 'Spring Security Kerberos Webflux'
+
+dependencies {
+    management platform(project(":spring-security-kerberos-dependencies"))
+
+    api project(":spring-security-kerberos-core")
+    implementation "org.springframework:spring-core"
+    implementation "org.springframework.security:spring-security-web"
+
+	api 'io.projectreactor:reactor-core'
+
+	provided 'org.springframework:spring-webflux'
+}

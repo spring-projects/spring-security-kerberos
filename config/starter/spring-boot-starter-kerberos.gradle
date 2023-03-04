@@ -1,0 +1,17 @@
+apply plugin: 'io.spring.convention.spring-module'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+
+description = "Starter for using Spring Security Kerberos"
+
+dependencies {
+	api "org.springframework.boot:spring-boot-starter"
+	api("org.springframework.security:spring-security-config")
+	api(project(":spring-security-kerberos-autoconfigure"))
+	api(project(":spring-security-kerberos-web"))
+	api(project(":spring-security-kerberos-webflux"))
+}
+
+bootJar {
+	enabled = false
+}

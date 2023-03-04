@@ -51,9 +51,8 @@ public class WebSecurityConfigSuccessHandler {
 	public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager)
 			throws Exception {
 		return http.exceptionHandling().authenticationEntryPoint(spnegoEntryPoint()).and().authorizeHttpRequests()
-				.requestMatchers("/", "/home", "/login").permitAll().requestMatchers("/hello").hasRole("ROLE_USER")
-				.anyRequest().authenticated().and()
-				.addFilterBefore(spnegoAuthenticationProcessingFilter(authenticationManager),
+				.mvcMatchers("/", "/home", "/login").permitAll().mvcMatchers("/hello").hasRole("ROLE_USER").anyRequest()
+				.authenticated().and().addFilterBefore(spnegoAuthenticationProcessingFilter(authenticationManager),
 						BasicAuthenticationFilter.class)
 				.build();
 	}

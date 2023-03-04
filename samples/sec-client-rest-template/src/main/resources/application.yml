@@ -1,4 +1,9 @@
+debug: true
 app:
     user-principal: user2@EXAMPLE.ORG
     keytab-location: /tmp/user2.keytab
     access-url: http://neo.example.org:8080/hello
+logging:
+  level:
+    logging.level.org.springframework.security: TRACE
+    org.apache.http: TRACE

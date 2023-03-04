@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.security.kerberos.web.authentication.SpnegoEntryPoint;
 
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;

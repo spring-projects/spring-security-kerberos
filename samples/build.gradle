@@ -37,6 +37,7 @@ allprojects {
 def sampleServerProjects() {
 	subprojects.findAll { project ->
 		project.name.contains('sec-server') && project.name != 'spring-security-kerberos-samples-common'
+				&& project.name != 'sec-server-spnego-webflux'
 	}
 }
 
@@ -54,7 +55,7 @@ configure(sampleServerProjects()) {
 	// don't publish boot packaged samples
 	tasks.findByPath("artifactoryPublish")?.enabled = false
 	dependencies {
-		implementation(platform("io.github.openprojectx.security.kerberos:spring-security-kerberos-bom:5.8.0-SNAPSHOT"))
+		implementation(platform("io.github.openprojectx.security.kerberos:spring-security-kerberos-bom:5.7.6-SNAPSHOT"))
 		implementation platform(SpringBootPlugin.BOM_COORDINATES)
 
 		implementation project(':spring-security-kerberos-samples-common')
@@ -72,7 +73,7 @@ configure(sampleClientProjects()) {
 	// don't publish boot packaged samples
 	tasks.findByPath("artifactoryPublish")?.enabled = false
 	dependencies {
-		implementation(platform("io.github.openprojectx.security.kerberos:spring-security-kerberos-bom:5.8.0-SNAPSHOT"))
+		implementation(platform("io.github.openprojectx.security.kerberos:spring-security-kerberos-bom:5.7.6-SNAPSHOT"))
 		implementation platform(SpringBootPlugin.BOM_COORDINATES)
 		implementation "io.github.openprojectx.security.kerberos:spring-security-kerberos-client"
 		implementation "org.springframework.boot:spring-boot-starter"

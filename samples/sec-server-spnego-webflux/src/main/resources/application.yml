@@ -1,0 +1,15 @@
+debug: true
+server:
+    port: 8080
+
+spring:
+  security:
+    kerberos:
+      server:
+        enabled: true
+        service-principal: HTTP/spring-security-sso-kerberos
+        keytab-location: file:///tmp/spring-security-sso-kerberos.keytab
+
+logging:
+  level:
+    logging.level.org.springframework.security: TRACE

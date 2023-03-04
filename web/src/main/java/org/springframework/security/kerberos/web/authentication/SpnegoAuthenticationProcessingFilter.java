@@ -17,6 +17,7 @@
 package org.springframework.security.kerberos.web.authentication;
 
 import java.io.IOException;
+import java.util.Base64;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -31,7 +32,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.kerberos.authentication.KerberosServiceAuthenticationProvider;
 import org.springframework.security.kerberos.authentication.KerberosServiceRequestToken;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
@@ -124,6 +124,8 @@ public class SpnegoAuthenticationProcessingFilter extends GenericFilterBean {
 
 	private SessionAuthenticationStrategy sessionStrategy = new NullAuthenticatedSessionStrategy();
 
+	private final Base64.Decoder base64Decoder = Base64.getDecoder();
+
 	private boolean skipIfAlreadyAuthenticated = true;
 
 	/**
@@ -159,7 +161,7 @@ public class SpnegoAuthenticationProcessingFilter extends GenericFilterBean {
 				logger.debug("Received Negotiate Header for request " + request.getRequestURL() + ": " + header);
 			}
 			byte[] base64Token = header.substring(header.indexOf(" ") + 1).getBytes("UTF-8");
-			byte[] kerberosTicket = Base64.decode(base64Token);
+			byte[] kerberosTicket = this.base64Decoder.decode(base64Token);
 			KerberosServiceRequestToken authenticationRequest = new KerberosServiceRequestToken(kerberosTicket);
 			authenticationRequest.setDetails(this.authenticationDetailsSource.buildDetails(request));
 			Authentication authentication;
