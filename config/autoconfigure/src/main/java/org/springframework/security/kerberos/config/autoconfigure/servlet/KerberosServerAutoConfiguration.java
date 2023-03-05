@@ -14,26 +14,24 @@
  * limitations under the License.
  */
 
-package org.springframework.security.kerberos.config.autoconfigure.reactive;
+package org.springframework.security.kerberos.config.autoconfigure.servlet;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
-import org.springframework.boot.autoconfigure.security.reactive.ReactiveSecurityAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.reactive.ReactiveUserDetailsServiceAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Import;
-import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.kerberos.config.autoconfigure.KerberosServerProperties;
 
-@AutoConfiguration(
-		before = { ReactiveSecurityAutoConfiguration.class, ReactiveUserDetailsServiceAutoConfiguration.class })
+@AutoConfiguration(before = { SecurityAutoConfiguration.class, UserDetailsServiceAutoConfiguration.class })
 @EnableConfigurationProperties(KerberosServerProperties.class)
-@ConditionalOnClass({ EnableWebFluxSecurity.class })
-@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
-@Import({ ReactiveKerberosServerConfiguration.class })
+@EnableWebSecurity
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+@Import({ KerberosServerConfiguration.class })
 @ConditionalOnProperty(value = "spring.security.kerberos.server.enabled", havingValue = "true")
-public class ReactiveKerberosServerAutoConfiguration {
+public class KerberosServerAutoConfiguration {
 
 }

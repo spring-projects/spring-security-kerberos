@@ -38,6 +38,7 @@ def sampleServerProjects() {
 	subprojects.findAll { project ->
 		project.name.contains('sec-server') && project.name != 'spring-security-kerberos-samples-common'
 				&& project.name != 'sec-server-spnego-webflux'
+				&& project.name != 'sec-server-spnego-web'
 	}
 }
 

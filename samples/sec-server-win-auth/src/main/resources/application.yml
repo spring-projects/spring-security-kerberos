@@ -4,8 +4,8 @@ server:
 app:
     ad-domain: EXAMPLE.ORG
     ad-server: ldap://WIN-EKBO0EQ7TS7.example.org/
-    service-principal: HTTP/neo.example.org@EXAMPLE.ORG
-    keytab-location: /tmp/tomcat.keytab
+    service-principal: HTTP/spring-security-sso-kerberos
+    keytab-location: file://${user.home}/spring-security-sso-kerberos.keytab
     ldap-search-base: dc=example,dc=org
     ldap-search-filter: "(| (userPrincipalName={0}) (sAMAccountName={0}))"
 logging:

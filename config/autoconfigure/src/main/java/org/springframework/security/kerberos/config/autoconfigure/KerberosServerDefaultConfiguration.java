@@ -16,19 +16,22 @@
 
 package org.springframework.security.kerberos.config.autoconfigure;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import java.util.Collection;
+import java.util.Collections;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.kerberos.authentication.KerberosTicketValidator;
 import org.springframework.security.kerberos.authentication.sun.SunJaasKerberosTicketValidator;
 
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnProperty(value = "spring.security.kerberos.server.enabled", havingValue = "true")
-public class KerberosServerConfiguration {
+public class KerberosServerDefaultConfiguration {
 
 	private final KerberosServerProperties kerberosServerProperties;
 
-	public KerberosServerConfiguration(KerberosServerProperties kerberosServerProperties) {
+	public KerberosServerDefaultConfiguration(KerberosServerProperties kerberosServerProperties) {
 		this.kerberosServerProperties = kerberosServerProperties;
 	}
 
@@ -38,6 +41,51 @@ public class KerberosServerConfiguration {
 		sunJaasKerberosTicketValidator.setServicePrincipal(this.kerberosServerProperties.getServicePrincipal());
 		sunJaasKerberosTicketValidator.setKeyTabLocation(this.kerberosServerProperties.getKeytabLocation());
 		return sunJaasKerberosTicketValidator;
+	}
+
+	public static class DefaultUser implements UserDetails {
+
+		private final String username;
+
+		public DefaultUser(String username) {
+			this.username = username;
+		}
+
+		@Override
+		public Collection<? extends GrantedAuthority> getAuthorities() {
+			return Collections.emptyList();
+		}
+
+		@Override
+		public String getPassword() {
+			return null;
+		}
+
+		@Override
+		public String getUsername() {
+			return this.username;
+		}
+
+		@Override
+		public boolean isAccountNonExpired() {
+			return true;
+		}
+
+		@Override
+		public boolean isAccountNonLocked() {
+			return true;
+		}
+
+		@Override
+		public boolean isCredentialsNonExpired() {
+			return true;
+		}
+
+		@Override
+		public boolean isEnabled() {
+			return true;
+		}
+
 	}
 
 }

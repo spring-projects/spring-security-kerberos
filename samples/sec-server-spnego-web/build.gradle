@@ -1,0 +1,11 @@
+apply plugin: 'java'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+
+description = 'Security Server Web Spnego Sample'
+
+dependencies {
+	implementation 'io.github.openprojectx.security.kerberos:spring-boot-starter-kerberos:5.7.6-SNAPSHOT'
+
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+}

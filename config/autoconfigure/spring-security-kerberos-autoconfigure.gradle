@@ -8,8 +8,11 @@ dependencies {
 
 	optional "org.springframework.security:spring-security-config"
 	optional "org.springframework:spring-webflux"
+	optional "org.springframework:spring-web"
+
 	optional project(":spring-security-kerberos-webflux")
 	optional project(":spring-security-kerberos-web")
+	optional "jakarta.servlet:jakarta.servlet-api"
 
 	testImplementation("org.junit.jupiter:junit-jupiter")
 	testImplementation("org.assertj:assertj-core")

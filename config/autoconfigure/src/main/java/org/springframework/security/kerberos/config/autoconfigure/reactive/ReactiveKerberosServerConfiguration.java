@@ -16,8 +16,6 @@
 
 package org.springframework.security.kerberos.config.autoconfigure.reactive;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Optional;
 
 import reactor.core.publisher.Mono;
@@ -28,14 +26,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.authentication.AccountStatusUserDetailsChecker;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsChecker;
 import org.springframework.security.kerberos.authentication.KerberosTicketValidator;
-import org.springframework.security.kerberos.config.autoconfigure.KerberosServerConfiguration;
+import org.springframework.security.kerberos.config.autoconfigure.KerberosServerDefaultConfiguration;
 import org.springframework.security.kerberos.webflux.authentication.SpnegoReactiveAuthenticationManager;
 import org.springframework.security.kerberos.webflux.authentication.SpnegoServerAuthenticationConverter;
 import org.springframework.security.kerberos.webflux.authentication.SpnegoServerAuthenticationEntryPoint;
@@ -44,8 +42,12 @@ import org.springframework.security.web.server.authentication.AuthenticationWebF
 import org.springframework.security.web.server.context.WebSessionServerSecurityContextRepository;
 
 @Configuration(proxyBeanMethods = false)
-@Import(KerberosServerConfiguration.class)
+@Import(KerberosServerDefaultConfiguration.class)
+@EnableWebFluxSecurity
 public class ReactiveKerberosServerConfiguration {
+
+	private static final ReactiveUserDetailsService DEFAULT_USER_DETAIL_SERVICE = (username) -> Mono
+			.just(new KerberosServerDefaultConfiguration.DefaultUser(username));
 
 	@Bean
 	@ConditionalOnBean(KerberosTicketValidator.class)
@@ -53,7 +55,7 @@ public class ReactiveKerberosServerConfiguration {
 			KerberosTicketValidator kerberosTicketValidator, Optional<ReactiveUserDetailsService> userDetailsService,
 			Optional<UserDetailsChecker> userDetailsChecker) {
 		return new SpnegoReactiveAuthenticationManager(kerberosTicketValidator,
-				userDetailsService.orElseGet(DefaultUserDetailService::new),
+				userDetailsService.orElse(DEFAULT_USER_DETAIL_SERVICE),
 				userDetailsChecker.orElseGet(AccountStatusUserDetailsChecker::new));
 	}
 
@@ -61,68 +63,16 @@ public class ReactiveKerberosServerConfiguration {
 	@ConditionalOnBean(SpnegoReactiveAuthenticationManager.class)
 	@ConditionalOnMissingBean(SecurityWebFilterChain.class)
 	SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http,
-			SpnegoReactiveAuthenticationManager spnegoReactiveAuthenticationManager) {
+			SpnegoReactiveAuthenticationManager spnegoReactiveAuthenticationManager,
+			Optional<Customizer<ServerHttpSecurity.AuthorizeExchangeSpec>> optionalCustomizer) {
 		AuthenticationWebFilter spnegoAuthenticationWebFilter = new AuthenticationWebFilter(
 				spnegoReactiveAuthenticationManager);
 		spnegoAuthenticationWebFilter.setServerAuthenticationConverter(new SpnegoServerAuthenticationConverter());
 		spnegoAuthenticationWebFilter.setSecurityContextRepository(new WebSessionServerSecurityContextRepository());
-		return http.authorizeExchange((exchanges) -> exchanges.anyExchange().authenticated()).exceptionHandling()
-				.authenticationEntryPoint(new SpnegoServerAuthenticationEntryPoint()).and()
+		return http.authorizeExchange(optionalCustomizer.orElse((exchanges) -> exchanges.anyExchange().authenticated()))
+				.exceptionHandling().authenticationEntryPoint(new SpnegoServerAuthenticationEntryPoint())
+				.and()
 				.addFilterAt(spnegoAuthenticationWebFilter, SecurityWebFiltersOrder.AUTHENTICATION).build();
-	}
-
-	private static class DefaultUser implements UserDetails {
-
-		private final String username;
-
-		DefaultUser(String username) {
-			this.username = username;
-		}
-
-		@Override
-		public Collection<? extends GrantedAuthority> getAuthorities() {
-			return Collections.emptyList();
-		}
-
-		@Override
-		public String getPassword() {
-			return null;
-		}
-
-		@Override
-		public String getUsername() {
-			return this.username;
-		}
-
-		@Override
-		public boolean isAccountNonExpired() {
-			return true;
-		}
-
-		@Override
-		public boolean isAccountNonLocked() {
-			return true;
-		}
-
-		@Override
-		public boolean isCredentialsNonExpired() {
-			return true;
-		}
-
-		@Override
-		public boolean isEnabled() {
-			return true;
-		}
-
-	}
-
-	private static class DefaultUserDetailService implements ReactiveUserDetailsService {
-
-		@Override
-		public Mono<UserDetails> findByUsername(String username) {
-			return Mono.just(new DefaultUser(username));
-		}
-
 	}
 
 }
