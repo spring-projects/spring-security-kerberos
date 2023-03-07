@@ -22,7 +22,6 @@ jobs:
         with:
           distribution: adopt
           java-version: ${{ matrix.java }}
-          cache: gradle
       - name: Build
         run: ./gradlew build
       - uses: actions/upload-artifact@v3
