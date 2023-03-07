@@ -15,14 +15,13 @@
  */
 package org.springframework.security.kerberos.authentication.sun;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.not;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
+
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.codec.Base64;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class SunJaasKerberosTicketValidatorTests {
 
@@ -66,17 +65,29 @@ public class SunJaasKerberosTicketValidatorTests {
 			+ "PB1vJdIMjc8benP9/+EUhX1LkwvV/rOO3ocwjtdLY1rcmNXSbhnf8jDcVjOe"
 			+ "eL2PHBfvkne/FgxC";
 
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
+	// @Rule
+	// public ExpectedException thrown = ExpectedException.none();
+
+	// @Test
+	// public void testJdkMsKrb5OIDRegressionTweak() throws Exception {
+	// 	thrown.expect(BadCredentialsException.class);
+	// 	thrown.expectMessage(not(containsString("GSSContext name of the context initiator is null")));
+	// 	thrown.expectMessage(containsString("Kerberos validation not successful"));
+	// 	SunJaasKerberosTicketValidator validator = new SunJaasKerberosTicketValidator();
+	// 	byte[] kerberosTicket = Base64.decode(header.getBytes());
+	// 	validator.validateTicket(kerberosTicket);
+	// }
 
 	@Test
-	public void testJdkMsKrb5OIDRegressionTweak() throws Exception {
-		thrown.expect(BadCredentialsException.class);
-		thrown.expectMessage(not(containsString("GSSContext name of the context initiator is null")));
-		thrown.expectMessage(containsString("Kerberos validation not successful"));
-		SunJaasKerberosTicketValidator validator = new SunJaasKerberosTicketValidator();
-		byte[] kerberosTicket = Base64.decode(header.getBytes());
-		validator.validateTicket(kerberosTicket);
+	public void testJdkMsKrb5OIDRegressionTweak()  {
+        assertThatThrownBy(() -> {
+			SunJaasKerberosTicketValidator validator = new SunJaasKerberosTicketValidator();
+			byte[] kerberosTicket = Base64.decode(header.getBytes());
+			validator.validateTicket(kerberosTicket);
+		})
+		.isInstanceOf(BadCredentialsException.class)
+		.hasMessageNotContaining("GSSContext name of the context initiator is null")
+		.hasMessageContaining("Kerberos validation not successful");
 	}
 
 }

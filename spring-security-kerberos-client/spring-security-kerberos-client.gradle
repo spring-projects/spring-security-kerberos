@@ -1,0 +1,21 @@
+plugins {
+	id 'org.springframework.security.kerberos.module'
+}
+
+description = 'Spring Security Kerberos Client'
+
+dependencies {
+	management platform(project(":spring-security-kerberos-management"))
+	implementation project(':spring-security-kerberos-core')
+	implementation project(':spring-security-kerberos-web')
+	// api('org.apache.httpcomponents:httpclient')
+	api('org.apache.httpcomponents.client5:httpclient5')
+	optional 'org.springframework.security:spring-security-ldap'
+	// api('org.springframework.security:spring-security-web')
+	// api('jakarta.servlet:jakarta.servlet-api')
+	testImplementation 'org.springframework:spring-test'
+	testImplementation 'org.springframework.security:spring-security-config'
+	testImplementation 'org.junit.jupiter:junit-jupiter'
+	testImplementation 'org.mockito:mockito-junit-jupiter'
+	testImplementation 'org.assertj:assertj-core'
+}

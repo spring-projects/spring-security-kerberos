@@ -1,18 +1,41 @@
+pluginManagement {
+	repositories {
+		mavenCentral()
+		gradlePluginPortal()
+		maven { url 'https://repo.spring.io/release' }
+		if (version.contains('-')) {
+			maven { url 'https://repo.spring.io/milestone' }
+		}
+		if (version.endsWith('-SNAPSHOT')) {
+			maven { url 'https://repo.spring.io/snapshot' }
+		}
+	}
+	plugins {
+		id 'org.springframework.boot' version "$springBootVersion"
+		id 'io.spring.dependency-management' version '1.1.0'
+		// id 'com.gradle.enterprise' version "$gradleEnterpriseVersion"
+		// id 'io.spring.ge.conventions' version "$springGeConventionsVersion"
+	}
+}
+
+// plugins {
+// 	id "com.gradle.enterprise"
+// 	id "io.spring.ge.conventions"
+// }
+
 rootProject.name = 'spring-security-kerberos'
 
+include 'spring-security-kerberos-management'
 include 'spring-security-kerberos-core'
 include 'spring-security-kerberos-client'
-include 'spring-security-kerberos-test'
 include 'spring-security-kerberos-web'
-include 'spring-security-kerberos-samples'
-include 'spring-security-kerberos-samples:sec-server-client-auth'
 include 'spring-security-kerberos-samples:sec-server-spnego-form-auth'
-include 'spring-security-kerberos-samples:sec-server-spnego-form-auth-xml'
-include 'spring-security-kerberos-samples:sec-server-win-auth'
-include 'spring-security-kerberos-samples:sec-client-rest-template'
 
-rootProject.children.find {
-	if (it.name == 'spring-security-kerberos-samples') {
-		it.name = 'spring-security-kerberos-samples-common'
+rootProject.children.each { project ->
+	project.buildFileName = "${project.name}.gradle"
+	if (project.name == 'spring-security-kerberos-samples') {
+		project.children.each { sampleProject ->
+			sampleProject.buildFileName = "${sampleProject.name}.gradle"
+		}
 	}
 }

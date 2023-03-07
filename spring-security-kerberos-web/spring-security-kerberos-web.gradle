@@ -1,0 +1,17 @@
+plugins {
+	id 'org.springframework.security.kerberos.module'
+}
+
+description = 'Spring Security Kerberos Web'
+
+dependencies {
+	management platform(project(":spring-security-kerberos-management"))
+	implementation project(':spring-security-kerberos-core')
+	api('org.springframework.security:spring-security-web')
+	api('jakarta.servlet:jakarta.servlet-api')
+	testImplementation 'org.springframework:spring-test'
+	testImplementation 'org.springframework.security:spring-security-config'
+	testImplementation 'org.junit.jupiter:junit-jupiter'
+	testImplementation 'org.mockito:mockito-junit-jupiter'
+	testImplementation 'org.assertj:assertj-core'
+}

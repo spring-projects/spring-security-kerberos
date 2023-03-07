@@ -1,0 +1,22 @@
+plugins {
+	id 'java-platform'
+}
+
+javaPlatform {
+	allowDependencies()
+}
+
+description = 'Spring Security Kerberos Management'
+
+dependencies {
+	api platform("org.springframework:spring-framework-bom:$springFrameworkVersion")
+	api platform("org.springframework.security:spring-security-bom:$springSecurityVersion")
+	api platform("org.junit:junit-bom:$junitVersion")
+	api platform("org.mockito:mockito-bom:$mockitoVersion")
+	constraints {
+		// api "org.apache.httpcomponents:httpclient:$httpclientVersion"
+		api "org.apache.httpcomponents.client5:httpclient5:$httpclient5Version"
+		api "org.assertj:assertj-core:$assertjVersion"
+		api "jakarta.servlet:jakarta.servlet-api:$servletApiVersion"
+	}
+}

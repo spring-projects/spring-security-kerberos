@@ -1,0 +1,50 @@
+plugins {
+	id "java-gradle-plugin"
+	id "java"
+}
+
+sourceCompatibility = JavaVersion.VERSION_17
+
+repositories {
+	gradlePluginPortal()
+	mavenCentral()
+	maven { url 'https://repo.spring.io/plugins-release/' }
+	maven { url "https://repo.spring.io/snapshot" }
+}
+
+ext {
+	def propertiesFile = new File(new File("$projectDir").parentFile, "gradle.properties")
+	propertiesFile.withInputStream {
+		def properties = new Properties()
+		properties.load(it)
+		set("springFrameworkVersion", properties["springFrameworkVersion"])
+	}
+}
+
+dependencies {
+	implementation(platform("org.springframework:spring-framework-bom:${springFrameworkVersion}"))
+	implementation("org.springframework:spring-core")
+	implementation 'org.asciidoctor:asciidoctor-gradle-jvm:3.3.2'
+	implementation 'org.jfrog.buildinfo:build-info-extractor-gradle:4.29.0'
+}
+
+gradlePlugin {
+	plugins {
+		modulePlugin {
+			id = "org.springframework.security.kerberos.module"
+			implementationClass = "org.springframework.security.kerberos.gradle.ModulePlugin"
+		}
+		bomPlugin {
+			id = "org.springframework.security.kerberos.bom"
+			implementationClass = "org.springframework.security.kerberos.gradle.BomPlugin"
+		}
+		distPlugin {
+			id = "org.springframework.security.kerberos.root"
+			implementationClass = "org.springframework.security.kerberos.gradle.RootPlugin"
+		}
+		samplePlugin {
+			id = "org.springframework.security.kerberos.sample"
+			implementationClass = "org.springframework.security.kerberos.gradle.SamplePlugin"
+		}
+	}
+}

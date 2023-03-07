@@ -15,15 +15,19 @@
  */
 package org.springframework.security.kerberos.web;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
 import org.springframework.security.kerberos.web.authentication.SpnegoEntryPoint;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.*;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Test class for {@link SpnegoEntryPoint}
@@ -75,9 +79,11 @@ public class SpnegoEntryPointTest {
 		verify(requestDispatcher).forward(request, response);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testEntryPointForwardAbsolute() throws Exception {
-		new SpnegoEntryPoint("http://test/login");
+		assertThatThrownBy(() -> {
+			new SpnegoEntryPoint("http://test/login");
+		}).isInstanceOf(IllegalArgumentException.class);
 	}
 
 }

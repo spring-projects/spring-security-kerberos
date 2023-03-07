@@ -1,13 +1,14 @@
 package org.springframework.security.kerberos.authentication;
 
-import org.ietf.jgss.GSSContext;
-import org.ietf.jgss.GSSCredential;
-import org.junit.Test;
-
 import javax.security.auth.Subject;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import org.ietf.jgss.GSSContext;
+import org.ietf.jgss.GSSCredential;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.mock;
 
 public class KerberosTicketValidationTest {
 
@@ -30,7 +31,7 @@ public class KerberosTicketValidationTest {
         assertEquals(responseToken, ticketValidation.responseToken());
         assertEquals(gssContext, ticketValidation.getGssContext());
 
-        assertNull("With no credential delegation", ticketValidation.getDelegationCredential());
+        assertNull(ticketValidation.getDelegationCredential(), "With no credential delegation");
     }
 
     @Test
@@ -47,6 +48,6 @@ public class KerberosTicketValidationTest {
         assertEquals(responseToken, ticketValidation.responseToken());
         assertEquals(gssContext, ticketValidation.getGssContext());
 
-        assertEquals("With credential delegation", delegationCredential, ticketValidation.getDelegationCredential());
+        assertEquals(delegationCredential, ticketValidation.getDelegationCredential(), "With credential delegation");
     }
 }

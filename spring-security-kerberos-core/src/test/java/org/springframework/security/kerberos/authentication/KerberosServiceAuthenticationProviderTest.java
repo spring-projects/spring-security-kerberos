@@ -15,13 +15,12 @@
  */
 package org.springframework.security.kerberos.authentication;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.CredentialsExpiredException;
@@ -38,6 +37,12 @@ import org.springframework.security.kerberos.authentication.KerberosServiceAuthe
 import org.springframework.security.kerberos.authentication.KerberosServiceRequestToken;
 import org.springframework.security.kerberos.authentication.KerberosTicketValidation;
 import org.springframework.security.kerberos.authentication.KerberosTicketValidator;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Test class for {@link KerberosServiceAuthenticationProvider}
@@ -63,7 +68,7 @@ public class KerberosServiceAuthenticationProviderTest {
     private static final UserDetails USER_DETAILS = new User(TEST_USER, "empty", true, true, true,true, AUTHORITY_LIST);
     private static final KerberosServiceRequestToken INPUT_TOKEN = new KerberosServiceRequestToken(TEST_TOKEN);
 
-    @Before
+    @BeforeEach
     public void before() {
         // mocking
         this.ticketValidator = mock(KerberosTicketValidator.class);
@@ -91,48 +96,60 @@ public class KerberosServiceAuthenticationProviderTest {
         assertEquals(requestToken.getDetails(), output.getDetails());
     }
 
-    @Test(expected=DisabledException.class)
+    @Test
     public void testUserIsDisabled() throws Exception {
-        User disabledUser = new User(TEST_USER, "empty", false, true, true,true, AUTHORITY_LIST);
-        callProviderAndReturnUser(disabledUser, INPUT_TOKEN);
+        assertThatThrownBy(() -> {
+            User disabledUser = new User(TEST_USER, "empty", false, true, true,true, AUTHORITY_LIST);
+            callProviderAndReturnUser(disabledUser, INPUT_TOKEN);
+        }).isInstanceOf(DisabledException.class);
     }
 
-    @Test(expected=AccountExpiredException.class)
+    @Test
     public void testUserAccountIsExpired() throws Exception {
-        User expiredUser = new User(TEST_USER, "empty", true, false, true,true, AUTHORITY_LIST);
-        callProviderAndReturnUser(expiredUser, INPUT_TOKEN);
+        assertThatThrownBy(() -> {
+            User expiredUser = new User(TEST_USER, "empty", true, false, true,true, AUTHORITY_LIST);
+            callProviderAndReturnUser(expiredUser, INPUT_TOKEN);
+        }).isInstanceOf(AccountExpiredException.class);
     }
 
-    @Test(expected=CredentialsExpiredException.class)
+    @Test
     public void testUserCredentialsExpired() throws Exception {
-        User credExpiredUser = new User(TEST_USER, "empty", true, true, false ,true, AUTHORITY_LIST);
-        callProviderAndReturnUser(credExpiredUser, INPUT_TOKEN);
+        assertThatThrownBy(() -> {
+            User credExpiredUser = new User(TEST_USER, "empty", true, true, false ,true, AUTHORITY_LIST);
+            callProviderAndReturnUser(credExpiredUser, INPUT_TOKEN);
+        }).isInstanceOf(CredentialsExpiredException.class);
     }
 
-    @Test(expected=LockedException.class)
+    @Test
     public void testUserAccountLockedCredentialsExpired() throws Exception {
-        User lockedUser = new User(TEST_USER, "empty", true, true, true ,false, AUTHORITY_LIST);
-        callProviderAndReturnUser(lockedUser, INPUT_TOKEN);
+        assertThatThrownBy(() -> {
+            User lockedUser = new User(TEST_USER, "empty", true, true, true ,false, AUTHORITY_LIST);
+            callProviderAndReturnUser(lockedUser, INPUT_TOKEN);
+        }).isInstanceOf(LockedException.class);
     }
 
-    @Test(expected=UsernameNotFoundException.class)
+    @Test
     public void testUsernameNotFound() throws Exception {
         // stubbing
         when(ticketValidator.validateTicket(TEST_TOKEN)).thenReturn(TICKET_VALIDATION);
         when(userDetailsService.loadUserByUsername(TEST_USER)).thenThrow(new UsernameNotFoundException(""));
 
         // testing
-        provider.authenticate(INPUT_TOKEN);
+        assertThatThrownBy(() -> {
+            provider.authenticate(INPUT_TOKEN);
+        }).isInstanceOf(UsernameNotFoundException.class);
     }
 
 
-    @Test(expected=BadCredentialsException.class)
+    @Test
     public void testTicketValidationWrong() throws Exception {
         // stubbing
         when(ticketValidator.validateTicket(TEST_TOKEN)).thenThrow(new BadCredentialsException(""));
 
         // testing
-        provider.authenticate(INPUT_TOKEN);
+        assertThatThrownBy(() -> {
+            provider.authenticate(INPUT_TOKEN);
+        }).isInstanceOf(BadCredentialsException.class);
     }
 
     private Authentication callProviderAndReturnUser(UserDetails userDetails, Authentication inputToken) {

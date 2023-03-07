@@ -36,17 +36,27 @@ import javax.security.auth.login.Configuration;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
-import org.apache.http.auth.AuthSchemeProvider;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.Credentials;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.AuthSchemes;
-import org.apache.http.config.Lookup;
-import org.apache.http.config.RegistryBuilder;
-import org.apache.http.impl.auth.SPNegoSchemeFactory;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.hc.client5.http.auth.AuthSchemeFactory;
+import org.apache.hc.client5.http.auth.AuthScope;
+import org.apache.hc.client5.http.auth.Credentials;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
+import org.apache.hc.client5.http.impl.auth.SPNegoSchemeFactory;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.core5.http.config.Lookup;
+
+// import org.apache.http.auth.AuthSchemeProvider;
+// import org.apache.http.auth.AuthScope;
+// import org.apache.http.auth.Credentials;
+// import org.apache.http.client.HttpClient;
+// import org.apache.http.client.config.AuthSchemes;
+// import org.apache.http.config.Lookup;
+// import org.apache.http.config.RegistryBuilder;
+// import org.apache.http.impl.auth.SPNegoSchemeFactory;
+// import org.apache.http.impl.client.BasicCredentialsProvider;
+// import org.apache.http.impl.client.CloseableHttpClient;
+// import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.util.StringUtils;
@@ -197,11 +207,12 @@ public class KerberosRestTemplate extends RestTemplate {
 	 */
 	private static HttpClient buildHttpClient() {
 		HttpClientBuilder builder = HttpClientBuilder.create();
-		Lookup<AuthSchemeProvider> authSchemeRegistry = RegistryBuilder.<AuthSchemeProvider> create()
-				.register(AuthSchemes.SPNEGO, new SPNegoSchemeFactory(true)).build();
+		// Lookup<AuthSchemeProvider> authSchemeRegistry = RegistryBuilder.<AuthSchemeProvider> create()
+		// 		.register(AuthSchemes.SPNEGO, new SPNegoSchemeFactory(true)).build();
+		Lookup<AuthSchemeFactory> authSchemeRegistry = null;
 		builder.setDefaultAuthSchemeRegistry(authSchemeRegistry);
 		BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-		credentialsProvider.setCredentials(new AuthScope(null, -1, null), credentials);
+		credentialsProvider.setCredentials(new AuthScope(null, -1), credentials);
 		builder.setDefaultCredentialsProvider(credentialsProvider);
 		CloseableHttpClient httpClient = builder.build();
 		return httpClient;
@@ -303,7 +314,7 @@ public class KerberosRestTemplate extends RestTemplate {
 		}
 
 		@Override
-		public String getPassword() {
+		public char[] getPassword() {
 			return null;
 		}
 

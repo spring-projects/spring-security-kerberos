@@ -13,12 +13,13 @@
  */
 package org.springframework.security.kerberos.docs;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(locations= {"AuthProviderConfig.xml"})
 public class AuthProviderConfigTest {
 

@@ -15,9 +15,6 @@
  */
 package org.springframework.security.kerberos.web;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -25,16 +22,17 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -49,6 +47,11 @@ import org.springframework.security.kerberos.web.authentication.SpnegoAuthentica
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+
 
 /**
  * Test class for {@link SpnegoAuthenticationProcessingFilter}
@@ -96,7 +99,7 @@ public class SpnegoAuthenticationProcessingFilterTest {
 
 	private static final BadCredentialsException BCE = new BadCredentialsException("");
 
-    @Before
+    @BeforeEach
     public void before() throws Exception {
         // mocking
         authenticationManager = mock(AuthenticationManager.class);
@@ -266,7 +269,7 @@ public class SpnegoAuthenticationProcessingFilterTest {
         filter.setFailureHandler(failureHandler);
     }
 
-    @After
+    @AfterEach
     public void after() {
         SecurityContextHolder.clearContext();
     }

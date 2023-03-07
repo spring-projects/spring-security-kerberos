@@ -1,0 +1,9 @@
+{
+    "java.completion.importOrder": [
+        "java",
+        "javax",
+        "",
+        "org.springframework",
+        "#"
+    ]
+}

@@ -15,13 +15,16 @@
  */
 package org.springframework.security.kerberos.authentication;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -49,7 +52,7 @@ public class KerberosAuthenticationProviderTest {
     private static final UserDetails USER_DETAILS = new User(TEST_USER, "empty", true, true, true,true, AUTHORITY_LIST);
     private static final JaasSubjectHolder JAAS_SUBJECT_HOLDER = new JaasSubjectHolder(null, TEST_USER);
 
-    @Before
+    @BeforeEach
     public void before() {
         // mocking
         this.kerberosClient = mock(KerberosClient.class);
