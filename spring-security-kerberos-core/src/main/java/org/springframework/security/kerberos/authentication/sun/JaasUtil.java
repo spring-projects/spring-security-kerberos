@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2015 the original author or authors.
+ * Copyright 2009-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,10 @@
  */
 package org.springframework.security.kerberos.authentication.sun;
 
-import javax.security.auth.Subject;
 import java.security.Principal;
 import java.util.HashSet;
+
+import javax.security.auth.Subject;
 
 /**
  * JAAS utility functions.

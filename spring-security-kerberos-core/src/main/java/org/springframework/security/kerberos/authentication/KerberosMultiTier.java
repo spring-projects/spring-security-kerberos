@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2015 the original author or authors.
+ * Copyright 2009-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,19 @@
  */
 package org.springframework.security.kerberos.authentication;
 
-import org.ietf.jgss.*;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.Authentication;
+import java.security.PrivilegedAction;
 
 import javax.security.auth.Subject;
-import java.security.PrivilegedAction;
+
+import org.ietf.jgss.GSSContext;
+import org.ietf.jgss.GSSCredential;
+import org.ietf.jgss.GSSException;
+import org.ietf.jgss.GSSManager;
+import org.ietf.jgss.GSSName;
+import org.ietf.jgss.Oid;
+
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.Authentication;
 
 /**
  * <p>Allows creating tickets against other service principals storing the

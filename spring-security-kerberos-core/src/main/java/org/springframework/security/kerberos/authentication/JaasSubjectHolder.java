@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2015 the original author or authors.
+ * Copyright 2009-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,12 @@
  */
 package org.springframework.security.kerberos.authentication;
 
-import org.springframework.security.kerberos.authentication.sun.SunJaasKerberosClient;
-
-import javax.security.auth.Subject;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.security.auth.Subject;
+
+import org.springframework.security.kerberos.authentication.sun.SunJaasKerberosClient;
 
 /**
  * <p>Holds the Subject of the currently authenticated user, since this
