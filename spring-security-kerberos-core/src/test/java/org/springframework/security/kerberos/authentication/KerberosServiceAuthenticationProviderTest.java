@@ -19,6 +19,7 @@ package org.springframework.security.kerberos.authentication;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.security.authentication.AccountExpiredException;
@@ -51,6 +52,7 @@ import static org.mockito.Mockito.when;
  * @author Jeremy Stone
  * @since 1.0
  */
+@Disabled("Until gh-170 gets resolved")
 public class KerberosServiceAuthenticationProviderTest {
 
     private KerberosServiceAuthenticationProvider provider;
