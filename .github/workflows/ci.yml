@@ -25,3 +25,11 @@ jobs:
           cache: gradle
       - name: Build
         run: ./gradlew build
+      - uses: actions/upload-artifact@v3
+        if: ${{ failure() }}
+        with:
+          name: buildreports
+          retention-days: 1
+          path: |
+            */build/reports
+            spring-security-kerberos-samples/*/build/reports
