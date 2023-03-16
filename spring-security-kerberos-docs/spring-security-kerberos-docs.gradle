@@ -6,7 +6,6 @@ description = 'Spring Security Kerberos Documentation'
 
 dependencies {
 	management platform(project(":spring-security-kerberos-management"))
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
 node {
