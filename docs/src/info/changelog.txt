@@ -1,3 +1,0 @@
-SPRING SECURITY KERBEROS CHANGELOG
-==================================
-

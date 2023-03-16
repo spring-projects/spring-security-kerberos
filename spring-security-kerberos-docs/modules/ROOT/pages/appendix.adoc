@@ -10,7 +10,7 @@ user source.
 
 [source,java,indent=0]
 ----
-include::samples/DummyUserDetailsService.java[tags=snippetA]
+include::example$DummyUserDetailsService.java[tags=snippetA]
 ----
 
 [appendix]
@@ -18,7 +18,7 @@ include::samples/DummyUserDetailsService.java[tags=snippetA]
 In any authentication process there are usually a three parties
 involved.
 
-image:images/drawio-kerb-cc1.png[]
+image:drawio-kerb-cc1.png[]
 
 First is a `client` which sometimes is a client computer but in most
 of the scenarios it is the actual user sitting on a computer and
@@ -40,7 +40,7 @@ Effectively `KDC` has its own key and other keys for domain users.
 Interestingly there is no communication between a `resource` and a
 `KDC` during the authentication process.
 
-image:images/drawio-kerb-cc2.png[]
+image:drawio-kerb-cc2.png[]
 
 When client wants to authenticate itself with a `resource` it first
 needs to communicate with a `KDC`. `Client` will craft a special package
@@ -61,7 +61,7 @@ Ticket` which is signed by a KDC's own private key. Later when
 operation is succesfull it knows that it was a ticket it itself
 originally signed and gave to a `client`.
 
-image:images/drawio-kerb-cc3.png[]
+image:drawio-kerb-cc3.png[]
 
 When client wants to get a ticket which it can use to authenticate
 with a service, `TGT` is send to `KDC` which then signs a service ticket
@@ -69,7 +69,7 @@ with service's own key. This a moment when a trust between
 `client` and `service` is created. This service ticket contains data
 which only `service` itself is able to decrypt.
 
-image:images/drawio-kerb-cc4.png[]
+image:drawio-kerb-cc4.png[]
 
 When `client` is authenticating with a service it sends previously
 received service ticket to a service which then thinks that I don't
@@ -97,8 +97,8 @@ Initializing database '/var/lib/krb5kdc/principal' for realm 'EXAMPLE.ORG',
 master key name 'K/M@EXAMPLE.ORG'
 You will be prompted for the database Master Password.
 It is important that you NOT FORGET this password.
-Enter KDC database master key: 
-Re-enter KDC database master key to verify: 
+Enter KDC database master key:
+Re-enter KDC database master key to verify:
 ----
 
 `kadmin` command can be used to administer Kerberos environment but
@@ -116,7 +116,7 @@ Lets use `kadmin.local` command to create one.
 
 [source,text,indent=0]
 ----
-root@neo:/etc/krb5kdc# kadmin.local 
+root@neo:/etc/krb5kdc# kadmin.local
 Authenticating as principal root/admin@EXAMPLE.ORG with password.
 
 kadmin.local:  listprincs
@@ -129,8 +129,8 @@ krbtgt/EXAMPLE.ORG@EXAMPLE.ORG
 kadmin.local:  addprinc root/admin@EXAMPLE.ORG
 WARNING: no policy specified for root/admin@EXAMPLE.ORG; defaulting to
 no policy
-Enter password for principal "root/admin@EXAMPLE.ORG": 
-Re-enter password for principal "root/admin@EXAMPLE.ORG": 
+Enter password for principal "root/admin@EXAMPLE.ORG":
+Re-enter password for principal "root/admin@EXAMPLE.ORG":
 Principal "root/admin@EXAMPLE.ORG" created.
 ----
 
@@ -139,7 +139,7 @@ services.
 
 [source,text,indent=0]
 ----
-# cat /etc/krb5kdc/kadm5.acl 
+# cat /etc/krb5kdc/kadm5.acl
 # This file Is the access control list for krb5 administration.
 */admin *
 ----
@@ -152,8 +152,8 @@ principal. Lets create our first user `user1`.
 kadmin:  addprinc user1
 WARNING: no policy specified for user1@EXAMPLE.ORG; defaulting to no
 policy
-Enter password for principal "user1@EXAMPLE.ORG": 
-Re-enter password for principal "user1@EXAMPLE.ORG": 
+Enter password for principal "user1@EXAMPLE.ORG":
+Re-enter password for principal "user1@EXAMPLE.ORG":
 Principal "user1@EXAMPLE.ORG" created.
 ----
 
@@ -164,8 +164,8 @@ Lets create our second user `user2` and export a keytab file.
 kadmin:  addprinc user2
 WARNING: no policy specified for user2@EXAMPLE.ORG; defaulting to no
 policy
-Enter password for principal "user2@EXAMPLE.ORG": 
-Re-enter password for principal "user2@EXAMPLE.ORG": 
+Enter password for principal "user2@EXAMPLE.ORG":
+Re-enter password for principal "user2@EXAMPLE.ORG":
 Principal "user2@EXAMPLE.ORG" created.
 
 kadmin:  ktadd -k /tmp/user2.keytab user2@EXAMPLE.ORG
@@ -313,13 +313,13 @@ have a valid kerberos tickets as shown below.
 
 [source,text]
 ----
-$ klist 
+$ klist
 klist: Credentials cache file '/tmp/krb5cc_1000' not found
 ----
 
 We already have a keytab file we exported from Windows AD to be used
 with tomcat running on Linux. Lets try to use that to authenticate
-with Windows AD. 
+with Windows AD.
 
 You can have a dedicated config file which usually can be used with
 native Linux commands and JVMs via system propertys.
@@ -429,7 +429,7 @@ enabled to perform Spnego authentication.
 === Chrome
 
 With Google Chrome you generally need to set command-line parameters
-order to white list servers with Chrome will negotiate. 
+order to white list servers with Chrome will negotiate.
 
 - on Windows machines (clients): Chrome shares the configuration with
   Internet Explorer so if all changes were applied to IE (as described

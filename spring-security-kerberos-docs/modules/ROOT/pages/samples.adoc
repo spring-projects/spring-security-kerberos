@@ -54,7 +54,7 @@ using command-line options or custom `application.yml` file.
 Run a server.
 [source,text,subs="attributes"]
 ----
-$ java -jar sec-server-win-auth-{revnumber}.jar
+$ java -jar sec-server-win-auth-{version}.jar
 ----
 
 [IMPORTANT]
@@ -72,15 +72,15 @@ windows kerberos environment.
 
 Login to `Windows 8.1` using domain credentials and access sample
 
-image:images/ie1.png[]
-image:images/ie2.png[]
+image:ie1.png[]
+image:ie2.png[]
 
 Access sample application from a non windows vm and use domain
 credentials manually.
 
-image:images/ff1.png[]
-image:images/ff2.png[]
-image:images/ff3.png[]
+image:ff1.png[]
+image:ff2.png[]
+image:ff3.png[]
 
 
 [[samples-sec-server-client-auth]]
@@ -92,7 +92,7 @@ form login.
 Run a server.
 [source,text,subs="attributes"]
 ----
-$ java -jar sec-server-client-auth-{revnumber}.jar
+$ java -jar sec-server-client-auth-{version}.jar
 ----
 
 [source,yaml,indent=0]
@@ -112,7 +112,7 @@ manually using credentials.
 [source,text]
 ----
 $ kinit user1
-Password for user1@EXAMPLE.ORG: 
+Password for user1@EXAMPLE.ORG:
 
 $ klist
 Ticket cache: FILE:/tmp/krb5cc_1000
@@ -141,7 +141,7 @@ Valid starting     Expires            Service principal
 Run a server.
 [source,text,subs="attributes"]
 ----
-$ java -jar sec-server-spnego-form-auth-{revnumber}.jar
+$ java -jar sec-server-spnego-form-auth-{version}.jar
 ----
 
 Now you should be able to open your browser and let it do Spnego
@@ -170,7 +170,7 @@ using xml based configuration instead of JavaConfig.
 Run a server.
 [source,text,subs="attributes"]
 ----
-$ java -jar sec-server-spnego-form-auth-xml-{revnumber}.jar
+$ java -jar sec-server-spnego-form-auth-xml-{version}.jar
 ----
 
 [[samples-sec-client-rest-template]]
@@ -193,7 +193,7 @@ Using a `user1` principal <<setupmitkerberos>>, do a kerberos login
 manually using credentials.
 [source,text,subs="attributes"]
 ----
-$ java -jar sec-client-rest-template-{revnumber}.jar --app.user-principal --app.keytab-location
+$ java -jar sec-client-rest-template-{version}.jar --app.user-principal --app.keytab-location
 ----
 
 [NOTE]
@@ -219,7 +219,7 @@ If operation is succesfull you should see below output with `user1@EXAMPLE.ORG`.
 Or use a `user2` with a keytab file.
 [source,text,subs="attributes"]
 ----
-$ java -jar sec-client-rest-template-{revnumber}.jar
+$ java -jar sec-client-rest-template-{version}.jar
 ----
 
 If operation is succesfull you should see below output with `user2@EXAMPLE.ORG`.

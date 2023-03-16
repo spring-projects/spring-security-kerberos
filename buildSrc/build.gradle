@@ -26,6 +26,8 @@ dependencies {
 	implementation("org.springframework:spring-core")
 	implementation 'org.asciidoctor:asciidoctor-gradle-jvm:3.3.2'
 	implementation 'org.jfrog.buildinfo:build-info-extractor-gradle:4.29.0'
+	implementation 'org.antora:gradle-antora-plugin:1.0.0'
+	implementation 'io.spring.gradle.antora:spring-antora-plugin:0.0.1'
 }
 
 gradlePlugin {
@@ -37,6 +39,10 @@ gradlePlugin {
 		bomPlugin {
 			id = "org.springframework.security.kerberos.bom"
 			implementationClass = "org.springframework.security.kerberos.gradle.BomPlugin"
+		}
+		docsPlugin {
+			id = "org.springframework.security.kerberos.docs"
+			implementationClass = "org.springframework.security.kerberos.gradle.DocsPlugin"
 		}
 		distPlugin {
 			id = "org.springframework.security.kerberos.root"

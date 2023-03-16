@@ -18,14 +18,14 @@ Provider configuration using JavaConfig.
 
 [source,java,indent=0]
 ----
-include::samples/AuthProviderConfig.java[tags=snippetA]
+include::example$AuthProviderConfig.java[tags=snippetA]
 ----
 
 Provider configuration using xml.
 
 [source,xml,indent=0]
 ----
-include::samples/AuthProviderConfig.xml[tags=snippetA]
+include::example$AuthProviderConfig.xml[tags=snippetA]
 ----
 
 [[ssk-spnego]]
@@ -35,14 +35,14 @@ Spnego configuration using JavaConfig.
 
 [source,java,indent=0]
 ----
-include::samples/SpnegoConfig.java[tags=snippetA]
+include::example$SpnegoConfig.java[tags=snippetA]
 ----
 
 Spnego configuration using xml.
 
 [source,xml,indent=0]
 ----
-include::samples/SpnegoConfig.xml[tags=snippetA]
+include::example$SpnegoConfig.xml[tags=snippetA]
 ----
 
 [[ssk-resttemplate]]
@@ -64,13 +64,13 @@ configure this template.
 With ticket cache.
 [source,java,indent=0]
 ----
-include::samples/KerberosRestTemplateConfig.java[tags=snippetA]
+include::example$KerberosRestTemplateConfig.java[tags=snippetA]
 ----
 
 With keytab file.
 [source,java,indent=0]
 ----
-include::samples/KerberosRestTemplateConfig.java[tags=snippetB]
+include::example$KerberosRestTemplateConfig.java[tags=snippetB]
 ----
 
 [[ssk-kerberosldap]]
@@ -88,7 +88,7 @@ which is at least proven to work well with Windows AD services.
 
 [source,java,indent=0]
 ----
-include::samples/KerberosLdapContextSourceConfig.java[tags=snippetA]
+include::example$KerberosLdapContextSourceConfig.java[tags=snippetA]
 ----
 
 [TIP]

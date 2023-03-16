@@ -1,0 +1,23 @@
+plugins {
+	id 'org.springframework.security.kerberos.docs'
+}
+
+description = 'Spring Security Kerberos Documentation'
+
+dependencies {
+	management platform(project(":spring-security-kerberos-management"))
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+node {
+	version = '16.15.0'
+}
+
+antora {
+	version = '3.2.0-alpha.2'
+	options = [clean: true, fetch: true, stacktrace: true]
+	playbook = 'local-antora-playbook.yml'
+	packages = [
+		'@antora/collector-extension': 'latest'
+    ]
+}

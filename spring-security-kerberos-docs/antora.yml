@@ -1,0 +1,13 @@
+name: spring-security-kerberos
+version: '2.0.0'
+prerelease: '-SNAPSHOT'
+start_page: ROOT:index.adoc
+nav:
+- modules/ROOT/nav.adoc
+ext:
+  collector:
+    run:
+      command: gradlew -q -PbuildSrc.skipTests=true "-Dorg.gradle.jvmargs=-Xmx3g -XX:+HeapDumpOnOutOfMemoryError" :spring-security-kerberos-docs:generateAntoraYml
+      local: true
+    scan:
+      dir: ./build/generated-antora-resources
