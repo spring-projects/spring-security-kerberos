@@ -12,7 +12,7 @@ repositories {
 }
 
 allprojects {
-	group = 'org.springframework.shell'
+	group = 'org.springframework.security.kerberos'
 
 	repositories {
 		mavenCentral()
