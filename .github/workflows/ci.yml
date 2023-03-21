@@ -9,6 +9,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    if: ${{ github.repository == 'spring-projects/spring-security-kerberos' }}
     strategy:
       fail-fast: false
       matrix:
@@ -36,3 +37,20 @@ jobs:
           path: |
             */build/reports
             spring-security-kerberos-samples/*/build/reports
+  publish:
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          distribution: adopt
+          java-version: 17
+      - name: Build
+        env:
+          ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
+          ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
+        run: |
+          ./gradlew build artifactoryPublish \
+            -PartifactoryUsername="$ARTIFACTORY_USERNAME" \
+            -PartifactoryPassword="$ARTIFACTORY_PASSWORD"
