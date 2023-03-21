@@ -25,6 +25,7 @@ import org.gradle.api.publish.tasks.GenerateModuleMetadata;
 import org.jfrog.build.extractor.clientConfiguration.ArtifactSpec;
 import org.jfrog.build.extractor.clientConfiguration.ArtifactSpecs;
 import org.jfrog.gradle.plugin.artifactory.ArtifactoryPlugin;
+import org.jfrog.gradle.plugin.artifactory.dsl.ArtifactoryPluginConvention;
 import org.jfrog.gradle.plugin.artifactory.task.ArtifactoryTask;
 
 /**
@@ -41,6 +42,28 @@ public class ArtifactoryConventions {
 		});
 
 		project.getPlugins().withType(ArtifactoryPlugin.class, artifactory -> {
+			if (isRootProject(project)) {
+				ArtifactoryPluginConvention apConvention = (ArtifactoryPluginConvention) project.getConvention()
+						.getPlugins().get("artifactory");
+				if (project.hasProperty("artifactoryContextUrl")) {
+					apConvention.setContextUrl(project.property("artifactoryContextUrl"));
+				}
+				else {
+					apConvention.setContextUrl("https://repo.spring.io");
+				}
+				apConvention.publish(publisherConfig -> {
+					publisherConfig.invokeMethod("setPublishBuildInfo", new Object[] { false });
+					publisherConfig.repository(repository -> {
+						String repoKey = Utils.isSnapshot(project) ? "libs-snapshot-local"
+								: Utils.isMilestone(project) ? "libs-milestone-local" : "libs-release-local";
+						repository.setRepoKey(repoKey);
+						if (project.hasProperty("artifactoryUsername") && project.hasProperty("artifactoryPassword") ) {
+							repository.setUsername(project.property("artifactoryUsername"));
+							repository.setPassword(project.property("artifactoryPassword"));
+						}
+					});
+				});
+			}
 			Task task = project.getTasks().findByName(ArtifactoryTask.ARTIFACTORY_PUBLISH_TASK_NAME);
 			if (task != null) {
 				ArtifactoryTask aTask = (ArtifactoryTask) task;
@@ -48,7 +71,8 @@ public class ArtifactoryConventions {
 				// bom is not a java project so plugin doesn't
 				// add defaults for publications.
 				aTask.publications("mavenJava");
-				aTask.publishConfigs("archives");
+				// aTask.publishConfigs("archives");
+				aTask.setPublishIvy(false);
 
 				// plugin is difficult to work with, use this hack
 				// to set props before task does its real work
@@ -71,4 +95,8 @@ public class ArtifactoryConventions {
 			}
 		});
 	}
+
+	private static boolean isRootProject(Project project) {
+		return project.equals(project.getRootProject());
+    }
 }

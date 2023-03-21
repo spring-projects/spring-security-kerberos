@@ -1,5 +1,6 @@
 plugins {
 	id "base"
+	id 'org.springframework.security.kerberos.root'
 }
 
 description = 'Spring Security Kerberos'
