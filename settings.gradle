@@ -26,6 +26,7 @@ pluginManagement {
 rootProject.name = 'spring-security-kerberos'
 
 include 'spring-security-kerberos-management'
+include 'spring-security-kerberos-bom'
 include 'spring-security-kerberos-core'
 include 'spring-security-kerberos-client'
 include 'spring-security-kerberos-web'

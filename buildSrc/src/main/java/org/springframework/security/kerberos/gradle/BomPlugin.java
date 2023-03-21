@@ -33,7 +33,7 @@ class BomPlugin implements Plugin<Project> {
 		pluginManager.apply(JavaPlatformPlugin.class);
 		new ArtifactoryConventions().apply(project);
 
-		// bom should have main shell modules and starters
+		// bom should have modules
 		DependencyConstraintHandler constraints = project.getDependencies().getConstraints();
 		project.getRootProject().getAllprojects().forEach(p -> {
 			p.getPlugins().withType(ModulePlugin.class, m -> {

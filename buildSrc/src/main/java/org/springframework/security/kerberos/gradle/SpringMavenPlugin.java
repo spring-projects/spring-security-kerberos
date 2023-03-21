@@ -104,9 +104,9 @@ public class SpringMavenPlugin implements Plugin<Project> {
 		pom.issueManagement(this::customizeIssueManagement);
 
 		// TODO: find something better not to add dependencyManagement in pom
-		//       which result spring-security-kerberos-management in it. spring-security-kerberos-dependencies
+		//       which result spring-security-kerberos-management in it. spring-security-kerberos-bom
 		//       has its own dependencyManagement which we need to keep
-		if (!project.getName().equals("spring-security-kerberos-dependencies")) {
+		if (!project.getName().equals("spring-security-kerberos-bom")) {
 			pom.withXml(xxx -> {
 				Node pomNode = xxx.asNode();
 				List<?> childs = pomNode.children();
