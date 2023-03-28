@@ -33,6 +33,7 @@ include 'spring-security-kerberos-web'
 include 'spring-security-kerberos-samples:sec-client-rest-template'
 include 'spring-security-kerberos-samples:sec-server-client-auth'
 include 'spring-security-kerberos-samples:sec-server-spnego-form-auth'
+include 'spring-security-kerberos-samples:sec-server-win-auth'
 include 'spring-security-kerberos-docs'
 
 rootProject.children.each { project ->

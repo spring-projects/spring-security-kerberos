@@ -1,3 +1,18 @@
+/*
+ * Copyright 2023 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package demo.app;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -5,10 +20,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.annotation.web.servlet.configuration.EnableWebMvcSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.kerberos.authentication.KerberosServiceAuthenticationProvider;
 import org.springframework.security.kerberos.authentication.sun.SunJaasKerberosTicketValidator;
 import org.springframework.security.kerberos.client.config.SunJaasKrb5LoginConfig;
@@ -19,11 +33,12 @@ import org.springframework.security.ldap.authentication.ad.ActiveDirectoryLdapAu
 import org.springframework.security.ldap.search.FilterBasedLdapUserSearch;
 import org.springframework.security.ldap.userdetails.LdapUserDetailsMapper;
 import org.springframework.security.ldap.userdetails.LdapUserDetailsService;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 @Configuration
-@EnableWebMvcSecurity
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+@EnableWebSecurity
+public class WebSecurityConfig {
 
 	@Value("${app.ad-domain}")
 	private String adDomain;
@@ -43,15 +58,20 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Value("${app.ldap-search-filter}")
 	private String ldapSearchFilter;
 
-	@Override
-	protected void configure(HttpSecurity http) throws Exception {
+	@Bean
+	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+		KerberosServiceAuthenticationProvider kerberosServiceAuthenticationProvider = kerberosServiceAuthenticationProvider();
+		ActiveDirectoryLdapAuthenticationProvider activeDirectoryLdapAuthenticationProvider = activeDirectoryLdapAuthenticationProvider();
+		ProviderManager providerManager = new ProviderManager(kerberosServiceAuthenticationProvider,
+				activeDirectoryLdapAuthenticationProvider);
+
 		http
+			.authorizeHttpRequests((authz) -> authz
+				.requestMatchers("/", "/home").permitAll()
+				.anyRequest().authenticated()
+			)
 			.exceptionHandling()
 				.authenticationEntryPoint(spnegoEntryPoint())
-				.and()
-			.authorizeRequests()
-				.antMatchers("/", "/home").permitAll()
-				.anyRequest().authenticated()
 				.and()
 			.formLogin()
 				.loginPage("/login").permitAll()
@@ -59,16 +79,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 			.logout()
 				.permitAll()
 				.and()
-			.addFilterBefore(
-					spnegoAuthenticationProcessingFilter(authenticationManagerBean()),
-					BasicAuthenticationFilter.class);
-	}
-
-	@Override
-	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-		auth
 			.authenticationProvider(activeDirectoryLdapAuthenticationProvider())
-			.authenticationProvider(kerberosServiceAuthenticationProvider());
+			.authenticationProvider(kerberosServiceAuthenticationProvider())
+			.addFilterBefore(spnegoAuthenticationProcessingFilter(providerManager),
+				BasicAuthenticationFilter.class);
+
+		return http.build();
 	}
 
 	@Bean
@@ -89,7 +105,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		return filter;
 	}
 
-	@Bean
 	public KerberosServiceAuthenticationProvider kerberosServiceAuthenticationProvider() throws Exception {
 		KerberosServiceAuthenticationProvider provider = new KerberosServiceAuthenticationProvider();
 		provider.setTicketValidator(sunJaasKerberosTicketValidator());
@@ -131,11 +146,5 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 				new LdapUserDetailsService(userSearch, new ActiveDirectoryLdapAuthoritiesPopulator());
 		service.setUserDetailsMapper(new LdapUserDetailsMapper());
 		return service;
-	}
-
-	@Bean
-	@Override
-	public AuthenticationManager authenticationManagerBean() throws Exception {
-		return super.authenticationManagerBean();
 	}
 }
