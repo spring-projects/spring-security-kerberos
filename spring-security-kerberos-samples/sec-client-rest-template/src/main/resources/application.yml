@@ -1,4 +1,4 @@
 app:
-    user-principal: user2@EXAMPLE.ORG
+    user-principal: user2@KERBOS.COM
     keytab-location: /tmp/user2.keytab
-    access-url: http://neo.example.org:8080/hello
+    access-url: http://cypher.localdomain:8080/hello

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2015-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,27 +36,20 @@ import javax.security.auth.login.Configuration;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
+import org.apache.hc.client5.http.SystemDefaultDnsResolver;
 import org.apache.hc.client5.http.auth.AuthSchemeFactory;
 import org.apache.hc.client5.http.auth.AuthScope;
 import org.apache.hc.client5.http.auth.Credentials;
+import org.apache.hc.client5.http.auth.KerberosConfig;
+import org.apache.hc.client5.http.auth.StandardAuthScheme;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
 import org.apache.hc.client5.http.impl.auth.SPNegoSchemeFactory;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.core5.http.config.Lookup;
+import org.apache.hc.core5.http.config.RegistryBuilder;
 
-// import org.apache.http.auth.AuthSchemeProvider;
-// import org.apache.http.auth.AuthScope;
-// import org.apache.http.auth.Credentials;
-// import org.apache.http.client.HttpClient;
-// import org.apache.http.client.config.AuthSchemes;
-// import org.apache.http.config.Lookup;
-// import org.apache.http.config.RegistryBuilder;
-// import org.apache.http.impl.auth.SPNegoSchemeFactory;
-// import org.apache.http.impl.client.BasicCredentialsProvider;
-// import org.apache.http.impl.client.CloseableHttpClient;
-// import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.util.StringUtils;
@@ -207,9 +200,16 @@ public class KerberosRestTemplate extends RestTemplate {
 	 */
 	private static HttpClient buildHttpClient() {
 		HttpClientBuilder builder = HttpClientBuilder.create();
-		// Lookup<AuthSchemeProvider> authSchemeRegistry = RegistryBuilder.<AuthSchemeProvider> create()
-		// 		.register(AuthSchemes.SPNEGO, new SPNegoSchemeFactory(true)).build();
-		Lookup<AuthSchemeFactory> authSchemeRegistry = null;
+
+		Lookup<AuthSchemeFactory> authSchemeRegistry = RegistryBuilder.<AuthSchemeFactory>create()
+				.register(StandardAuthScheme.SPNEGO, new SPNegoSchemeFactory(
+					KerberosConfig.custom()
+						.setStripPort(KerberosConfig.Option.ENABLE)
+						.setUseCanonicalHostname(KerberosConfig.Option.DISABLE)
+						.build(),
+					SystemDefaultDnsResolver.INSTANCE))
+				.build();
+
 		builder.setDefaultAuthSchemeRegistry(authSchemeRegistry);
 		BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
 		credentialsProvider.setCredentials(new AuthScope(null, -1), credentials);
@@ -234,7 +234,7 @@ public class KerberosRestTemplate extends RestTemplate {
 	}
 
 	@Override
-	protected final <T> T doExecute(final URI url, final HttpMethod method, final RequestCallback requestCallback,
+	protected final <T> T doExecute(final URI url, final String uriTemplate, final HttpMethod method, final RequestCallback requestCallback,
 			final ResponseExtractor<T> responseExtractor) throws RestClientException {
 
 		try {
@@ -245,7 +245,7 @@ public class KerberosRestTemplate extends RestTemplate {
 
 				@Override
 				public T run() {
-					return KerberosRestTemplate.this.doExecuteSubject(url, method, requestCallback, responseExtractor);
+					return KerberosRestTemplate.this.doExecuteSubject(url, uriTemplate, method, requestCallback, responseExtractor);
 				}
 			});
 
@@ -254,9 +254,9 @@ public class KerberosRestTemplate extends RestTemplate {
 		}
 	}
 
-	private <T> T doExecuteSubject(URI url, HttpMethod method, RequestCallback requestCallback,
+	private <T> T doExecuteSubject(URI url, String uriTemplate, HttpMethod method, RequestCallback requestCallback,
 			ResponseExtractor<T> responseExtractor) throws RestClientException {
-		return super.doExecute(url, method, requestCallback, responseExtractor);
+		return super.doExecute(url, uriTemplate, method, requestCallback, responseExtractor);
 	}
 
 	private static class ClientLoginConfig extends Configuration {

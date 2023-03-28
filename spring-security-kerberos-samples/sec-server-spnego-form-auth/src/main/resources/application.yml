@@ -1,7 +1,7 @@
 server:
     port: 8080
 app:
-    service-principal: HTTP/cypher.localdomain@KERBOS.ORG
+    service-principal: HTTP/cypher.localdomain@KERBOS.COM
     keytab-location: /tmp/tomcat.keytab
 logging:
     level:

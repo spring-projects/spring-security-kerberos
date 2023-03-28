@@ -20,6 +20,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.kerberos.authentication.KerberosAuthenticationProvider;
@@ -42,13 +43,17 @@ public class WebSecurityConfig {
 	private String keytabLocation;
 
 	@Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-		AuthenticationManager authenticationManager = http.getSharedObject(AuthenticationManager.class);
-        http
-            .authorizeHttpRequests((authz) -> authz
+	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+		KerberosAuthenticationProvider kerberosAuthenticationProvider = kerberosAuthenticationProvider();
+		KerberosServiceAuthenticationProvider kerberosServiceAuthenticationProvider = kerberosServiceAuthenticationProvider();
+		ProviderManager providerManager = new ProviderManager(kerberosAuthenticationProvider,
+				kerberosServiceAuthenticationProvider);
+
+		http
+			.authorizeHttpRequests((authz) -> authz
 				.requestMatchers("/", "/home").permitAll()
-                .anyRequest().authenticated()
-            )
+				.anyRequest().authenticated()
+			)
 			.exceptionHandling()
 				.authenticationEntryPoint(spnegoEntryPoint())
 				.and()
@@ -60,11 +65,10 @@ public class WebSecurityConfig {
 				.and()
 			.authenticationProvider(kerberosAuthenticationProvider())
 			.authenticationProvider(kerberosServiceAuthenticationProvider())
-			.addFilterBefore(spnegoAuthenticationProcessingFilter(authenticationManager),
-					BasicAuthenticationFilter.class)
-			;
-    	    return http.build();
-    }
+			.addFilterBefore(spnegoAuthenticationProcessingFilter(providerManager),
+					BasicAuthenticationFilter.class);
+			return http.build();
+	}
 
 	@Bean
 	public KerberosAuthenticationProvider kerberosAuthenticationProvider() {
