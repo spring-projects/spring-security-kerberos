@@ -1,0 +1,19 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "sec-client-rest-template",
+            "request": "launch",
+            "mainClass": "demo.app.Application",
+            "projectName": "sec-client-rest-template"
+        },
+        {
+            "type": "java",
+            "name": "sec-server-spnego-form-auth",
+            "request": "launch",
+            "mainClass": "demo.app.Application",
+            "projectName": "sec-server-spnego-form-auth"
+        }
+    ]
+}
