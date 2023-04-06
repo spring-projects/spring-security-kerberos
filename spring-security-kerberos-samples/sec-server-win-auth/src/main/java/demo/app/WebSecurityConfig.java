@@ -97,7 +97,7 @@ public class WebSecurityConfig {
 		return new SpnegoEntryPoint("/login");
 	}
 
-	@Bean
+	// @Bean
 	public SpnegoAuthenticationProcessingFilter spnegoAuthenticationProcessingFilter(
 			AuthenticationManager authenticationManager) {
 		SpnegoAuthenticationProcessingFilter filter = new SpnegoAuthenticationProcessingFilter();
