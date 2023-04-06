@@ -3,6 +3,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Application",
+            "request": "launch",
+            "mainClass": "demo.app.Application",
+            "projectName": "sec-server-win-auth"
+        },
+        {
+            "type": "java",
             "name": "sec-client-rest-template",
             "request": "launch",
             "mainClass": "demo.app.Application",
@@ -14,6 +21,13 @@
             "request": "launch",
             "mainClass": "demo.app.Application",
             "projectName": "sec-server-spnego-form-auth"
+        },
+        {
+            "type": "java",
+            "name": "sec-server-win-auth",
+            "request": "launch",
+            "mainClass": "demo.app.Application",
+            "projectName": "sec-server-win-auth"
         }
     ]
 }
