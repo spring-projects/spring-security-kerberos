@@ -1,0 +1,33 @@
+antora:
+  extensions:
+    - ./lib/antora/extensions/inject-collector-config.js
+    - '@antora/collector-extension'
+    - ./lib/antora/extensions/version-fix.js
+    - '@opendevise/antora-release-line-extension'
+    - require: '@springio/antora-extensions/tabs-migration-extension'
+      # uncomment this option to save the migrated content to the worktree
+      #save_result: true
+      unwrap_example_block: always
+site:
+  title: Spring Security Kerberos
+  url: https://docs.spring.io/spring-security-kerberos/reference
+content:
+  sources:
+  - url: .
+    branches: [main]
+    start_path: spring-security-kerberos-docs
+    worktrees: true # automatically discovers worktrees, if present; otherwise, will use git tree
+asciidoc:
+  attributes:
+    page-pagination: ''
+    hide-uri-scheme: '@'
+    tabs-sync-option: '@'
+  extensions:
+    - '@asciidoctor/tabs'
+    - '@springio/asciidoctor-extensions'
+urls:
+  latest_version_segment: ''
+ui:
+  bundle:
+    url: https://github.com/spring-io/antora-ui-spring/releases/download/v0.1.1/ui-bundle.zip
+    snapshot: true
