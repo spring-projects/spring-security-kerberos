@@ -1,7 +1,5 @@
-name: spring-security-kerberos
-version: '2.0.0'
-prerelease: '-SNAPSHOT'
-start_page: ROOT:index.adoc
+name: ROOT
+version: true
 nav:
 - modules/ROOT/nav.adoc
 ext:
