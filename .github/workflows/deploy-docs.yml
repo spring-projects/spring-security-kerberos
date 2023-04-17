@@ -2,7 +2,8 @@ name: Deploy Docs
 on:
   workflow_dispatch:
 
-permissions: read-all
+permissions:
+  actions: write
 jobs:
   build:
     runs-on: ubuntu-latest
