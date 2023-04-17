@@ -5,7 +5,7 @@ nav:
 ext:
   collector:
     run:
-      command: gradlew -q -PbuildSrc.skipTests=true "-Dorg.gradle.jvmargs=-Xmx3g -XX:+HeapDumpOnOutOfMemoryError" :spring-security-kerberos-docs:generateAntoraYml
+      command: gradlew -PbuildSrc.skipTests=true "-Dorg.gradle.jvmargs=-Xmx3g -XX:+HeapDumpOnOutOfMemoryError" :spring-security-kerberos-docs:generateAntoraYml
       local: true
     scan:
       dir: ./build/generated-antora-resources
