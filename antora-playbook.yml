@@ -10,8 +10,10 @@ antora:
       # uncomment this option to save the migrated content to the worktree
       #save_result: true
       unwrap_example_block: always
-    - require: ./lib/antora/extensions/publish-docsearch-config
-      template_path: ./.github/actions/docsearch-config.json.hbs
+    - require: '@springio/antora-extensions/publish-docsearch-config-extension'
+      index_name: 'spring-security-kerberos-docs'
+      root_component_name: 'security'
+
 site:
   title: Spring Security Kerberos
   url: https://docs.spring.io/spring-security-kerberos/reference

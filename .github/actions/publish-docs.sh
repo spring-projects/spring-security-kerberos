@@ -20,7 +20,7 @@ fi
   install -m 600 -D /dev/null "$SSH_PRIVATE_KEY_PATH"
   echo "$SSH_PRIVATE_KEY" > "$SSH_PRIVATE_KEY_PATH"
   echo "$SSH_KNOWN_HOST" > ~/.ssh/known_hosts
-  RSYNC_OPTS='-avz --delete'
+  RSYNC_OPTS='--dry-run -avz --delete'
   if [ -f .full-build ]; then
     unlink .full-build
     BUILD_REFNAME=
@@ -30,11 +30,11 @@ fi
     RSYNC_OPTS="$RSYNC_OPTS$(find $FROM -mindepth 1 -maxdepth 1 -type d \! -name _ -printf ' --include /%P --include /%P/**') --exclude **"
   fi
   rsync $RSYNC_OPTS -e "ssh -i $SSH_PRIVATE_KEY_PATH" $FROM/ "$HOST:$HOST_PATH"
-  if [ -z "$BUILD_REFNAME" ]; then
-    curl -X POST "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/purge_cache" \
-      -H "Content-Type:application/json" -H "Authorization: Bearer $CLOUDFLARE_CACHE_TOKEN" \
-      --data '{"files":["https://docs.spring.io/spring-security-kerberos"]}'
-  fi
+#  if [ -z "$BUILD_REFNAME" ]; then
+#    curl -X POST "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/purge_cache" \
+#      -H "Content-Type:application/json" -H "Authorization: Bearer $CLOUDFLARE_CACHE_TOKEN" \
+#      --data '{"files":["https://docs.spring.io/spring-security-kerberos"]}'
+#  fi
 )
 exit_code=$?
 
