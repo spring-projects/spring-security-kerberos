@@ -1,1 +1,4 @@
-= Spring Security Kerberos - Reference Documentation
+= Spring Security Kerberos
+
+Spring Security Kerberos is an extension of Spring Security for
+application developers to Kerberos concepts with Spring.
