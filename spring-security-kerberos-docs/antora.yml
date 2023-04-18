@@ -1,5 +1,6 @@
 name: ROOT
 version: true
+title: Documentation
 nav:
 - modules/ROOT/nav.adoc
 ext:
