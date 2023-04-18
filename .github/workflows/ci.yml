@@ -63,4 +63,4 @@ jobs:
         if: github.ref_type == 'branch'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh workflow run deploy-docs.yml -r $(git rev-parse --abbrev-ref HEAD) -f build-refname=${{ github.ref_name }}
+        run: gh workflow run deploy-docs.yml -r docs-build -f build-refname=${{ github.ref_name }}
