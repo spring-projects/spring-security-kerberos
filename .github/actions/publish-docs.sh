@@ -20,7 +20,7 @@ fi
   install -m 600 -D /dev/null "$SSH_PRIVATE_KEY_PATH"
   echo "$SSH_PRIVATE_KEY" > "$SSH_PRIVATE_KEY_PATH"
   echo "$SSH_KNOWN_HOST" > ~/.ssh/known_hosts
-  RSYNC_OPTS='--dry-run -avz --delete'
+  RSYNC_OPTS='-avz --delete'
   if [ -f .full-build ]; then
     unlink .full-build
     BUILD_REFNAME=
