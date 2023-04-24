@@ -28,6 +28,7 @@ dependencies {
 	implementation 'org.jfrog.buildinfo:build-info-extractor-gradle:4.29.0'
 	implementation 'org.antora:gradle-antora-plugin:1.0.0'
 	implementation 'io.spring.gradle.antora:spring-antora-plugin:0.0.1'
+	implementation 'io.github.gradle-nexus:publish-plugin:1.1.0'
 }
 
 gradlePlugin {

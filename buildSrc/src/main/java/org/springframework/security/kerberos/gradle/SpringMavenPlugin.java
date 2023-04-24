@@ -45,8 +45,10 @@ public class SpringMavenPlugin implements Plugin<Project> {
 	public void apply(Project project) {
 		PluginManager pluginManager = project.getPluginManager();
 		pluginManager.apply(MavenPublishPlugin.class);
+		pluginManager.apply(SpringSigningPlugin.class);
 		pluginManager.apply(PublishLocalPlugin.class);
 		pluginManager.apply(PublishAllJavaComponentsPlugin.class);
+		pluginManager.apply(PublishArtifactsPlugin.class);
 
 		project.getPlugins().withType(MavenPublishPlugin.class).all(mavenPublish -> {
 			PublishingExtension publishing = project.getExtensions().getByType(PublishingExtension.class);

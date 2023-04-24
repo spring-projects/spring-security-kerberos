@@ -51,7 +51,7 @@ jobs:
           ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
           ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
         run: |
-          ./gradlew build artifactoryPublish \
+          ./gradlew build publishArtifacts \
             -PartifactoryUsername="$ARTIFACTORY_USERNAME" \
             -PartifactoryPassword="$ARTIFACTORY_PASSWORD"
   docs:

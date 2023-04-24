@@ -42,7 +42,6 @@ class DocsPlugin implements Plugin<Project> {
 		pluginManager.apply(JavaPlugin.class);
 		pluginManager.apply(JavaLibraryPlugin.class);
 		pluginManager.apply(ManagementConfigurationPlugin.class);
-		pluginManager.apply(SpringMavenPlugin.class);
 		pluginManager.apply(AntoraPlugin.class);
 		pluginManager.apply(GenerateAntoraYmlPlugin.class);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 the original author or authors.
+ * Copyright 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,23 +15,27 @@
  */
 package org.springframework.security.kerberos.gradle;
 
+import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.gradle.api.plugins.PluginManager;
-import org.gradle.api.publish.maven.plugins.MavenPublishPlugin;
+import org.gradle.api.Task;
 
-/**
- * Manages tasks creating zip file for docs and publishing it.
- *
- * @author Janne Valkealahti
- */
-class RootPlugin implements Plugin<Project> {
+public class PublishArtifactsPlugin implements Plugin<Project> {
 
 	@Override
 	public void apply(Project project) {
-		PluginManager pluginManager = project.getPluginManager();
-		pluginManager.apply(MavenPublishPlugin.class);
-		pluginManager.apply(SpringNexusPublishPlugin.class);
-		new ArtifactoryConventions().apply(project);
+		project.getTasks().register("publishArtifacts", new Action<Task>() {
+			@Override
+			public void execute(Task publishArtifacts) {
+				publishArtifacts.setGroup("Publishing");
+				publishArtifacts.setDescription("Publish the artifacts to either Artifactory or Maven Central based on the version");
+				if (Utils.isRelease(project)) {
+					publishArtifacts.dependsOn("publishToOssrh");
+				}
+				else {
+					publishArtifacts.dependsOn("artifactoryPublish");
+				}
+			}
+		});
 	}
 }
