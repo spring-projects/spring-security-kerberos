@@ -93,6 +93,6 @@ include::example$KerberosLdapContextSourceConfig.java[tags=snippetA]
 
 [TIP]
 ====
-Sample <<samples-sec-server-win-auth>> is currently configured to
-query user details from AD if authentication happen via kerberos.
+Sample xref:samples.adoc#samples-sec-server-win-auth[Security Server Windows Auth Sample]
+is currently configured to query user details from AD if authentication happen via kerberos.
 ====

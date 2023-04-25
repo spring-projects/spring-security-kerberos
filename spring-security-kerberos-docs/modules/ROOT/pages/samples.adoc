@@ -66,8 +66,8 @@ You may need to use custom kerberos config with Linux either by using
 
 [NOTE]
 ====
-See <<setupwinkerberos>> for more instructions how to work with
-windows kerberos environment.
+See xref:appendix.adoc#setupwinkerberos[Setup Windows Domain Controller]
+for more instructions how to work with windows kerberos environment.
 ====
 
 Login to `Windows 8.1` using domain credentials and access sample
@@ -107,8 +107,8 @@ This sample demonstrates how a server can be configured to accept a
 Spnego based negotiation from a browser while still being able to fall
 back to a form based authentication.
 
-Using a `user1` principal <<setupmitkerberos>>, do a kerberos login
-manually using credentials.
+Using a `user1` principal xref:appendix.adoc#setupmitkerberos[Setup MIT Kerberos],
+do a kerberos login manually using credentials.
 [source,text]
 ----
 $ kinit user1
@@ -149,8 +149,8 @@ authentication with existing ticket.
 
 [NOTE]
 ====
-See <<browserspnegoconfig>> for more instructions for configuring
-browsers to use Spnego.
+See xref:appendix.adoc#browserspnegoconfig[Configure Browsers for Spnego Negotiation]
+for more instructions for configuring browsers to use Spnego.
 ====
 
 [source,yaml,indent=0]
@@ -189,8 +189,8 @@ app:
 ----
 
 
-Using a `user1` principal <<setupmitkerberos>>, do a kerberos login
-manually using credentials.
+Using a `user1` principal xref:appendix.adoc#setupmitkerberos[Setup MIT Kerberos],
+do a kerberos login manually using credentials.
 [source,text,subs="attributes"]
 ----
 $ java -jar sec-client-rest-template-{version}.jar --app.user-principal --app.keytab-location
