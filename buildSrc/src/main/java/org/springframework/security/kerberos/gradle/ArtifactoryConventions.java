@@ -70,9 +70,7 @@ public class ArtifactoryConventions {
 				aTask.setCiServerBuild();
 				// bom is not a java project so plugin doesn't
 				// add defaults for publications.
-				aTask.publications("mavenJava");
-				// aTask.publishConfigs("archives");
-				aTask.setPublishIvy(false);
+				aTask.publications("mavenJava", "docs");
 
 				// plugin is difficult to work with, use this hack
 				// to set props before task does its real work
@@ -86,8 +84,8 @@ public class ArtifactoryConventions {
 					propsMap.put("zip.type", "docs");
 					ArtifactSpec spec = ArtifactSpec.builder()
 						.artifactNotation("*:*:*:*@zip")
-						// archives is manually set for zip in root plugin
-						.configuration("archives")
+						// docs is manually set for zip in root plugin
+						.configuration("docs")
 						.properties(propsMap)
 						.build();
 					artifactSpecs.add(spec);
