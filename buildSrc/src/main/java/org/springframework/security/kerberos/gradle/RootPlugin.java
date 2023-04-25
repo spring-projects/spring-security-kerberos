@@ -42,6 +42,7 @@ class RootPlugin implements Plugin<Project> {
 		pluginManager.apply(MavenPublishPlugin.class);
 		pluginManager.apply(SpringNexusPublishPlugin.class);
 		pluginManager.apply(PublishLocalPlugin.class);
+		pluginManager.apply(PublishArtifactsPlugin.class);
 		Javadoc apiTask = createApiTask(project);
 		Zip zipTask = createZipTask(project);
 		zipTask.dependsOn(apiTask);
