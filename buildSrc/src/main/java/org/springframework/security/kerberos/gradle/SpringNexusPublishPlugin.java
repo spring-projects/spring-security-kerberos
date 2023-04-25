@@ -21,6 +21,7 @@ import java.time.Duration;
 import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.Task;
 
 import io.github.gradlenexus.publishplugin.NexusPublishExtension;
 import io.github.gradlenexus.publishplugin.NexusPublishPlugin;
@@ -42,5 +43,12 @@ public class SpringNexusPublishPlugin implements Plugin<Project> {
 		});
 		nexusPublishing.getConnectTimeout().set(Duration.ofMinutes(3));
 		nexusPublishing.getClientTimeout().set(Duration.ofMinutes(3));
+
+		// Ensure release build automatically closes and releases staging repository
+		Task finalizeDeployArtifacts = project.task("finalizeDeployArtifacts");
+		if (Utils.isRelease(project) && project.hasProperty("ossrhUsername")) {
+			Task closeAndReleaseOssrhStagingRepository = project.getTasks().findByName("closeAndReleaseOssrhStagingRepository");
+			finalizeDeployArtifacts.dependsOn(closeAndReleaseOssrhStagingRepository);
+		}
 	}
 }
