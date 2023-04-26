@@ -24,6 +24,7 @@ content:
   sources:
   - url: https://github.com/spring-projects/spring-security-kerberos
     branches: [main]
+    tags: ['2.+({0..9}).+({0..9})?(-{RC,M}*)']
     start_path: spring-security-kerberos-docs
 asciidoc:
   attributes:
