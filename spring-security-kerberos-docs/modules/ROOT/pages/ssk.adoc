@@ -21,13 +21,6 @@ Provider configuration using JavaConfig.
 include::example$AuthProviderConfig.java[tags=snippetA]
 ----
 
-Provider configuration using xml.
-
-[source,xml,indent=0]
-----
-include::example$AuthProviderConfig.xml[tags=snippetA]
-----
-
 [[ssk-spnego]]
 == Spnego Negotiate
 
@@ -36,13 +29,6 @@ Spnego configuration using JavaConfig.
 [source,java,indent=0]
 ----
 include::example$SpnegoConfig.java[tags=snippetA]
-----
-
-Spnego configuration using xml.
-
-[source,xml,indent=0]
-----
-include::example$SpnegoConfig.xml[tags=snippetA]
 ----
 
 [[ssk-resttemplate]]

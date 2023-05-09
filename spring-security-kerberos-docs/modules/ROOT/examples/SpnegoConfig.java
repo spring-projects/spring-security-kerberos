@@ -15,104 +15,137 @@
  */
 package org.springframework.security.kerberos.docs;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.annotation.web.servlet.configuration.EnableWebMvcSecurity;
-import org.springframework.security.kerberos.authentication.KerberosAuthenticationProvider;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.kerberos.authentication.KerberosServiceAuthenticationProvider;
-import org.springframework.security.kerberos.authentication.sun.SunJaasKerberosClient;
 import org.springframework.security.kerberos.authentication.sun.SunJaasKerberosTicketValidator;
+import org.springframework.security.kerberos.client.config.SunJaasKrb5LoginConfig;
+import org.springframework.security.kerberos.client.ldap.KerberosLdapContextSource;
 import org.springframework.security.kerberos.web.authentication.SpnegoAuthenticationProcessingFilter;
 import org.springframework.security.kerberos.web.authentication.SpnegoEntryPoint;
+import org.springframework.security.ldap.authentication.ad.ActiveDirectoryLdapAuthenticationProvider;
+import org.springframework.security.ldap.search.FilterBasedLdapUserSearch;
+import org.springframework.security.ldap.userdetails.LdapUserDetailsMapper;
+import org.springframework.security.ldap.userdetails.LdapUserDetailsService;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 //tag::snippetA[]
 @Configuration
-@EnableWebMvcSecurity
-public class SpnegoConfig extends WebSecurityConfigurerAdapter {
+@EnableWebSecurity
+public class WebSecurityConfig {
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http
-            .exceptionHandling()
-                .authenticationEntryPoint(spnegoEntryPoint())
-                .and()
-            .authorizeRequests()
-                .antMatchers("/", "/home").permitAll()
-                .anyRequest().authenticated()
-                .and()
-            .formLogin()
-                .loginPage("/login").permitAll()
-                .and()
-            .logout()
-                .permitAll()
-                .and()
-            .addFilterBefore(
-                    spnegoAuthenticationProcessingFilter(authenticationManagerBean()),
-                    BasicAuthenticationFilter.class);
-    }
+	@Value("${app.ad-domain}")
+	private String adDomain;
 
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth)
-    		throws Exception {
-        auth
-            .authenticationProvider(kerberosAuthenticationProvider())
-            .authenticationProvider(kerberosServiceAuthenticationProvider());
-    }
+	@Value("${app.ad-server}")
+	private String adServer;
 
-    @Bean
-    public KerberosAuthenticationProvider kerberosAuthenticationProvider() {
-        KerberosAuthenticationProvider provider =
-        		new KerberosAuthenticationProvider();
-        SunJaasKerberosClient client = new SunJaasKerberosClient();
-        client.setDebug(true);
-        provider.setKerberosClient(client);
-        provider.setUserDetailsService(dummyUserDetailsService());
-        return provider;
-    }
+	@Value("${app.service-principal}")
+	private String servicePrincipal;
 
-    @Bean
-    public SpnegoEntryPoint spnegoEntryPoint() {
-        return new SpnegoEntryPoint("/login");
-    }
+	@Value("${app.keytab-location}")
+	private String keytabLocation;
 
-    @Bean
-    public SpnegoAuthenticationProcessingFilter spnegoAuthenticationProcessingFilter(
-            AuthenticationManager authenticationManager) {
-        SpnegoAuthenticationProcessingFilter filter =
-        		new SpnegoAuthenticationProcessingFilter();
-        filter.setAuthenticationManager(authenticationManager);
-        return filter;
-    }
+	@Value("${app.ldap-search-base}")
+	private String ldapSearchBase;
 
-    @Bean
-    public KerberosServiceAuthenticationProvider kerberosServiceAuthenticationProvider() {
-        KerberosServiceAuthenticationProvider provider =
-        		new KerberosServiceAuthenticationProvider();
-        provider.setTicketValidator(sunJaasKerberosTicketValidator());
-        provider.setUserDetailsService(dummyUserDetailsService());
-        return provider;
-    }
+	@Value("${app.ldap-search-filter}")
+	private String ldapSearchFilter;
 
-    @Bean
-    public SunJaasKerberosTicketValidator sunJaasKerberosTicketValidator() {
-        SunJaasKerberosTicketValidator ticketValidator =
-        		new SunJaasKerberosTicketValidator();
-        ticketValidator.setServicePrincipal("HTTP/servicehost.example.org@EXAMPLE.ORG");
-        ticketValidator.setKeyTabLocation(new FileSystemResource("/tmp/service.keytab"));
-        ticketValidator.setDebug(true);
-        return ticketValidator;
-    }
+	@Bean
+	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+		KerberosServiceAuthenticationProvider kerberosServiceAuthenticationProvider = kerberosServiceAuthenticationProvider();
+		ActiveDirectoryLdapAuthenticationProvider activeDirectoryLdapAuthenticationProvider = activeDirectoryLdapAuthenticationProvider();
+		ProviderManager providerManager = new ProviderManager(kerberosServiceAuthenticationProvider,
+				activeDirectoryLdapAuthenticationProvider);
 
-    @Bean
-    public DummyUserDetailsService dummyUserDetailsService() {
-        return new DummyUserDetailsService();
-    }
+		http
+			.authorizeHttpRequests((authz) -> authz
+				.requestMatchers("/", "/home").permitAll()
+				.anyRequest().authenticated()
+			)
+			.exceptionHandling()
+				.authenticationEntryPoint(spnegoEntryPoint())
+				.and()
+			.formLogin()
+				.loginPage("/login").permitAll()
+				.and()
+			.logout()
+				.permitAll()
+				.and()
+			.authenticationProvider(activeDirectoryLdapAuthenticationProvider())
+			.authenticationProvider(kerberosServiceAuthenticationProvider())
+			.addFilterBefore(spnegoAuthenticationProcessingFilter(providerManager),
+				BasicAuthenticationFilter.class);
 
+		return http.build();
+	}
+
+	@Bean
+	public ActiveDirectoryLdapAuthenticationProvider activeDirectoryLdapAuthenticationProvider() {
+		return new ActiveDirectoryLdapAuthenticationProvider(adDomain, adServer);
+	}
+
+	@Bean
+	public SpnegoEntryPoint spnegoEntryPoint() {
+		return new SpnegoEntryPoint("/login");
+	}
+
+	public SpnegoAuthenticationProcessingFilter spnegoAuthenticationProcessingFilter(
+			AuthenticationManager authenticationManager) {
+		SpnegoAuthenticationProcessingFilter filter = new SpnegoAuthenticationProcessingFilter();
+		filter.setAuthenticationManager(authenticationManager);
+		return filter;
+	}
+
+	public KerberosServiceAuthenticationProvider kerberosServiceAuthenticationProvider() throws Exception {
+		KerberosServiceAuthenticationProvider provider = new KerberosServiceAuthenticationProvider();
+		provider.setTicketValidator(sunJaasKerberosTicketValidator());
+		provider.setUserDetailsService(ldapUserDetailsService());
+		return provider;
+	}
+
+	@Bean
+	public SunJaasKerberosTicketValidator sunJaasKerberosTicketValidator() {
+		SunJaasKerberosTicketValidator ticketValidator = new SunJaasKerberosTicketValidator();
+		ticketValidator.setServicePrincipal(servicePrincipal);
+		ticketValidator.setKeyTabLocation(new FileSystemResource(keytabLocation));
+		ticketValidator.setDebug(true);
+		return ticketValidator;
+	}
+
+	@Bean
+	public KerberosLdapContextSource kerberosLdapContextSource() throws Exception {
+		KerberosLdapContextSource contextSource = new KerberosLdapContextSource(adServer);
+		contextSource.setLoginConfig(loginConfig());
+		return contextSource;
+	}
+
+	public SunJaasKrb5LoginConfig loginConfig() throws Exception {
+		SunJaasKrb5LoginConfig loginConfig = new SunJaasKrb5LoginConfig();
+		loginConfig.setKeyTabLocation(new FileSystemResource(keytabLocation));
+		loginConfig.setServicePrincipal(servicePrincipal);
+		loginConfig.setDebug(true);
+		loginConfig.setIsInitiator(true);
+		loginConfig.afterPropertiesSet();
+		return loginConfig;
+	}
+
+	@Bean
+	public LdapUserDetailsService ldapUserDetailsService() throws Exception {
+		FilterBasedLdapUserSearch userSearch =
+				new FilterBasedLdapUserSearch(ldapSearchBase, ldapSearchFilter, kerberosLdapContextSource());
+		LdapUserDetailsService service =
+				new LdapUserDetailsService(userSearch, new ActiveDirectoryLdapAuthoritiesPopulator());
+		service.setUserDetailsMapper(new LdapUserDetailsMapper());
+		return service;
+	}
 }
 //end::snippetA[]
