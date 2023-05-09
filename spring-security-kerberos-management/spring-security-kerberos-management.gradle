@@ -14,9 +14,11 @@ dependencies {
 	api platform("org.junit:junit-bom:$junitVersion")
 	api platform("org.mockito:mockito-bom:$mockitoVersion")
 	constraints {
-		// api "org.apache.httpcomponents:httpclient:$httpclientVersion"
 		api "org.apache.httpcomponents.client5:httpclient5:$httpclient5Version"
 		api "org.assertj:assertj-core:$assertjVersion"
 		api "jakarta.servlet:jakarta.servlet-api:$servletApiVersion"
+		api "org.apache.kerby:kerb-simplekdc:$kerbyVersion"
+		api "com.squareup.okhttp3:mockwebserver:$okhttp3Version"
+		api "com.squareup.okhttp3:okhttp:$okhttp3Version"
 	}
 }

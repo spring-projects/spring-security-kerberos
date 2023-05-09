@@ -14,9 +14,11 @@ dependencies {
 	optional 'org.springframework.security:spring-security-ldap'
 	// api('org.springframework.security:spring-security-web')
 	// api('jakarta.servlet:jakarta.servlet-api')
+	testImplementation project(':spring-security-kerberos-test')
 	testImplementation 'org.springframework:spring-test'
 	testImplementation 'org.springframework.security:spring-security-config'
 	testImplementation 'org.junit.jupiter:junit-jupiter'
 	testImplementation 'org.mockito:mockito-junit-jupiter'
 	testImplementation 'org.assertj:assertj-core'
+	testImplementation 'com.squareup.okhttp3:mockwebserver'
 }

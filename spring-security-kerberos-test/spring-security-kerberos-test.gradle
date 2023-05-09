@@ -1,0 +1,14 @@
+plugins {
+	id 'org.springframework.security.kerberos.module'
+}
+
+description = 'Spring Security Kerberos Test'
+
+dependencies {
+	management platform(project(":spring-security-kerberos-management"))
+	api 'org.apache.kerby:kerb-simplekdc'
+	api 'org.junit.jupiter:junit-jupiter'
+	testImplementation 'org.springframework:spring-test'
+	testImplementation 'org.mockito:mockito-junit-jupiter'
+	testImplementation 'org.assertj:assertj-core'
+}

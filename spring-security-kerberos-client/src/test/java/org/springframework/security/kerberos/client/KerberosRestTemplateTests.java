@@ -1,11 +1,11 @@
 /*
- * Copyright 2015 the original author or authors.
+ * Copyright 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * https://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,249 +15,115 @@
  */
 package org.springframework.security.kerberos.client;
 
-// import static org.hamcrest.CoreMatchers.is;
-// import static org.junit.Assert.assertThat;
+import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 
-// import java.io.File;
-// import java.io.IOException;
-// import java.lang.annotation.Documented;
-// import java.lang.annotation.ElementType;
-// import java.lang.annotation.Retention;
-// import java.lang.annotation.RetentionPolicy;
-// import java.lang.annotation.Target;
-// import java.net.InetAddress;
-// import java.util.concurrent.CountDownLatch;
-// import java.util.concurrent.TimeUnit;
+import okhttp3.mockwebserver.Dispatcher;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
+import okio.Buffer;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-// import org.junit.After;
-// import org.junit.Test;
-// import org.springframework.boot.SpringApplication;
-// import org.springframework.boot.autoconfigure.PropertyPlaceholderAutoConfiguration;
-// import org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration;
-// import org.springframework.boot.autoconfigure.web.DispatcherServletAutoConfiguration;
-// import org.springframework.boot.autoconfigure.web.EmbeddedServletContainerAutoConfiguration;
-// import org.springframework.boot.autoconfigure.web.ErrorMvcAutoConfiguration;
-// import org.springframework.boot.autoconfigure.web.HttpMessageConvertersAutoConfiguration;
-// import org.springframework.boot.autoconfigure.web.ServerPropertiesAutoConfiguration;
-// import org.springframework.boot.autoconfigure.web.WebMvcAutoConfiguration;
-// import org.springframework.boot.context.embedded.EmbeddedServletContainerInitializedEvent;
-// import org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainerFactory;
-// import org.springframework.context.ApplicationListener;
-// import org.springframework.context.ConfigurableApplicationContext;
-// import org.springframework.context.annotation.Bean;
-// import org.springframework.context.annotation.Configuration;
-// import org.springframework.context.annotation.Import;
-// import org.springframework.http.client.ClientHttpResponse;
-// import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-// import org.springframework.security.kerberos.client.KerberosRestTemplate;
-// import org.springframework.security.kerberos.test.KerberosSecurityTestcase;
-// import org.springframework.security.kerberos.test.MiniKdc;
-// import org.springframework.stereotype.Controller;
-// import org.springframework.web.bind.annotation.RequestMapping;
-// import org.springframework.web.bind.annotation.RequestMethod;
-// import org.springframework.web.bind.annotation.ResponseBody;
-// import org.springframework.web.client.DefaultResponseErrorHandler;
-// import org.springframework.web.client.RestTemplate;
+import org.springframework.http.MediaType;
+import org.springframework.security.kerberos.test.KerberosSecurityTestcase;
+import org.springframework.security.kerberos.test.MiniKdc;
 
-public class KerberosRestTemplateTests /*extends KerberosSecurityTestcase */{
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static org.springframework.http.HttpHeaders.CONTENT_LENGTH;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
+import static org.springframework.http.HttpHeaders.WWW_AUTHENTICATE;
 
-	// private ConfigurableApplicationContext context;
+class KerberosRestTemplateTests extends KerberosSecurityTestcase {
 
-	// @After
-	// public void close() {
-	// 	if (context != null) {
-	// 		context.close();
-	// 	}
-	// 	context = null;
-	// }
+	private final MockWebServer server = new MockWebServer();
+	private static final String helloWorld = "Hello World";
+	private static final MediaType textContentType =
+			new MediaType("text", "plain", Collections.singletonMap("charset", "UTF-8"));
+	private int port;
+	private String baseUrl;
+	private KerberosRestTemplate restTemplate;
+	private String clientPrincipal;
+	private File clientKeytab;
 
-    // @Test
-    // public void testSpnego() throws Exception {
+	@BeforeEach
+	void setUp() throws Exception {
+		this.server.setDispatcher(new TestDispatcher());
+		this.server.start();
+		this.port = this.server.getPort();
+		this.baseUrl = "http://localhost:" + this.port;
 
-	// 	MiniKdc kdc = getKdc();
-	// 	File workDir = getWorkDir();
-	// 	String host = InetAddress.getLocalHost().getCanonicalHostName();
+		MiniKdc kdc = getKdc();
+		File workDir = getWorkDir();
 
-	// 	String serverPrincipal = "HTTP/" + host;
-	// 	File serverKeytab = new File(workDir, "server.keytab");
-	// 	kdc.createPrincipal(serverKeytab, serverPrincipal);
+		clientPrincipal = "client/localhost";
+		clientKeytab = new File(workDir, "client.keytab");
+		kdc.createPrincipal(clientKeytab, clientPrincipal);
 
-	// 	String clientPrincipal = "client/" + host;
-	// 	File clientKeytab = new File(workDir, "client.keytab");
-	// 	kdc.createPrincipal(clientKeytab, clientPrincipal);
+		String serverPrincipal = "HTTP/localhost";
+		File serverKeytab = new File(workDir, "server.keytab");
+		kdc.createPrincipal(serverKeytab, serverPrincipal);
+	}
 
+	@AfterEach
+	void tearDown() throws Exception {
+		this.server.shutdown();
+	}
 
-	// 	context = SpringApplication.run(new Object[] { WebSecurityConfig.class, VanillaWebConfiguration.class,
-	// 			WebConfiguration.class }, new String[] { "--security.basic.enabled=true",
-	// 			"--security.user.name=username", "--security.user.password=password",
-	// 			"--serverPrincipal=" + serverPrincipal, "--serverKeytab=" + serverKeytab.getAbsolutePath() });
+	@Test
+	void sendsNegotiateHeader() {
+		setUpClient();
+		String s = restTemplate.getForObject(baseUrl + "/get", String.class);
+		assertThat(s).isEqualTo(helloWorld);
+	}
 
-	// 	PortInitListener portInitListener = context.getBean(PortInitListener.class);
-	// 	assertThat(portInitListener.latch.await(10, TimeUnit.SECONDS), is(true));
-	// 	int port = portInitListener.port;
+	private void setUpClient() {
+		restTemplate = new KerberosRestTemplate(clientKeytab.getAbsolutePath(), clientPrincipal);
+	}
 
-	// 	KerberosRestTemplate restTemplate = new KerberosRestTemplate(clientKeytab.getAbsolutePath(), clientPrincipal);
+	private MockResponse getRequest(RecordedRequest request, byte[] body, String contentType) {
+		if (request.getMethod().equals("OPTIONS")) {
+			return new MockResponse().setResponseCode(200).setHeader("Allow", "GET, OPTIONS, HEAD, TRACE");
+		}
+		Buffer buf = new Buffer();
+		buf.write(body);
+		MockResponse response = new MockResponse()
+				.setHeader(CONTENT_LENGTH, body.length)
+				.setBody(buf)
+				.setResponseCode(200);
+		if (contentType != null) {
+			response = response.setHeader(CONTENT_TYPE, contentType);
+		}
+		return response;
+	}
 
-	// 	String response = restTemplate.getForObject("http://" + host + ":" + port + "/hello", String.class);
-	// 	assertThat(response, is("home"));
-    // }
+	protected class TestDispatcher extends Dispatcher {
 
-	// @Test
-	// public void testSpnegoWithPassword() throws Exception {
+		@Override
+		public MockResponse dispatch(RecordedRequest request) throws InterruptedException {
+			try {
+				byte[] helloWorldBytes = helloWorld.getBytes(StandardCharsets.UTF_8);
 
-	// 	MiniKdc kdc = getKdc();
-	// 	File workDir = getWorkDir();
-	// 	String host = InetAddress.getLocalHost().getCanonicalHostName();
+				if (request.getPath().equals("/get")) {
+					String header = request.getHeader(AUTHORIZATION);
+					if (header == null) {
+						return new MockResponse().setResponseCode(401).addHeader(WWW_AUTHENTICATE, "Negotiate");
+					}
+					else if (header != null && header.startsWith("Negotiate ")) {
+						return getRequest(request, helloWorldBytes, textContentType.toString());
+					}
+				}
+				return new MockResponse().setResponseCode(404);
+			}
+			catch (Throwable ex) {
+				return new MockResponse().setResponseCode(500).setBody(ex.toString());
+			}
 
-	// 	String serverPrincipal = "HTTP/" + host;
-	// 	File serverKeytab = new File(workDir, "server.keytab");
-	// 	kdc.createPrincipal(serverKeytab, serverPrincipal);
-
-	// 	String userPrincipal = "testuser";
-	// 	String password = "testpassword";
-	// 	kdc.createPrincipal(userPrincipal, password);
-
-
-	// 	context = SpringApplication.run(new Object[] { WebSecurityConfig.class, VanillaWebConfiguration.class,
-	// 			WebConfiguration.class }, new String[] { "--security.basic.enabled=true",
-	// 			"--security.user.name=username", "--security.user.password=password",
-	// 			"--serverPrincipal=" + serverPrincipal, "--serverKeytab=" + serverKeytab.getAbsolutePath() });
-
-	// 	PortInitListener portInitListener = context.getBean(PortInitListener.class);
-	// 	assertThat(portInitListener.latch.await(10, TimeUnit.SECONDS), is(true));
-	// 	int port = portInitListener.port;
-
-	// 	KerberosRestTemplate restTemplate = new KerberosRestTemplate(null, userPrincipal, password, null);
-
-	// 	String response = restTemplate.getForObject("http://" + host + ":" + port + "/hello", String.class);
-	// 	assertThat(response, is("home"));
-	// }
-
-    // @Test
-    // public void testSpnegoWithForward() throws Exception {
-
-	// 	MiniKdc kdc = getKdc();
-	// 	File workDir = getWorkDir();
-	// 	String host = InetAddress.getLocalHost().getCanonicalHostName();
-
-	// 	String serverPrincipal = "HTTP/" + host;
-	// 	File serverKeytab = new File(workDir, "server.keytab");
-	// 	kdc.createPrincipal(serverKeytab, serverPrincipal);
-
-	// 	context = SpringApplication.run(new Object[] { WebSecurityConfigSpnegoForward.class, VanillaWebConfiguration.class,
-	// 			WebConfiguration.class }, new String[] { "--security.basic.enabled=true",
-	// 			"--security.user.name=username", "--security.user.password=password",
-	// 			"--serverPrincipal=" + serverPrincipal, "--serverKeytab=" + serverKeytab.getAbsolutePath() });
-
-	// 	PortInitListener portInitListener = context.getBean(PortInitListener.class);
-	// 	assertThat(portInitListener.latch.await(10, TimeUnit.SECONDS), is(true));
-	// 	int port = portInitListener.port;
-
-	// 	// TODO: should tweak minikdc so that we can use kerberos principals
-	// 	//       which are not valid, for now just use plain RestTemplate
-
-	// 	// just checking that we get 401 which we skip and
-	// 	// get login page content
-	// 	RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
-	// 	restTemplate.setErrorHandler(new DefaultResponseErrorHandler() {
-	// 		@Override
-	// 		public void handleError(ClientHttpResponse response) throws IOException {
-	// 		}
-	// 	});
-
-	// 	String response = restTemplate.getForObject("http://" + host + ":" + port + "/hello", String.class);
-	// 	assertThat(response, is("login"));
-    // }
-
-    // @Test
-    // public void testSpnegoWithSuccessHandler() throws Exception {
-
-	// 	MiniKdc kdc = getKdc();
-	// 	File workDir = getWorkDir();
-	// 	String host = InetAddress.getLocalHost().getCanonicalHostName();
-
-	// 	String serverPrincipal = "HTTP/" + host;
-	// 	File serverKeytab = new File(workDir, "server.keytab");
-	// 	kdc.createPrincipal(serverKeytab, serverPrincipal);
-
-	// 	String clientPrincipal = "client/" + host;
-	// 	File clientKeytab = new File(workDir, "client.keytab");
-	// 	kdc.createPrincipal(clientKeytab, clientPrincipal);
-
-
-	// 	context = SpringApplication.run(new Object[] { WebSecurityConfigSuccessHandler.class, VanillaWebConfiguration.class,
-	// 			WebConfiguration.class }, new String[] { "--security.basic.enabled=true",
-	// 			"--security.user.name=username", "--security.user.password=password",
-	// 			"--serverPrincipal=" + serverPrincipal, "--serverKeytab=" + serverKeytab.getAbsolutePath() });
-
-	// 	PortInitListener portInitListener = context.getBean(PortInitListener.class);
-	// 	assertThat(portInitListener.latch.await(10, TimeUnit.SECONDS), is(true));
-	// 	int port = portInitListener.port;
-
-	// 	KerberosRestTemplate restTemplate = new KerberosRestTemplate(clientKeytab.getAbsolutePath(), clientPrincipal);
-
-	// 	String response = restTemplate.getForObject("http://" + host + ":" + port + "/hello", String.class);
-	// 	assertThat(response, is("home"));
-    // }
-
-	// protected static class PortInitListener implements ApplicationListener<EmbeddedServletContainerInitializedEvent> {
-
-	// 	public int port;
-	// 	public CountDownLatch latch = new CountDownLatch(1);
-
-	// 	@Override
-	// 	public void onApplicationEvent(EmbeddedServletContainerInitializedEvent event) {
-	// 		port = event.getEmbeddedServletContainer().getPort();
-	// 		latch.countDown();
-	// 	}
-
-	// }
-
-    // @Configuration
-    // protected static class VanillaWebConfiguration {
-
-    // 	@Bean
-    // 	public PortInitListener portListener() {
-    // 		return new PortInitListener();
-    // 	}
-
-    // 	@Bean
-    // 	public TomcatEmbeddedServletContainerFactory tomcatEmbeddedServletContainerFactory() {
-    // 	    TomcatEmbeddedServletContainerFactory factory = new TomcatEmbeddedServletContainerFactory();
-    // 	    factory.setPort(0);
-    // 	    return factory;
-    // 	}
-    // }
-
-    // @MinimalWebConfiguration
-    // @Import(SecurityAutoConfiguration.class)
-    // @Controller
-	// protected static class WebConfiguration {
-
-    // 	@RequestMapping(method = RequestMethod.GET)
-    // 	@ResponseBody
-    // 	public String home() {
-    // 		return "home";
-    // 	}
-
-    // 	@RequestMapping(method = RequestMethod.GET, value = "/login")
-    // 	@ResponseBody
-    // 	public String login() {
-    // 		return "login";
-    // 	}
-
-	// }
-
-    // @Configuration
-    // @Target(ElementType.TYPE)
-    // @Retention(RetentionPolicy.RUNTIME)
-    // @Documented
-    // @Import({ EmbeddedServletContainerAutoConfiguration.class,
-    //                 ServerPropertiesAutoConfiguration.class,
-    //                 DispatcherServletAutoConfiguration.class, WebMvcAutoConfiguration.class,
-    //                 HttpMessageConvertersAutoConfiguration.class,
-    //                 ErrorMvcAutoConfiguration.class, PropertyPlaceholderAutoConfiguration.class })
-    // protected static @interface MinimalWebConfiguration {
-    // }
+		}
+	}
 
 }
