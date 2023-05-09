@@ -30,11 +30,16 @@ public class PublishArtifactsPlugin implements Plugin<Project> {
 				publishArtifacts.setGroup("Publishing");
 				publishArtifacts.setDescription("Publish the artifacts to either Artifactory or Maven Central based on the version");
 				if (Utils.isRelease(project)) {
-					publishArtifacts.dependsOn("publishToOssrh");
+					// Don't depend on publishDocsPublicationToOssrhRepository as we don't
+					// want dist zip for api docs on central
+					Task publishOssrh = project.getTasks().findByName("publishMavenJavaPublicationToOssrhRepository");
+					if (publishOssrh != null) {
+						publishArtifacts.dependsOn(publishOssrh);
+					}
 				}
-				else {
-					publishArtifacts.dependsOn("artifactoryPublish");
-				}
+				// publishArtifacts.dependsOn("publishMavenJavaPublicationToOssrhRepository");
+				// always publish to artifactory as we need apidocs via autorepo
+				publishArtifacts.dependsOn("artifactoryPublish");
 			}
 		});
 	}
