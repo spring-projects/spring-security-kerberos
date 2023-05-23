@@ -168,18 +168,6 @@ public class KerberosRestTemplate extends RestTemplate {
 	 *
 	 * @param keyTabLocation the key tab location
 	 * @param userPrincipal the user principal
-	 * @param loginOptions the login options
-	 * @param httpClient the http client
-	 */
-	private KerberosRestTemplate(String keyTabLocation, String userPrincipal, Map<String, Object> loginOptions, HttpClient httpClient) {
-		this(keyTabLocation, userPrincipal, null, loginOptions, httpClient);
-	}
-
-	/**
-	 * Instantiates a new kerberos rest template.
-	 *
-	 * @param keyTabLocation the key tab location
-	 * @param userPrincipal the user principal
 	 * @param password the password
 	 * @param loginOptions the login options
 	 * @param httpClient the http client
