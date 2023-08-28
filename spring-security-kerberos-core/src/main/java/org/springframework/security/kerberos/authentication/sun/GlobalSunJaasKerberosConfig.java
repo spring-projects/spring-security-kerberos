@@ -15,6 +15,8 @@
  */
 package org.springframework.security.kerberos.authentication.sun;
 
+import java.security.Security;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -30,6 +32,8 @@ public class GlobalSunJaasKerberosConfig implements BeanPostProcessor, Initializ
     private boolean debug = false;
 
     private String krbConfLocation;
+    
+    private String gssConfLocation;
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -39,7 +43,12 @@ public class GlobalSunJaasKerberosConfig implements BeanPostProcessor, Initializ
         if (krbConfLocation != null) {
             System.setProperty("java.security.krb5.conf", krbConfLocation);
         }
-
+        if (gssConfLocation != null) {
+            System.setProperty("java.security.auth.login.config", gssConfLocation);
+        	Security.setProperty("policy.allowSystemProperty", "true");
+        } else {
+        	Security.setProperty("policy.allowSystemProperty", "false");
+        }
     }
 
     /**
@@ -59,6 +68,15 @@ public class GlobalSunJaasKerberosConfig implements BeanPostProcessor, Initializ
     public void setKrbConfLocation(String krbConfLocation) {
         this.krbConfLocation = krbConfLocation;
     }
+    
+    /**
+     * GSS config file location can be specified here.
+     * 
+     * @param gssConfLocation the path to the gss config file
+     */
+    public void setGssConfLocation(String gssConfLocation) {
+		this.gssConfLocation = gssConfLocation;
+	}
 
     //  The following methods are not used here. This Bean implements only BeanPostProcessor to ensure that it
     //  is created before any other bean is created, because the system properties needed to be set very early
