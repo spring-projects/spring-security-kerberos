@@ -250,14 +250,12 @@ public class SunJaasKerberosTicketValidator implements KerberosTicketValidator, 
             byte[] responseToken = new byte[0];
             GSSName gssName = null;
             GSSContext context = GSSManager.getInstance().createContext((GSSCredential) null);
-            boolean first = true;
             while (!context.isEstablished()) {
                 responseToken = context.acceptSecContext(kerberosTicket, 0, kerberosTicket.length);
                 gssName = context.getSrcName();
                 if (gssName == null) {
                     throw new BadCredentialsException("GSSContext name of the context initiator is null");
                 }
-                first = false;
             }
 
             GSSCredential delegationCredential = null;
