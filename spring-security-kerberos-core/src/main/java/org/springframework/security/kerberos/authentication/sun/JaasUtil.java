@@ -31,11 +31,9 @@ public class JaasUtil {
      * @return
      */
     public static Subject copySubject(Subject subject) {
-        Subject subjectCopy = new Subject(false,
+        return new Subject(false,
                 new HashSet<Principal>(subject.getPrincipals()),
                 new HashSet<Object>(subject.getPublicCredentials()),
                 new HashSet<Object>(subject.getPrivateCredentials()));
-
-        return subjectCopy;
     }
 }

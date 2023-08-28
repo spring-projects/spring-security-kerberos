@@ -132,7 +132,7 @@ public class SpnegoAuthenticationProcessingFilter extends GenericFilterBean {
             Authentication existingAuth = SecurityContextHolder.getContext().getAuthentication();
 
             if (existingAuth != null && existingAuth.isAuthenticated()
-                    && (existingAuth instanceof AnonymousAuthenticationToken) == false) {
+                    && !(existingAuth instanceof AnonymousAuthenticationToken)) {
                 chain.doFilter(request, response);
                 return;
             }
@@ -144,7 +144,7 @@ public class SpnegoAuthenticationProcessingFilter extends GenericFilterBean {
             if (logger.isDebugEnabled()) {
                 logger.debug("Received Negotiate Header for request " + request.getRequestURL() + ": " + header);
             }
-            byte[] base64Token = header.substring(header.indexOf(" ") + 1).getBytes("UTF-8");
+            byte[] base64Token = header.substring(header.indexOf(' ') + 1).getBytes("UTF-8");
             byte[] kerberosTicket = Base64.decode(base64Token);
             KerberosServiceRequestToken authenticationRequest = new KerberosServiceRequestToken(kerberosTicket);
             authenticationRequest.setDetails(authenticationDetailsSource.buildDetails(request));
