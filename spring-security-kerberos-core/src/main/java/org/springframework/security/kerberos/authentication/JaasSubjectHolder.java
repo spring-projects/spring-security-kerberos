@@ -32,8 +32,8 @@ import org.springframework.security.kerberos.authentication.sun.SunJaasKerberosC
  * @see org.springframework.security.kerberos.authentication.KerberosAuthenticationProvider
  */
 public class JaasSubjectHolder implements Serializable {
-    @java.io.Serial
-    private static final long serialVersionUID = 8174713761131577405L;
+
+	private static final long serialVersionUID = 8174713761131577405L;
 
     private Subject jaasSubject;
     private String username;
