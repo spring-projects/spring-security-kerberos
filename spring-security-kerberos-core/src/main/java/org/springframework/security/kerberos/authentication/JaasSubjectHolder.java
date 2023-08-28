@@ -15,6 +15,7 @@
  */
 package org.springframework.security.kerberos.authentication;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,7 +31,10 @@ import org.springframework.security.kerberos.authentication.sun.SunJaasKerberosC
  * @see SunJaasKerberosClient
  * @see org.springframework.security.kerberos.authentication.KerberosAuthenticationProvider
  */
-public class JaasSubjectHolder {
+public class JaasSubjectHolder implements Serializable {
+
+	private static final long serialVersionUID = 8174713761131577405L;
+
     private Subject jaasSubject;
     private String username;
 
