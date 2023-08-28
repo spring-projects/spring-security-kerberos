@@ -36,7 +36,9 @@ public class KerberosUsernamePasswordAuthenticationToken
         extends UsernamePasswordAuthenticationToken
         implements KerberosAuthentication {
 
-    private final JaasSubjectHolder jaasSubjectHolder;
+    private static final long serialVersionUID = 6327699460703504153L;
+
+	private final JaasSubjectHolder jaasSubjectHolder;
 
     /**
      * <p>Creates an authentication token that holds the username and password, and the Subject
