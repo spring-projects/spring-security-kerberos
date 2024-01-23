@@ -1,4 +1,4 @@
-= Spring Security Kerberos
+= Spring Security Kerberos image:https://img.shields.io/badge/Revved%20up%20by-Develocity-06A0CE?logo=Gradle&labelColor=02303A["Revved up by Develocity", link="https://ge.spring.io/scans?search.rootProjectNames=spring-security-kerberos"]
 
 With the Spring Security Kerberos Extension, your users are authenticated against your web application just by opening the URL. There is no need to enter a username/password and no need to install additional software.
 
