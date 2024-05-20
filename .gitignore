@@ -9,3 +9,4 @@ bin/
 .project
 .settings
 kerberos-user.properties
+node_modules

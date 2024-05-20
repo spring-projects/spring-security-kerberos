@@ -8,15 +8,10 @@ dependencies {
 	management platform(project(":spring-security-kerberos-management"))
 }
 
-node {
-	version = '16.15.0'
-}
-
 antora {
-	version = '3.2.0-alpha.2'
-	options = [clean: true, fetch: true, stacktrace: true]
-	playbook = 'local-antora-playbook.yml'
-	packages = [
-		'@antora/collector-extension': 'latest'
-    ]
+	options = [clean: true, fetch: !project.gradle.startParameter.offline, stacktrace: true]
+	environment = [
+			'BUILD_REFNAME': 'HEAD',
+			'BUILD_VERSION': project.version,
+	]
 }
