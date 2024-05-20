@@ -1,19 +1,7 @@
 antora:
   extensions:
-    - '@springio/antora-extensions/partial-build-extension'
-    - ./lib/antora/extensions/inject-collector-config.js
-    - '@antora/collector-extension'
-    - ./lib/antora/extensions/version-fix.js
-    - '@antora/atlas-extension'
-    - '@opendevise/antora-release-line-extension'
-    - require: '@springio/antora-extensions/tabs-migration-extension'
-      # uncomment this option to save the migrated content to the worktree
-      #save_result: true
-      unwrap_example_block: always
-    - require: '@springio/antora-extensions/publish-docsearch-config-extension'
-      index_name: 'spring-security-kerberos-docs'
-      root_component_name: 'security'
-
+  - require: '@springio/antora-extensions'
+    root_component_name: 'kerberos'
 site:
   title: Spring Security Kerberos
   url: https://docs.spring.io/spring-security-kerberos/reference
@@ -23,22 +11,30 @@ git:
 content:
   sources:
   - url: https://github.com/spring-projects/spring-security-kerberos
-    branches: [main]
-    tags: ['2.+({0..9}).+({0..9})?(-{RC,M}*)']
+    # Refname matching:
+    # https://docs.antora.org/antora/latest/playbook/content-refname-matching/
+    branches: [main,'*.x','!1.*.x']
+    tags: ['*','!1.*']
     start_path: spring-security-kerberos-docs
 asciidoc:
-  attributes:
-    page-pagination: ''
-    hide-uri-scheme: '@'
-    tabs-sync-option: '@'
   extensions:
     - '@asciidoctor/tabs'
     - '@springio/asciidoctor-extensions'
+    - '@springio/asciidoctor-extensions/include-code-extension'
+  attributes:
+    page-stackoverflow-url: https://stackoverflow.com/tags/spring-security
+    page-related-doc-categories: security
+    page-related-doc-projects: framework,graphql
+    hide-uri-scheme: '@'
+    tabs-sync-option: '@'
 urls:
   latest_version_segment_strategy: redirect:to
   latest_version_segment: ''
   redirect_facility: httpd
+runtime:
+  log:
+    failure_level: warn
 ui:
   bundle:
-    url: https://github.com/spring-io/antora-ui-spring/releases/download/v0.1.1/ui-bundle.zip
+    url: https://github.com/spring-io/antora-ui-spring/releases/download/v0.4.15/ui-bundle.zip
     snapshot: true

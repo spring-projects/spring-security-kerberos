@@ -6,10 +6,10 @@ on:
       build-refname:
         description: Enter git refname to build (e.g., main).
         required: false
-  # push:
-  #   branches: docs-build
-# env:
-#   GRADLE_ENTERPRISE_SECRET_ACCESS_KEY: ${{ secrets.GRADLE_ENTERPRISE_SECRET_ACCESS_KEY }}
+  push:
+    branches: [docs-build]
+env:
+  GRADLE_ENTERPRISE_SECRET_ACCESS_KEY: ${{ secrets.GRADLE_ENTERPRISE_SECRET_ACCESS_KEY }}
 permissions: read-all
 jobs:
   build:
@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 5
       - name: Set Up Gradle
@@ -33,5 +33,19 @@ jobs:
           echo BUILD_VERSION=$(git cat-file --textconv FETCH_HEAD:gradle.properties | sed -n '/^version=/ { s/^version=//;p }') >> $GITHUB_ENV
       - name: Run Antora
         run: ./gradlew antora --stacktrace
+      - name: Copy the cache to be included in the site
+        run: cp -rf build/antora/inject-collector-cache-config-extension/.cache build/site/
       - name: Publish Docs
-        run: $GITHUB_WORKSPACE/.github/actions/publish-docs.sh "${{ secrets.DOCS_USERNAME }}@${{ secrets.DOCS_HOST }}" /opt/www/domains/spring.io/docs/htdocs/spring-security-kerberos/reference/ "${{ secrets.DOCS_SSH_KEY }}" "${{ secrets.DOCS_SSH_HOST_KEY }}" "${{ secrets.CLOUDFLARE_ZONE_ID }}" "${{ secrets.CLOUDFLARE_CACHE_TOKEN }}"
+        uses: spring-io/spring-doc-actions/rsync-antora-reference@v0.0.17
+        with:
+          docs-username: ${{ secrets.DOCS_USERNAME }}
+          docs-host: ${{ secrets.DOCS_HOST }}
+          docs-ssh-key: ${{ secrets.DOCS_SSH_KEY }}
+          docs-ssh-host-key: ${{ secrets.DOCS_SSH_HOST_KEY }}
+      - name: Bust Clouflare Cache
+        uses: spring-io/spring-doc-actions/bust-cloudflare-antora-cache@v0.0.17
+        with:
+          context-root: spring-security-kerberos
+          cloudflare-zone-id: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+          cloudflare-cache-token: ${{ secrets.CLOUDFLARE_CACHE_TOKEN }}
+
