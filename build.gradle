@@ -30,3 +30,10 @@ allprojects {
 		resolutionStrategy.cacheChangingModulesFor 1, 'hours'
 	}
 }
+
+develocity {
+	buildScan {
+		termsOfUseUrl = 'https://gradle.com/help/legal-terms-of-use'
+		termsOfUseAgree = 'yes'
+	}
+}
