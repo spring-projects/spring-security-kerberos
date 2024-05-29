@@ -70,15 +70,15 @@ public class WebSecurityConfig {
 				.requestMatchers("/", "/home").permitAll()
 				.anyRequest().authenticated()
 			)
-			.exceptionHandling()
+			.exceptionHandling((exceptions) -> exceptions
 				.authenticationEntryPoint(spnegoEntryPoint())
-				.and()
-			.formLogin()
+			)
+			.formLogin((form) -> form
 				.loginPage("/login").permitAll()
-				.and()
-			.logout()
+			)
+			.logout((logout) -> logout
 				.permitAll()
-				.and()
+			)
 			.authenticationProvider(activeDirectoryLdapAuthenticationProvider())
 			.authenticationProvider(kerberosServiceAuthenticationProvider())
 			.addFilterBefore(spnegoAuthenticationProcessingFilter(providerManager),
