@@ -133,23 +133,24 @@ public class SpnegoAuthenticationProcessingFilterTest {
     private void everythingWorksWithHandlers(String tokenPrefix) throws Exception {
         createHandler();
         everythingWorks(tokenPrefix);
-		verify(successHandler).onAuthenticationSuccess(request, response, AUTHENTICATION);
-		verify(failureHandler, never()).onAuthenticationFailure(any(HttpServletRequest.class),
+        everythingWorksVerifyHandlers();
+    }
+
+    private void everythingWorksVerifyHandlers() throws Exception {
+        verify(successHandler).onAuthenticationSuccess(request, response, AUTHENTICATION);
+        verify(failureHandler, never()).onAuthenticationFailure(any(HttpServletRequest.class),
                 any(HttpServletResponse.class), any(AuthenticationException.class));
     }
 
     private void everythingWorks(String tokenPrefix) throws IOException,
             ServletException {
         // stubbing
-		when(request.getHeader(HEADER)).thenReturn(tokenPrefix + TEST_TOKEN_BASE64);
-		KerberosServiceRequestToken requestToken = new KerberosServiceRequestToken(TEST_TOKEN);
-		requestToken.setDetails(detailsSource.buildDetails(request));
-		when(authenticationManager.authenticate(requestToken)).thenReturn(AUTHENTICATION);
+        everythingWorksStub(tokenPrefix);
 
         // testing
-		filter.doFilter(request, response, chain);
-		verify(chain).doFilter(request, response);
-		assertEquals(AUTHENTICATION, SecurityContextHolder.getContext().getAuthentication());
+        filter.doFilter(request, response, chain);
+        verify(chain).doFilter(request, response);
+        assertEquals(AUTHENTICATION, SecurityContextHolder.getContext().getAuthentication());
     }
 
     @Test
@@ -184,12 +185,12 @@ public class SpnegoAuthenticationProcessingFilterTest {
 
     @Test
     public void testAuthenticationFailsWithHandlers() throws Exception {
-		createHandler();
-		authenticationFails();
-		verify(failureHandler).onAuthenticationFailure(request, response, BCE);
-		verify(successHandler, never()).onAuthenticationSuccess(any(HttpServletRequest.class),
-				any(HttpServletResponse.class), any(Authentication.class));
-		verify(response, never()).setStatus(anyInt());
+        createHandler();
+        authenticationFails();
+        verify(failureHandler).onAuthenticationFailure(request, response, BCE);
+        verify(successHandler, never()).onAuthenticationSuccess(any(HttpServletRequest.class),
+                any(HttpServletResponse.class), any(Authentication.class));
+        verify(response, never()).setStatus(anyInt());
     }
 
     @Test
@@ -246,6 +247,27 @@ public class SpnegoAuthenticationProcessingFilterTest {
         finally {
             SecurityContextHolder.clearContext();
         }
+    }
+
+    @Test
+    public void testEverythingWorksWithHandlers_stopFilterChain() throws Exception {
+        filter.setStopFilterChainOnSuccessfulAuthentication(true);
+
+        createHandler();
+        everythingWorksStub(TOKEN_PREFIX_NEG);
+
+        // testing
+        filter.doFilter(request, response, chain);
+        verify(chain, never()).doFilter(request, response);
+        assertEquals(AUTHENTICATION, SecurityContextHolder.getContext().getAuthentication());
+        everythingWorksVerifyHandlers();
+    }
+
+    private void everythingWorksStub(String tokenPrefix) throws IOException, ServletException {
+        when(request.getHeader(HEADER)).thenReturn(tokenPrefix + TEST_TOKEN_BASE64);
+        KerberosServiceRequestToken requestToken = new KerberosServiceRequestToken(TEST_TOKEN);
+        requestToken.setDetails(detailsSource.buildDetails(request));
+        when(authenticationManager.authenticate(requestToken)).thenReturn(AUTHENTICATION);
     }
 
     private void authenticationFails() throws IOException, ServletException {
