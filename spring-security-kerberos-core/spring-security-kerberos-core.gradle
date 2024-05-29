@@ -9,5 +9,5 @@ dependencies {
 	api('org.springframework.security:spring-security-core')
 	testImplementation 'org.junit.jupiter:junit-jupiter'
 	testImplementation 'org.mockito:mockito-junit-jupiter'
-	testImplementation 'org.assertj:assertj-core'
+	testImplementation libs.assertj.core
 }

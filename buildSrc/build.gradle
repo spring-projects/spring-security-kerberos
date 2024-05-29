@@ -22,7 +22,7 @@ ext {
 }
 
 dependencies {
-	implementation(platform("org.springframework:spring-framework-bom:${springFrameworkVersion}"))
+	implementation(platform(libs.spring.framework.bom))
 	implementation("org.springframework:spring-core")
 	implementation 'org.asciidoctor:asciidoctor-gradle-jvm:3.3.2'
 	implementation 'org.jfrog.buildinfo:build-info-extractor-gradle:4.29.0'

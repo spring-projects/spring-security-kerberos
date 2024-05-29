@@ -10,7 +10,7 @@ dependencies {
 	implementation project(':spring-security-kerberos-web')
 	// api('org.apache.httpcomponents:httpclient')
 	api('org.springframework:spring-web')
-	api('org.apache.httpcomponents.client5:httpclient5')
+	api libs.httpclient5
 	optional 'org.springframework.security:spring-security-ldap'
 	// api('org.springframework.security:spring-security-web')
 	// api('jakarta.servlet:jakarta.servlet-api')
@@ -19,6 +19,6 @@ dependencies {
 	testImplementation 'org.springframework.security:spring-security-config'
 	testImplementation 'org.junit.jupiter:junit-jupiter'
 	testImplementation 'org.mockito:mockito-junit-jupiter'
-	testImplementation 'org.assertj:assertj-core'
-	testImplementation 'com.squareup.okhttp3:mockwebserver'
+	testImplementation libs.assertj.core
+	testImplementation libs.okhttp3.mockwebserver
 }

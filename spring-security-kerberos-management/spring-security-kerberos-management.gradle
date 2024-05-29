@@ -9,16 +9,16 @@ javaPlatform {
 description = 'Spring Security Kerberos Management'
 
 dependencies {
-	api platform("org.springframework:spring-framework-bom:$springFrameworkVersion")
-	api platform("org.springframework.security:spring-security-bom:$springSecurityVersion")
-	api platform("org.junit:junit-bom:$junitVersion")
-	api platform("org.mockito:mockito-bom:$mockitoVersion")
+	api platform(libs.spring.framework.bom)
+	api platform(libs.spring.security.bom)
+	api platform(libs.junit.bom)
+	api platform(libs.mockito.bom)
 	constraints {
-		api "org.apache.httpcomponents.client5:httpclient5:$httpclient5Version"
-		api "org.assertj:assertj-core:$assertjVersion"
-		api "jakarta.servlet:jakarta.servlet-api:$servletApiVersion"
-		api "org.apache.kerby:kerb-simplekdc:$kerbyVersion"
-		api "com.squareup.okhttp3:mockwebserver:$okhttp3Version"
-		api "com.squareup.okhttp3:okhttp:$okhttp3Version"
+		api libs.httpclient5
+		api libs.assertj.core
+		api libs.servlet.api
+		api libs.kerby
+		api libs.okhttp3.mockwebserver
+		api libs.okhttp3
 	}
 }

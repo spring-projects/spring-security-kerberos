@@ -43,6 +43,7 @@ import org.apache.hc.client5.http.auth.Credentials;
 import org.apache.hc.client5.http.auth.KerberosConfig;
 import org.apache.hc.client5.http.auth.StandardAuthScheme;
 import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
 import org.apache.hc.client5.http.impl.auth.SPNegoSchemeFactory;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
@@ -199,6 +200,10 @@ public class KerberosRestTemplate extends RestTemplate {
 				.build();
 
 		builder.setDefaultAuthSchemeRegistry(authSchemeRegistry);
+		RequestConfig negotiate = RequestConfig.copy(RequestConfig.DEFAULT)
+				.setTargetPreferredAuthSchemes(Set.of(StandardAuthScheme.SPNEGO, StandardAuthScheme.KERBEROS))
+				.build();
+		builder.setDefaultRequestConfig(negotiate);
 		BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
 		credentialsProvider.setCredentials(new AuthScope(null, -1), credentials);
 		builder.setDefaultCredentialsProvider(credentialsProvider);
