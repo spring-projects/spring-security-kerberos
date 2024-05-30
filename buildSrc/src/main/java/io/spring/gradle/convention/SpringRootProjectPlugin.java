@@ -36,7 +36,7 @@ public class SpringRootProjectPlugin implements Plugin<Project> {
 		// Apply default plugins
 		PluginManager pluginManager = project.getPluginManager();
 		pluginManager.apply(BasePlugin.class);
-		pluginManager.apply(SpringNoHttpPlugin.class);
+//		pluginManager.apply(SpringNoHttpPlugin.class);
 		pluginManager.apply(SpringNexusPlugin.class);
 		pluginManager.apply(SpringCheckProhibitedDependenciesLifecyclePlugin.class);
 		pluginManager.apply(SpringArtifactoryPlugin.class);

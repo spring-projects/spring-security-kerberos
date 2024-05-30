@@ -67,8 +67,8 @@ public class SpringJavaPlugin implements Plugin<Project> {
 		pluginManager.apply(SpringPropDepsEclipsePlugin.class);
 		pluginManager.apply(SpringPropDepsIdeaPlugin.class);
 		pluginManager.apply(SpringJavadocOptionsPlugin.class);
-		pluginManager.apply(SpringJavaFormatPlugin.class);
-		pluginManager.apply(SpringJavaCheckstylePlugin.class);
+//		pluginManager.apply(SpringJavaFormatPlugin.class);
+//		pluginManager.apply(SpringJavaCheckstylePlugin.class);
 		pluginManager.apply(SpringCopyPropertiesPlugin.class);
 		pluginManager.apply(SpringJacocoPlugin.class);
 
