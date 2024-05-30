@@ -17,3 +17,9 @@ antora {
 			'BUILD_VERSION': project.version,
 	]
 }
+
+docsZip {
+	from (api) {
+		into "api"
+	}
+}
