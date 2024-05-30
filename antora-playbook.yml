@@ -14,7 +14,7 @@ content:
     # Refname matching:
     # https://docs.antora.org/antora/latest/playbook/content-refname-matching/
     branches: [main,'*.x','!1.*.x']
-    tags: ['*','!1.*']
+    tags: ['*','v*','!1.*']
     start_path: spring-security-kerberos-docs
 asciidoc:
   extensions:
