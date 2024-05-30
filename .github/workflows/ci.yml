@@ -17,8 +17,8 @@ jobs:
           jdk: 17
           jdk-distribution: adopt
         - nickname: linux liberica 17
-          version: 17
-          distribution: liberica
+          jdk: 17
+          jdk-distribution: liberica
     with:
       runs-on: ubuntu-latest
       java-version: ${{ matrix.jdk }}
