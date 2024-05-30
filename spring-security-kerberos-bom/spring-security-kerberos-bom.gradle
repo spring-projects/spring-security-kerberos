@@ -1,5 +1,5 @@
 plugins {
-	id 'org.springframework.security.kerberos.bom'
+	id 'io.spring.convention.bom'
 }
 
 description = 'Spring Security Kerberos BOM'

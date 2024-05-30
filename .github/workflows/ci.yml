@@ -8,68 +8,41 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    if: ${{ github.repository == 'spring-projects/spring-security-kerberos' }}
+    name: Build
+    uses: spring-io/spring-security-release-tools/.github/workflows/build.yml@v1
     strategy:
-      fail-fast: false
       matrix:
         include:
-          - nickname: linux adopt 17
-            version: 17
-            distribution: adopt
-          - nickname: linux liberica 17
-            version: 17
-            distribution: liberica
-    name: CI Build ${{ matrix.nickname }}
-    steps:
-      - uses: actions/checkout@v3
-      - uses: spring-io/spring-gradle-build-action@v1
-        with:
-          distribution: ${{ matrix.distribution }}
-          java-version: ${{ matrix.version }}
-      - name: Build
-        env:
-          GRADLE_ENTERPRISE_CACHE_USERNAME: ${{ secrets.GRADLE_ENTERPRISE_CACHE_USER }}
-          GRADLE_ENTERPRISE_CACHE_PASSWORD: ${{ secrets.GRADLE_ENTERPRISE_CACHE_PASSWORD }}
-          GRADLE_ENTERPRISE_ACCESS_KEY: ${{ secrets.GRADLE_ENTERPRISE_SECRET_ACCESS_KEY }}
-        run: ./gradlew build
-      - uses: actions/upload-artifact@v3
-        if: ${{ failure() }}
-        with:
-          name: buildreports
-          retention-days: 1
-          path: |
-            */build/reports
-            spring-security-kerberos-samples/*/build/reports
-  publish:
+        - nickname: linux adopt 17
+          jdk: 17
+          jdk-distribution: adopt
+        - nickname: linux liberica 17
+          version: 17
+          distribution: liberica
+    with:
+      runs-on: ubuntu-latest
+      java-version: ${{ matrix.jdk }}
+      distribution: ${{ matrix.jdk-distribution }}
+    secrets: inherit
+  deploy-artifacts:
+    name: Deploy Artifacts
+    needs: [ build ]
+    uses: spring-io/spring-security-release-tools/.github/workflows/deploy-artifacts.yml@v1
+    with:
+      should-deploy-artifacts: ${{ needs.build.outputs.should-deploy-artifacts }}
+    secrets: inherit
+  deploy-docs:
+    name: Deploy Javadocs
+    needs: [ build ]
+    uses: spring-io/spring-security-release-tools/.github/workflows/deploy-docs.yml@v1
+    with:
+      should-deploy-docs: ${{ needs.build.outputs.should-deploy-artifacts }}
+    secrets: inherit
+  docs:
     runs-on: ubuntu-latest
     needs: [build]
     steps:
-      - uses: actions/checkout@v3
-      - uses: spring-io/spring-gradle-build-action@v1
-        with:
-          distribution: adopt
-          java-version: 17
-      - name: Build
-        env:
-          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.GPG_PRIVATE_KEY }}
-          ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.GPG_PASSPHRASE }}
-          OSSRH_TOKEN_USERNAME: ${{ secrets.OSSRH_S01_TOKEN_USERNAME }}
-          OSSRH_TOKEN_PASSWORD: ${{ secrets.OSSRH_S01_TOKEN_PASSWORD }}
-          ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
-          ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
-          DEVELOCITY_ACCESS_KEY: ${{ secrets.GRADLE_ENTERPRISE_SECRET_ACCESS_KEY }}
-        run: |
-          ./gradlew build publishArtifacts \
-            -PossrhUsername="$OSSRH_TOKEN_USERNAME" \
-            -PossrhPassword="$OSSRH_TOKEN_PASSWORD" \
-            -PartifactoryUsername="$ARTIFACTORY_USERNAME" \
-            -PartifactoryPassword="$ARTIFACTORY_PASSWORD"
-  docs:
-    runs-on: ubuntu-latest
-    needs: [publish]
-    steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Dispatch (partial build)
         if: github.ref_type == 'branch'
         env:

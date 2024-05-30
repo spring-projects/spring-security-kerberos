@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,24 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.security.kerberos.gradle;
+
+package io.spring.gradle.convention;
 
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.gradle.api.plugins.JavaPlugin;
+import org.gradle.api.plugins.JavaLibraryPlugin;
 import org.gradle.api.plugins.PluginManager;
-import org.springframework.gradle.management.SpringManagementConfigurationPlugin;
+
+import org.springframework.gradle.SpringJavaPlugin;
+import org.springframework.gradle.SpringMavenPlugin;
+import org.springframework.gradle.classpath.SpringCheckClasspathForProhibitedDependenciesPlugin;
 
 /**
- * @author Janne Valkealahti
+ * @author Steve Riesenberg
  */
-class SamplePlugin implements Plugin<Project> {
-
+public class SpringModulePlugin implements Plugin<Project> {
 	@Override
 	public void apply(Project project) {
+		// Apply default plugins
 		PluginManager pluginManager = project.getPluginManager();
-		pluginManager.apply(JavaPlugin.class);
-		pluginManager.apply(SpringManagementConfigurationPlugin.class);
-		new JavaConventions().apply(project);
+		pluginManager.apply(JavaLibraryPlugin.class);
+		pluginManager.apply(SpringJavaPlugin.class);
+		pluginManager.apply(SpringMavenPlugin.class);
+		pluginManager.apply(SpringCheckClasspathForProhibitedDependenciesPlugin.class);
 	}
 }

@@ -1,5 +1,7 @@
 plugins {
-	id 'org.springframework.security.kerberos.docs'
+	id 'io.spring.convention.docs'
+	id 'org.antora' version '1.0.0'
+	id 'io.spring.antora.generate-antora-yml' version '0.0.1'
 }
 
 description = 'Spring Security Kerberos Documentation'

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,24 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.security.kerberos.gradle;
+
+package org.springframework.gradle.maven;
 
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.gradle.api.plugins.JavaPlugin;
-import org.gradle.api.plugins.PluginManager;
-import org.springframework.gradle.management.SpringManagementConfigurationPlugin;
+
+import org.springframework.gradle.ProjectUtils;
 
 /**
- * @author Janne Valkealahti
+ * @author Steve Riesenberg
  */
-class SamplePlugin implements Plugin<Project> {
-
+public class SpringPublishArtifactsPlugin implements Plugin<Project> {
 	@Override
 	public void apply(Project project) {
-		PluginManager pluginManager = project.getPluginManager();
-		pluginManager.apply(JavaPlugin.class);
-		pluginManager.apply(SpringManagementConfigurationPlugin.class);
-		new JavaConventions().apply(project);
+		project.getTasks().register("publishArtifacts", (publishArtifacts) -> {
+			publishArtifacts.setGroup("Publishing");
+			publishArtifacts.setDescription("Publish the artifacts to either Artifactory or Maven Central based on the version");
+			if (ProjectUtils.isRelease(project)) {
+				publishArtifacts.dependsOn("publishToOssrh");
+			} else {
+				publishArtifacts.dependsOn("artifactoryPublish");
+			}
+		});
 	}
 }

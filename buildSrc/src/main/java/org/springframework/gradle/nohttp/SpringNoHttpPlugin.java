@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,24 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.security.kerberos.gradle;
 
+package org.springframework.gradle.nohttp;
+
+import java.io.File;
+
+import io.spring.nohttp.gradle.NoHttpExtension;
+import io.spring.nohttp.gradle.NoHttpPlugin;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.gradle.api.plugins.JavaPlugin;
-import org.gradle.api.plugins.PluginManager;
-import org.springframework.gradle.management.SpringManagementConfigurationPlugin;
 
 /**
- * @author Janne Valkealahti
+ * @author Steve Riesenberg
  */
-class SamplePlugin implements Plugin<Project> {
-
+public class SpringNoHttpPlugin implements Plugin<Project> {
 	@Override
 	public void apply(Project project) {
-		PluginManager pluginManager = project.getPluginManager();
-		pluginManager.apply(JavaPlugin.class);
-		pluginManager.apply(SpringManagementConfigurationPlugin.class);
-		new JavaConventions().apply(project);
+		// Apply nohttp plugin
+		project.getPluginManager().apply(NoHttpPlugin.class);
+
+		// Configure nohttp
+		NoHttpExtension nohttp = project.getExtensions().getByType(NoHttpExtension.class);
+		File allowlistFile = project.getRootProject().file("etc/nohttp/allowlist.lines");
+		nohttp.setAllowlistFile(allowlistFile);
+		nohttp.getSource().exclude("**/build/**");
 	}
 }

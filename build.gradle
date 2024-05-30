@@ -1,6 +1,6 @@
 plugins {
-	id "base"
-	id 'org.springframework.security.kerberos.root'
+	id 'io.spring.convention.root'
+	alias(libs.plugins.security.release)
 }
 
 description = 'Spring Security Kerberos'
@@ -36,4 +36,15 @@ develocity {
 		termsOfUseUrl = 'https://gradle.com/help/legal-terms-of-use'
 		termsOfUseAgree = 'yes'
 	}
+}
+
+springRelease {
+	repositoryOwner = "spring-projects"
+	repositoryName = "spring-security-kerberos"
+	weekOfMonth = 4
+	dayOfWeek = 1
+	referenceDocUrl = "https://docs.spring.io/spring-security-kerberos/reference/{version}/"
+	apiDocUrl = "https://docs.spring.io/spring-security-kerberos/docs/{version}/api/"
+	replaceVersionInReferenceDocUrl = true
+	releaseVersionPrefix = "v"
 }
