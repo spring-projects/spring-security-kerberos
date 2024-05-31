@@ -31,7 +31,7 @@ jobs:
     with:
       should-deploy-artifacts: ${{ needs.build.outputs.should-deploy-artifacts }}
     secrets: inherit
-  deploy-docs:
+  deploy-javadocs:
     name: Deploy Javadocs
     needs: [ build ]
     uses: spring-io/spring-security-release-tools/.github/workflows/deploy-docs.yml@v1
