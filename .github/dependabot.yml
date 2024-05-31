@@ -3,7 +3,7 @@ registries:
   spring-milestones:
     type: maven-repository
     url: https://repo.spring.io/milestone
-  updates:
+updates:
   - package-ecosystem: gradle
     target-branch: main
     directory: /
