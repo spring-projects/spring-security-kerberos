@@ -2,12 +2,15 @@ plugins {
 	id 'io.spring.convention.docs'
 	id 'org.antora' version '1.0.0'
 	id 'io.spring.antora.generate-antora-yml' version '0.0.1'
+	id 'java'
 }
 
 description = 'Spring Security Kerberos Documentation'
 
 dependencies {
 	management platform(project(":spring-security-kerberos-management"))
+	testImplementation 'org.springframework:spring-core'
+	testImplementation 'org.springframework.security:spring-security-core'
 }
 
 antora {
@@ -16,6 +19,24 @@ antora {
 			'BUILD_REFNAME': 'HEAD',
 			'BUILD_VERSION': project.version,
 	]
+}
+
+
+
+tasks.named("generateAntoraYml") {
+	asciidocAttributes = project.provider( { generateAttributes() } )
+}
+
+def generateAttributes() {
+	return [
+			"version": project.version
+	] + resolvedVersions(project.configurations.testRuntimeClasspath)
+}
+
+def resolvedVersions(Configuration configuration) {
+	return configuration.resolvedConfiguration
+			.resolvedArtifacts
+			.collectEntries { [(it.name.replace('-core','') + '-version'): it.moduleVersion.id.version] }
 }
 
 docsZip {
