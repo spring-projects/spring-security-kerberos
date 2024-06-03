@@ -50,3 +50,16 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh workflow run deploy-docs.yml -r docs-build -f build-refname=${{ github.ref_name }}
+
+  perform-release:
+    name: Perform Release
+    needs: [deploy-artifacts, deploy-javadocs]
+    uses: spring-io/spring-security-release-tools/.github/workflows/perform-release.yml@v1
+    with:
+      should-perform-release: ${{ needs.deploy-artifacts.outputs.artifacts-deployed }}
+      project-version: ${{ needs.deploy-artifacts.outputs.project-version }}
+      milestone-repo-url: https://repo.spring.io/artifactory/milestone
+      release-repo-url: https://repo1.maven.org/maven2
+      artifact-path: org/springframework/security/kerberos/spring-security-kerberos-core
+      slack-announcing-id: spring-security-kerberos-announcing
+    secrets: inherit
