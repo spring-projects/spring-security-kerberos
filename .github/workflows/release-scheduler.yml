@@ -5,7 +5,8 @@ on:
     - cron: '15 15 * * *' # Every day at 3:15pm UTC
   workflow_dispatch:
 
-permissions: read-all
+permissions:
+  actions: write
 
 jobs:
   dispatch_scheduled_releases:
@@ -23,5 +24,5 @@ jobs:
           fetch-depth: 1
       - name: Dispatch
         env:
-          GH_TOKEN: ${{ secrets.GH_ACTIONS_REPO_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh workflow run update-scheduled-release-version.yml -r ${{ matrix.branch }}
