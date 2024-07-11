@@ -41,6 +41,7 @@ import org.springframework.security.kerberos.web.authentication.SpnegoAuthentica
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.security.web.context.SecurityContextRepository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -145,11 +146,14 @@ public class SpnegoAuthenticationProcessingFilterTest {
     private void everythingWorks(String tokenPrefix) throws IOException,
             ServletException {
         // stubbing
+        SecurityContextRepository securityContextRepository = mock(SecurityContextRepository.class);
+        filter.setSecurityContextRepository(securityContextRepository);
         everythingWorksStub(tokenPrefix);
 
         // testing
         filter.doFilter(request, response, chain);
         verify(chain).doFilter(request, response);
+        verify(securityContextRepository).saveContext(SecurityContextHolder.getContext(), request, response);
         assertEquals(AUTHENTICATION, SecurityContextHolder.getContext().getAuthentication());
     }
 
