@@ -18,7 +18,7 @@ dependencies {
 	implementation "org.apache.commons:commons-compress:1.26.2"
 	implementation "com.github.ben-manes:gradle-versions-plugin:0.38.0"
 	implementation "io.github.gradle-nexus:publish-plugin:1.1.0"
-	implementation "io.spring.javaformat:spring-javaformat-gradle-plugin:0.0.41"
+	implementation "io.spring.javaformat:spring-javaformat-gradle-plugin:0.0.43"
 	implementation "io.spring.nohttp:nohttp-gradle:0.0.11"
 	implementation "org.asciidoctor:asciidoctor-gradle-jvm:3.3.2"
 	implementation "org.asciidoctor:asciidoctor-gradle-jvm-pdf:3.3.2"
