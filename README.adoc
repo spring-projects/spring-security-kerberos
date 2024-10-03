@@ -11,8 +11,8 @@ By participating, you  are expected to uphold this code. Please report unaccepta
 See https://github.com/spring-projects/spring-framework/wiki/Downloading-Spring-artifacts[downloading Spring artifacts] for Maven repository information.
 
 == Documentation
-Be sure to read the http://docs.spring.io/spring-security-kerberos/docs/1.0.x/reference/htmlsingle/[Spring Security Kerberos Reference].
-Extensive JavaDoc for the Spring Security Kerberos code is also available in the http://docs.spring.io/spring-security-kerberos/docs/1.0.x/api/[Spring Security Kerberos API Documentation].
+Be sure to read the https://docs.spring.io/spring-security-kerberos/reference/index.html[Spring Security Kerberos Reference].
+Extensive JavaDoc for the Spring Security Kerberos code is also available in the https://docs.spring.io/spring-security-kerberos/docs/current/api/[Spring Security Kerberos API Documentation].
 
 == Samples
 Samples can be found under `spring-security-kerberos-samples`. Check
