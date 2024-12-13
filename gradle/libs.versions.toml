@@ -7,7 +7,7 @@ mockito-bom='org.mockito:mockito-bom:5.12.0'
 okhttp3='com.squareup.okhttp3:okhttp:3.14.9'
 okhttp3-mockwebserver='com.squareup.okhttp3:mockwebserver:3.14.9'
 servlet-api='jakarta.servlet:jakarta.servlet-api:6.0.0'
-spring-framework-bom='org.springframework:spring-framework-bom:6.1.8'
+spring-framework-bom='org.springframework:spring-framework-bom:6.1.16'
 spring-security-bom='org.springframework.security:spring-security-bom:6.3.3'
 
 [plugins]
