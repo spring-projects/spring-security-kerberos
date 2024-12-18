@@ -12,5 +12,5 @@ spring-security-bom='org.springframework.security:spring-security-bom:6.3.3'
 
 [plugins]
 spring-boot='org.springframework.boot:3.3.0'
-dependency-management='io.spring.dependency-management:1.1.5'
+dependency-management='io.spring.dependency-management:1.1.7'
 security-release='io.spring.security.release:1.0.3'
