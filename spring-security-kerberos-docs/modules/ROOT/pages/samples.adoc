@@ -19,9 +19,6 @@ is applied. See notes below for specific samples.
 <<samples-sec-server-spnego-form-auth>> sample using ticket validation
 with spnego and form
 
-<<samples-sec-server-spnego-form-auth-xml>> sample using ticket
-validation with spnego and form (xml config)
-
 <<samples-sec-client-rest-template>> sample for KerberosRestTemplate
 
 [[samples-sec-server-win-auth]]
@@ -160,17 +157,6 @@ server:
 app:
     service-principal: HTTP/neo.example.org@EXAMPLE.ORG
     keytab-location: /tmp/tomcat.keytab
-----
-
-[[samples-sec-server-spnego-form-auth-xml]]
-== Security Server Spnego and Form Auth Xml Sample
-This is a same sample than <<samples-sec-server-spnego-form-auth>> but
-using xml based configuration instead of JavaConfig.
-
-Run a server.
-[source,text,subs="attributes"]
-----
-$ java -jar sec-server-spnego-form-auth-xml-{version}.jar
 ----
 
 [[samples-sec-client-rest-template]]
