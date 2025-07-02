@@ -21,4 +21,6 @@ dependencies {
 	testImplementation 'org.mockito:mockito-junit-jupiter'
 	testImplementation libs.assertj.core
 	testImplementation libs.okhttp3.mockwebserver
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
+
