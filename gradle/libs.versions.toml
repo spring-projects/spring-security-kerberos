@@ -1,5 +1,5 @@
 [libraries]
-assertj-core='org.assertj:assertj-core:3.26.0'
+assertj-core='org.assertj:assertj-core:3.27.3'
 httpclient5="org.apache.httpcomponents.client5:httpclient5:5.3.1"
 junit-bom='org.junit:junit-bom:5.10.4'
 kerby='org.apache.kerby:kerb-simplekdc:2.0.3'
