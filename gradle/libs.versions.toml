@@ -1,7 +1,7 @@
 [libraries]
 assertj-core='org.assertj:assertj-core:3.27.3'
 httpclient5="org.apache.httpcomponents.client5:httpclient5:5.5"
-junit-bom='org.junit:junit-bom:5.10.4'
+junit-bom='org.junit:junit-bom:5.12.2'
 kerby='org.apache.kerby:kerb-simplekdc:2.0.3'
 mockito-bom='org.mockito:mockito-bom:5.12.0'
 okhttp3='com.squareup.okhttp3:okhttp:3.14.9'
