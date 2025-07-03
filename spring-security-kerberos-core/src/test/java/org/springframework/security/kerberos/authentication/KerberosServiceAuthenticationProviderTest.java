@@ -18,6 +18,7 @@ package org.springframework.security.kerberos.authentication;
 
 import java.util.List;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -75,6 +76,12 @@ public class KerberosServiceAuthenticationProviderTest {
         this.provider = new KerberosServiceAuthenticationProvider();
         this.provider.setTicketValidator(this.ticketValidator);
         this.provider.setUserDetailsService(this.userDetailsService);
+    }
+
+    @AfterEach
+    public void after() {
+        System.clearProperty("java.security.krb5.conf");
+        System.clearProperty("java.security.krb5.kdc");
     }
 
     @Test
