@@ -1,5 +1,17 @@
+import io.spring.gradle.convention.SpringModulePlugin
+
 plugins {
 	id 'io.spring.convention.bom'
 }
 
 description = 'Spring Security Kerberos BOM'
+
+dependencies {
+	constraints {
+		project.rootProject.allprojects { p ->
+			p.plugins.withType(SpringModulePlugin) {
+				api p
+			}
+		}
+	}
+}
