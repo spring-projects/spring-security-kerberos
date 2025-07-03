@@ -26,7 +26,7 @@ a cross-platform, self-contained bootstrap mechanism for the build.
 === Prerequisites
 http://help.github.com/set-up-git-redirect[Git] and the http://www.oracle.com/technetwork/java/javase/downloads[JDK17 build].
 
-Be sure that your `JAVA_HOME` environment variable points to the `jdk1.7.0` folder extracted from the JDK download.
+Be sure that your `JAVA_HOME` environment variable points to the `jdk` folder extracted from the JDK download.
 
 === Check out sources
 [indent=0]
