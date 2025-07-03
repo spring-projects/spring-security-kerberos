@@ -1,0 +1,41 @@
+name: PR Build
+
+on: pull_request
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    if: ${{ github.repository == 'spring-projects/spring-security-kerberos' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up gradle
+        uses: spring-io/spring-gradle-build-action@v2
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Build with Gradle
+        run: ./gradlew clean build --continue
+  generate-docs:
+    name: Generate Docs
+    runs-on: ubuntu-latest
+    if: ${{ github.repository == 'spring-projects/spring-security-kerberos' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up gradle
+        uses: spring-io/spring-gradle-build-action@v2
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Run Antora
+        run: ./gradlew :spring-security-kerberos-docs:antora
+      - name: Upload Docs
+        id: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs
+          path: spring-security-kerberos-docs/build/site
+          overwrite: true
