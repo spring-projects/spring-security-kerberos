@@ -47,7 +47,7 @@ public class SpringMavenPublishingConventionsPlugin implements Plugin<Project> {
 	}
 
 	private void customizePom(MavenPom pom, Project project) {
-		pom.getUrl().set("https://spring.io/projects/spring-authorization-server");
+		pom.getUrl().set("https://spring.io/projects/spring-security-kerberos");
 		pom.getName().set(project.provider(project::getName));
 		pom.getDescription().set(project.provider(project::getDescription));
 		pom.organization(this::customizeOrganization);
@@ -86,14 +86,14 @@ public class SpringMavenPublishingConventionsPlugin implements Plugin<Project> {
 	}
 
 	private void customizeScm(MavenPomScm scm) {
-		scm.getConnection().set("scm:git:git://github.com/spring-projects/spring-authorization-server.git");
-		scm.getDeveloperConnection().set("scm:git:ssh://git@github.com/spring-projects/spring-authorization-server.git");
-		scm.getUrl().set("https://github.com/spring-projects/spring-authorization-server");
+		scm.getConnection().set("scm:git:git://github.com/spring-projects/spring-security-kerberos.git");
+		scm.getDeveloperConnection().set("scm:git:ssh://git@github.com/spring-projects/spring-security-kerberos.git");
+		scm.getUrl().set("https://github.com/spring-projects/spring-security-kerberos");
 	}
 
 	private void customizeIssueManagement(MavenPomIssueManagement issueManagement) {
 		issueManagement.getSystem().set("GitHub");
-		issueManagement.getUrl().set("https://github.com/spring-projects/spring-authorization-server/issues");
+		issueManagement.getUrl().set("https://github.com/spring-projects/spring-security-kerberos/issues");
 	}
 
 	private void customizeJavaPlugin(Project project) {
