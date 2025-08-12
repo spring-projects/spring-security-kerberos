@@ -44,7 +44,7 @@ jobs:
     needs: [build]
     if: ${{ needs.build.outputs.should-deploy-artifacts == 'true' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Dispatch (partial build)
         if: github.ref_type == 'branch'
         env:
