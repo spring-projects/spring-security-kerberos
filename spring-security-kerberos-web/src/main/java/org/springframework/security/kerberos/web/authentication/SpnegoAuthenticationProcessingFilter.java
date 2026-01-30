@@ -16,6 +16,7 @@
 package org.springframework.security.kerberos.web.authentication;
 
 import java.io.IOException;
+import java.util.Base64;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -30,7 +31,6 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextHolderStrategy;
-import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.kerberos.authentication.KerberosServiceAuthenticationProvider;
 import org.springframework.security.kerberos.authentication.KerberosServiceRequestToken;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
@@ -151,7 +151,7 @@ public class SpnegoAuthenticationProcessingFilter extends OncePerRequestFilter {
                 logger.debug("Received Negotiate Header for request " + request.getRequestURL() + ": " + header);
             }
             byte[] base64Token = header.substring(header.indexOf(" ") + 1).getBytes("UTF-8");
-            byte[] kerberosTicket = Base64.decode(base64Token);
+            byte[] kerberosTicket = Base64.getDecoder().decode(base64Token);
             KerberosServiceRequestToken authenticationRequest = new KerberosServiceRequestToken(kerberosTicket);
             authenticationRequest.setDetails(authenticationDetailsSource.buildDetails(request));
             Authentication authentication;
