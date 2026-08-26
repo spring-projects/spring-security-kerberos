@@ -34,7 +34,7 @@ jobs:
         run: ./gradlew :spring-security-kerberos-docs:antora
       - name: Upload Docs
         id: upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: docs
           path: spring-security-kerberos-docs/build/site
