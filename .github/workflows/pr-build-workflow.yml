@@ -11,9 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.repository == 'spring-projects/spring-security-kerberos' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - name: Set up gradle
-        uses: spring-io/spring-gradle-build-action@v2
+        uses: spring-io/spring-gradle-build-action@c8668747d7c264864c8c7f7026d0d277d14a78dc # v2.0.6
         with:
           java-version: '17'
           distribution: 'temurin'
@@ -24,9 +24,9 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.repository == 'spring-projects/spring-security-kerberos' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - name: Set up gradle
-        uses: spring-io/spring-gradle-build-action@v2
+        uses: spring-io/spring-gradle-build-action@c8668747d7c264864c8c7f7026d0d277d14a78dc # v2.0.6
         with:
           java-version: '17'
           distribution: 'temurin'
@@ -34,7 +34,7 @@ jobs:
         run: ./gradlew :spring-security-kerberos-docs:antora
       - name: Upload Docs
         id: upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: docs
           path: spring-security-kerberos-docs/build/site

@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     name: Build
-    uses: spring-io/spring-security-release-tools/.github/workflows/build.yml@v1
+    uses: spring-io/spring-security-release-tools/.github/workflows/build.yml@3f6cc7ffc137ca160061749d5f34dc30d5f36986 # v1.0.17
     strategy:
       matrix:
         include:
@@ -27,14 +27,14 @@ jobs:
   deploy-artifacts:
     name: Deploy Artifacts
     needs: [ build ]
-    uses: spring-io/spring-security-release-tools/.github/workflows/deploy-artifacts.yml@v1
+    uses: spring-io/spring-security-release-tools/.github/workflows/deploy-artifacts.yml@3f6cc7ffc137ca160061749d5f34dc30d5f36986 # v1.0.17
     with:
       should-deploy-artifacts: ${{ needs.build.outputs.should-deploy-artifacts }}
     secrets: inherit
   deploy-javadocs:
     name: Deploy Javadocs
     needs: [ build ]
-    uses: spring-io/spring-security-release-tools/.github/workflows/deploy-docs.yml@v1
+    uses: spring-io/spring-security-release-tools/.github/workflows/deploy-docs.yml@3f6cc7ffc137ca160061749d5f34dc30d5f36986 # v1.0.17
     with:
       should-deploy-docs: ${{ needs.build.outputs.should-deploy-artifacts }}
     secrets: inherit
@@ -44,7 +44,7 @@ jobs:
     needs: [build]
     if: ${{ needs.build.outputs.should-deploy-artifacts == 'true' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - name: Dispatch (partial build)
         if: github.ref_type == 'branch'
         env:
@@ -54,7 +54,7 @@ jobs:
   perform-release:
     name: Perform Release
     needs: [deploy-artifacts, deploy-javadocs]
-    uses: spring-io/spring-security-release-tools/.github/workflows/perform-release.yml@v1
+    uses: spring-io/spring-security-release-tools/.github/workflows/perform-release.yml@3f6cc7ffc137ca160061749d5f34dc30d5f36986 # v1.0.17
     with:
       should-perform-release: ${{ needs.deploy-artifacts.outputs.artifacts-deployed }}
       project-version: ${{ needs.deploy-artifacts.outputs.project-version }}
