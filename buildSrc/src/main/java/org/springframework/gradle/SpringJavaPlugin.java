@@ -16,9 +16,6 @@
 
 package org.springframework.gradle;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import io.spring.javaformat.gradle.SpringJavaFormatPlugin;
 import org.gradle.api.JavaVersion;
 import org.gradle.api.Plugin;
@@ -30,7 +27,6 @@ import org.gradle.api.plugins.PluginManager;
 import org.gradle.api.tasks.compile.CompileOptions;
 import org.gradle.api.tasks.compile.JavaCompile;
 import org.gradle.api.tasks.testing.Test;
-import org.gradle.jvm.tasks.Jar;
 import org.jetbrains.kotlin.gradle.plugin.KotlinPluginWrapper;
 
 import org.springframework.gradle.checkstyle.SpringJavaCheckstylePlugin;
@@ -71,6 +67,8 @@ public class SpringJavaPlugin implements Plugin<Project> {
 //		pluginManager.apply(SpringJavaCheckstylePlugin.class);
 		pluginManager.apply(SpringCopyPropertiesPlugin.class);
 		pluginManager.apply(SpringJacocoPlugin.class);
+		pluginManager.apply(org.springframework.gradle.SpringJarManifestPlugin.class);
+		pluginManager.apply(org.springframework.gradle.SpringReproducibleBuildPlugin.class);
 
 		// Apply Java source compatibility version
 		JavaPluginExtension java = project.getExtensions().getByType(JavaPluginExtension.class);
@@ -85,14 +83,6 @@ public class SpringJavaPlugin implements Plugin<Project> {
 				options.getRelease().set(17);
 			}
 		});
-		project.getTasks().withType(Jar.class, (jar) -> jar.manifest((manifest) -> {
-			Map<String, String> attributes = new HashMap<>();
-			attributes.put("Created-By", String.format("%s (%s)", System.getProperty("java.version"), System.getProperty("java.specification.vendor")));
-			attributes.put("Implementation-Title", project.getName());
-			attributes.put("Implementation-Version", project.getVersion().toString());
-			attributes.put("Automatic-Module-Name", project.getName().replace("-", "."));
-			manifest.attributes(attributes);
-		}));
 		project.getTasks().withType(Test.class, (test) -> {
 			test.useJUnitPlatform();
 		});
