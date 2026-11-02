@@ -6,8 +6,7 @@ import org.ietf.jgss.GSSContext;
 import org.ietf.jgss.GSSCredential;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 public class KerberosTicketValidationTest {
@@ -27,11 +26,11 @@ public class KerberosTicketValidationTest {
                 responseToken,
                 gssContext);
 
-        assertEquals(username, ticketValidation.username());
-        assertEquals(responseToken, ticketValidation.responseToken());
-        assertEquals(gssContext, ticketValidation.getGssContext());
+        assertThat(ticketValidation.username()).isEqualTo(username);
+        assertThat(ticketValidation.responseToken()).isEqualTo(responseToken);
+        assertThat(ticketValidation.getGssContext()).isEqualTo(gssContext);
 
-        assertNull(ticketValidation.getDelegationCredential(), "With no credential delegation");
+        assertThat(ticketValidation.getDelegationCredential()).as("With no credential delegation").isNull();
     }
 
     @Test
@@ -44,10 +43,10 @@ public class KerberosTicketValidationTest {
                 gssContext,
                 delegationCredential);
 
-        assertEquals(username, ticketValidation.username());
-        assertEquals(responseToken, ticketValidation.responseToken());
-        assertEquals(gssContext, ticketValidation.getGssContext());
+        assertThat(ticketValidation.username()).isEqualTo(username);
+        assertThat(ticketValidation.responseToken()).isEqualTo(responseToken);
+        assertThat(ticketValidation.getGssContext()).isEqualTo(gssContext);
 
-        assertEquals(delegationCredential, ticketValidation.getDelegationCredential(), "With credential delegation");
+        assertThat(ticketValidation.getDelegationCredential()).as("With credential delegation").isEqualTo(delegationCredential);
     }
 }
