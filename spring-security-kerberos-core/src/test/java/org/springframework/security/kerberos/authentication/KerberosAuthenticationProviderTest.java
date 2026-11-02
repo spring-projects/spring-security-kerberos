@@ -15,8 +15,7 @@
  */
 package org.springframework.security.kerberos.authentication;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -71,11 +70,11 @@ public class KerberosAuthenticationProviderTest {
 
         verify(kerberosClient).login(TEST_USER, TEST_PASSWORD);
 
-        assertNotNull(authenticate);
-        assertEquals(TEST_USER, authenticate.getName());
-        assertEquals(USER_DETAILS, authenticate.getPrincipal());
-        assertEquals(TEST_PASSWORD, authenticate.getCredentials());
-        assertEquals(AUTHORITY_LIST, authenticate.getAuthorities());
+        assertThat(authenticate).isNotNull();
+        assertThat(authenticate.getName()).isEqualTo(TEST_USER);
+        assertThat(authenticate.getPrincipal()).isEqualTo(USER_DETAILS);
+        assertThat(authenticate.getCredentials()).isEqualTo(TEST_PASSWORD);
+        assertThat(authenticate.getAuthorities()).isEqualTo(AUTHORITY_LIST);
 
     }
 }

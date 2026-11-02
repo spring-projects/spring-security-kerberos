@@ -36,9 +36,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -87,10 +86,10 @@ public class KerberosServiceAuthenticationProviderTest {
     @Test
     public void testEverythingWorks() throws Exception {
         Authentication output = callProviderAndReturnUser(USER_DETAILS, INPUT_TOKEN);
-        assertNotNull(output);
-        assertEquals(TEST_USER, output.getName());
-        assertEquals(AUTHORITY_LIST, output.getAuthorities());
-        assertEquals(USER_DETAILS, output.getPrincipal());
+        assertThat(output).isNotNull();
+        assertThat(output.getName()).isEqualTo(TEST_USER);
+        assertThat(output.getAuthorities()).isEqualTo(AUTHORITY_LIST);
+        assertThat(output.getPrincipal()).isEqualTo(USER_DETAILS);
     }
 
     @Test
@@ -98,8 +97,8 @@ public class KerberosServiceAuthenticationProviderTest {
     	KerberosServiceRequestToken requestToken = new KerberosServiceRequestToken(TEST_TOKEN);
     	requestToken.setDetails("TestDetails");
         Authentication output = callProviderAndReturnUser(USER_DETAILS, requestToken);
-        assertNotNull(output);
-        assertEquals(requestToken.getDetails(), output.getDetails());
+        assertThat(output).isNotNull();
+        assertThat(output.getDetails()).isEqualTo(requestToken.getDetails());
     }
 
     @Test
